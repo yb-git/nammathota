@@ -697,7 +697,7 @@ function Login({onLogin}){
         <div style={{background:"#fff",borderRadius:22,padding:24,boxShadow:"0 20px 60px rgba(0,0,0,.3)"}}>
           <Field label={t("userId")} required>
             <input value={uid_} onChange={e=>setUid(e.target.value)} placeholder="owner / sup1"
-              autoCapitalize="none" autoCorrect="off" style={inp}/>
+              autoCapitalize="none" autoCorrect="off" autoComplete="off" style={inp}/>
           </Field>
           <Field label={t("password")} required>
             <input type="password" value={pass} onChange={e=>setPass(e.target.value)}
