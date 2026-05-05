@@ -1827,9 +1827,106 @@ function TripsTab({farm,trips,setTrips,showToast}){
         );})}
       </div>
 
-      {/* ═══ BACKUP & RESTORE ═══ */}
-      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
-        <div style={{fontSize:17,fontWeight:700,marginBottom:12,color:"#333"}}>
+
+    </div>
+  );
+}
+
+/* ── Docs Page ──────────────────────────────────── */
+function DocsPage({docs,setDocs,showToast}){
+  const{t,lang}=useLang();
+  const E={date:today(),title:"",type:"Receipt",note:"",imgData:null};
+  const[form,setForm]=useState(E);
+  const[show,setShow]=useState(false);
+  const[viewImg,setViewImg]=useState(null);
+  const[uploading,setUploading]=useState(false);
+  const[savedId,setSavedId]=useState(null);
+  const fileRef=useRef();
+  const DOC_TYPES=["Receipt","Payment Proof","Sale Deed","Patta / RTC","Borewell Report","Bill","Photo","Agreement","Other"];
+  const pickFile=async e=>{const f=e.target.files[0];if(!f)return;setUploading(true);const d=await compress(f);setForm(p=>({...p,imgData:d}));setUploading(false);};
+  const save=()=>{
+    if(!form.title){showToast(lang==="kn"?"Title ಬೇಕು":"Title required","warn");return;}
+    const nid=uid();setDocs(p=>[{id:nid,...form},...p]);setSavedId(nid);
+    showToast("✅ "+(lang==="kn"?"ಉಳಿಸಲಾಗಿದೆ":"Saved"));
+    setTimeout(()=>{setSavedId(null);setForm(E);setShow(false);},1600);
+  };
+  const del=id=>{if(window.confirm(lang==="kn"?"ಅಳಿಸುವುದೇ?":"Delete?"))setDocs(p=>p.filter(d=>d.id!==id));};
+  return(
+    <div>
+      {viewImg&&<div onClick={()=>setViewImg(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.93)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:20}}>
+        <img src={viewImg.imgData} alt="" style={{maxWidth:"100%",maxHeight:"70vh",borderRadius:14,objectFit:"contain"}}/>
+        <button onClick={()=>setViewImg(null)} style={{marginTop:16,background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:20,padding:"10px 28px",fontSize:14,cursor:"pointer"}}>✕</button>
+      </div>}
+      <button onClick={()=>setShow(!show)} style={{width:"100%",background:"#00695C",color:"#fff",border:"none",borderRadius:16,padding:15,fontSize:17,fontWeight:700,cursor:"pointer",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+        {show?"✕ "+(lang==="kn"?"ರದ್ದು":"Cancel"):"📷 "+(lang==="kn"?"ದಾಖಲೆ ಸೇರಿಸಿ":"Add Document")}
+      </button>
+      {show&&(
+        <div style={{background:"#fff",borderRadius:18,padding:16,border:"2px solid #80CBC4",marginBottom:14}}>
+          <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ದಿನಾಂಕ":"Date"}</div><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></div>
+          <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಶೀರ್ಷಿಕೆ *":"Title *"}</div><input value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder={lang==="kn"?"ದಾಖಲೆ ಹೆಸರು":"Document name"}/></div>
+          <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ವಿಧ":"Type"}</div><select value={form.type} onChange={e=>setForm({...form,type:e.target.value})}>{DOC_TYPES.map(dt=><option key={dt}>{dt}</option>)}</select></div>
+          <div style={{marginBottom:14}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಟಿಪ್ಪಣಿ":"Note"}</div><textarea value={form.note} onChange={e=>setForm({...form,note:e.target.value})} rows={2}/></div>
+          <div onClick={()=>fileRef.current.click()} style={{border:"2px dashed #80CBC4",borderRadius:12,padding:16,textAlign:"center",cursor:"pointer",background:"#f9fffe",marginBottom:14,minHeight:80,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+            {uploading?"⏳":form.imgData?<img src={form.imgData} alt="" style={{maxHeight:120,maxWidth:"100%",borderRadius:8}}/>:<><div style={{fontSize:32,marginBottom:6}}>📷</div><div style={{fontSize:14,color:"#00695C",fontWeight:600}}>{lang==="kn"?"ಫೋಟೋ ತೆಗೆಯಿರಿ":"Take / Upload Photo"}</div></>}
+          </div>
+          <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={pickFile}/>
+          <div style={{display:"flex",gap:10}}>
+            <button onClick={save} style={{flex:1,background:"#00695C",color:"#fff",border:"none",borderRadius:14,padding:14,fontSize:17,fontWeight:700,cursor:"pointer"}}>💾 {lang==="kn"?"ಉಳಿಸಿ":"Save"}</button>
+            <button onClick={()=>setShow(false)} style={{background:"#f0f0f0",border:"none",color:"#555",borderRadius:14,padding:"14px 18px",fontSize:17,fontWeight:600,cursor:"pointer"}}>{lang==="kn"?"ರದ್ದು":"Cancel"}</button>
+          </div>
+        </div>
+      )}
+      {docs.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:"#aaa"}}><div style={{fontSize:48,marginBottom:12}}>📄</div><div style={{fontSize:16}}>{lang==="kn"?"ದಾಖಲೆ ಇಲ್ಲ":"No documents yet"}</div></div>}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+        {docs.map(d=>{const saved=savedId===d.id;return(
+          <div key={d.id} style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 2px 8px rgba(0,0,0,.08)",border:saved?"2px solid #80CBC4":"2px solid transparent",transition:"border .4s"}}>
+            <div onClick={()=>d.imgData&&setViewImg(d)} style={{cursor:d.imgData?"pointer":"default"}}>
+              {d.imgData?<img src={d.imgData} alt="" style={{width:"100%",height:90,objectFit:"cover"}}/>:<div style={{height:90,background:"#E0F2F1",display:"flex",alignItems:"center",justifyContent:"center",fontSize:38}}>📄</div>}
+            </div>
+            <div style={{padding:"9px 10px 8px"}}>
+              <div style={{fontSize:13,fontWeight:700,color:"#00695C",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{d.title}</div>
+              <div style={{fontSize:11,color:"#888",marginTop:2}}>{d.type} · {fmt(d.date)}</div>
+              <button onClick={()=>del(d.id)} style={{marginTop:7,background:"#FFEBEE",border:"none",borderRadius:8,padding:"6px",fontSize:12,fontWeight:600,cursor:"pointer",color:"#C62828",width:"100%"}}>🗑</button>
+            </div>
+          </div>
+        );})}
+      </div>
+    </div>
+  );
+}
+
+/* ── More Page ──────────────────────────────────── */
+function MorePage({farm,docs,setDocs,user,onManage,onProfile,onReport,onLogout,showToast}){
+  const{t,lang}=useLang();
+  const[showDocs,setShowDocs]=useState(false);
+  const menuItems=[
+    {icon:"📊",label:lang==="kn"?"ವರದಿ":"Reports",action:onReport},
+    ...(user.role==="owner"&&onManage?[{icon:"⚙️",label:lang==="kn"?"ನಿರ್ವಹಣೆ":"Manage",action:onManage}]:[]),
+    {icon:"👤",label:lang==="kn"?"ಪ್ರೊಫೈಲ್":"Profile",action:onProfile},
+  ];
+  return(
+    <div style={{padding:"14px 14px 24px"}}>
+      <div style={{fontSize:17,fontWeight:700,marginBottom:14}}>☰ {lang==="kn"?"ಹೆಚ್ಚಿನ ಆಯ್ಕೆ":"More"}</div>
+
+      {/* Menu grid */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:20}}>
+        {menuItems.map((m,i)=>(
+          <div key={i} onClick={m.action} style={{background:"#fff",borderRadius:16,padding:"16px 14px",cursor:"pointer",boxShadow:"0 2px 8px rgba(0,0,0,.06)",display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:26}}>{m.icon}</span>
+            <span style={{fontSize:15,fontWeight:600,color:"#333"}}>{m.label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Documents */}
+      <div style={{fontSize:16,fontWeight:700,marginBottom:12}}>
+        📷 {lang==="kn"?"ದಾಖಲೆಗಳು":"Documents"}
+      </div>
+      <DocsPage docs={docs} setDocs={setDocs} showToast={showToast}/>
+
+      {/* Backup & Restore */}
+      <div style={{background:"#fff",borderRadius:18,padding:16,marginTop:14,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+        <div style={{fontSize:17,fontWeight:700,marginBottom:12}}>
           ☁️ {lang==="kn"?"ಡೇಟಾ ಬ್ಯಾಕಪ್ & ಮರುಸ್ಥಾಪನೆ":"Data Backup & Restore"}
         </div>
         <button onClick={()=>{
@@ -1846,69 +1943,67 @@ function TripsTab({farm,trips,setTrips,showToast}){
           a.click();
           URL.revokeObjectURL(url);
           showToast(lang==="kn"?"✅ ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಆಗಿದೆ":"✅ Backup downloaded");
-        }} style={{width:"100%",background:"#E8F5E9",border:"2px solid #A5D6A7",color:"#1B5E20",
-          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
-          marginBottom:10,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+        }} style={{width:"100%",background:"#E8F5E9",border:"2px solid #A5D6A7",color:"#1B5E20",borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",marginBottom:10,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
           📥 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ":"Download Backup (.json)"}
         </button>
-        <label style={{width:"100%",background:"#E3F2FD",border:"2px solid #90CAF9",color:"#1565C0",
-          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
-          display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:8}}>
+        <label style={{width:"100%",background:"#E3F2FD",border:"2px solid #90CAF9",color:"#1565C0",borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:8}}>
           📤 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಮರುಸ್ಥಾಪಿಸಿ":"Restore from Backup"}
-          <input type="file" accept=".json" style={{display:"none"}}
-            onChange={e=>{
-              const file=e.target.files[0];if(!file)return;
-              const reader=new FileReader();
-              reader.onload=ev=>{
-                try{
-                  const data=JSON.parse(ev.target.result);
-                  if(!data["nt:global:users"]){showToast(lang==="kn"?"ತಪ್ಪಾದ ಫೈಲ್":"Invalid backup file","warn");return;}
-                  if(!window.confirm(lang==="kn"?"ಎಲ್ಲಾ ಡೇಟಾ ಮರುಸ್ಥಾಪಿಸುವುದೇ?":"Restore all data? Current data will be overwritten."))return;
-                  Object.keys(data).filter(k=>k.startsWith("nt:")).forEach(k=>{
-                    localStorage.setItem(k,JSON.stringify(data[k]));
-                    sbSet(k,data[k]);
-                  });
-                  showToast(lang==="kn"?"✅ ಮರುಸ್ಥಾಪಿಸಲಾಗಿದೆ — ಮರುಲೋಡ್...":"✅ Restored — Reloading...");
-                  setTimeout(()=>window.location.reload(),1500);
-                }catch(ex){showToast(lang==="kn"?"ಫೈಲ್ ಓದಲಾಗಲಿಲ್ಲ":"Could not read file","error");}
-              };
-              reader.readAsText(file);
-              e.target.value="";
-            }}/>
+          <input type="file" accept=".json" style={{display:"none"}} onChange={e=>{
+            const file=e.target.files[0];if(!file)return;
+            const reader=new FileReader();
+            reader.onload=ev=>{
+              try{
+                const data=JSON.parse(ev.target.result);
+                if(!data["nt:global:users"]){showToast(lang==="kn"?"ತಪ್ಪಾದ ಫೈಲ್":"Invalid file","warn");return;}
+                if(!window.confirm(lang==="kn"?"ಎಲ್ಲಾ ಡೇಟಾ ಮರುಸ್ಥಾಪಿಸುವುದೇ?":"Restore all data? Current data will be overwritten."))return;
+                Object.keys(data).filter(k=>k.startsWith("nt:")).forEach(k=>{
+                  localStorage.setItem(k,JSON.stringify(data[k]));
+                  sbSet(k,data[k]);
+                });
+                showToast(lang==="kn"?"✅ ಮರುಸ್ಥಾಪಿಸಲಾಗಿದೆ — ಮರುಲೋಡ್...":"✅ Restored — Reloading...");
+                setTimeout(()=>window.location.reload(),1500);
+              }catch(ex){showToast(lang==="kn"?"ಫೈಲ್ ಓದಲಾಗಲಿಲ್ಲ":"Could not read file","error");}
+            };
+            reader.readAsText(file);
+            e.target.value="";
+          }}/>
         </label>
         <div style={{fontSize:13,color:"#888",textAlign:"center",lineHeight:1.6}}>
-          {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ → Google Drive ಗೆ ಹಾಕಿ ಸುರಕ್ಷಿತವಾಗಿ ಇರಿಸಿ":"Download backup → Upload to Google Drive to keep it safe"}
+          {lang==="kn"?"ಡೌನ್‌ಲೋಡ್ ಆದ ಫೈಲ್ → Google Drive ಗೆ ಹಾಕಿ ಸುರಕ್ಷಿತವಾಗಿ ಇರಿಸಿ":"Downloaded file → Upload to Google Drive for safe keeping"}
         </div>
       </div>
 
-      {/* ═══ SIGN OUT ═══ */}
-      <button onClick={()=>{if(window.confirm(lang==="kn"?"ನಿಜವಾಗಿಯೂ Sign Out ಮಾಡುವುದೇ?":"Sign out of NammaThota?"))onLogout&&onLogout();}}
-        style={{width:"100%",background:"#FFEBEE",border:"2px solid #FFCDD2",
-          color:"#C62828",borderRadius:18,padding:18,fontSize:18,
-          fontWeight:700,cursor:"pointer",display:"flex",
-          alignItems:"center",justifyContent:"center",gap:10,marginBottom:16}}>
+      {/* Sign Out */}
+      <button onClick={()=>{
+        if(window.confirm(lang==="kn"?"ನಿಜವಾಗಿಯೂ Sign Out ಮಾಡುವುದೇ?":"Sign out of NammaThota?"))
+          onLogout&&onLogout();
+      }} style={{width:"100%",background:"#FFEBEE",border:"2px solid #FFCDD2",color:"#C62828",borderRadius:18,padding:18,fontSize:18,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10,marginBottom:16}}>
         🚪 {lang==="kn"?"ಸೈನ್ ಔಟ್":"Sign Out"}
       </button>
+
       <div style={{textAlign:"center",fontSize:13,color:"#ccc",marginBottom:8}}>
-        ನಮ್ಮ ತೋಟ · CodeTrail Technologies
+        ನಮ್ಮ ತೋಟ · CodeTrail Technologies Private Limited
       </div>
     </div>
   );
 }
 
+
+
+/* ── Labour Tab ─────────────────────────────────── */
 function LabourTab({farm,labour,setLabour,workers,setWorkers,showToast}){
-  const{t}=useLang();
+  const{t,lang}=useLang();
   const E={date:today(),workerName:"",workerId:"",days:"1",dailyRate:"",totalWages:"",taskDone:""};
   const[form,setForm]=useState(E);const[show,setShow]=useState(false);const[editId,setEditId]=useState(null);const[savedId,setSavedId]=useState(null);
   const[showWF,setShowWF]=useState(false);const[newW,setNewW]=useState({name:"",mobile:"",rate:""});
-
-  const calcWages=()=>{const w=(+form.days||0)*(+form.dailyRate||0);setForm(p=>({...p,totalWages:w||""}));};
+  const calc=()=>{const w=(+form.days||0)*(+form.dailyRate||0);setForm(p=>({...p,totalWages:w||""}));};
   const save=()=>{
-    if(!form.workerName){showToast(t("workerName")+" "+t("required"),"warn");return;}
+    if(!form.workerName){showToast(lang==="kn"?"ಕಾರ್ಮಿಕ ಹೆಸರು ಬೇಕು":"Worker name required","warn");return;}
     const entry={...form,totalWages:form.totalWages||(+form.days||0)*(+form.dailyRate||0)};
     const nid=editId||uid();
-    if(editId)setLabour(p=>p.map(x=>x.id===editId?{...x,...entry}:x));else setLabour(p=>[{id:nid,...entry},...p]);
-    setSavedId(nid);showToast("✅ "+t("saved"));
+    if(editId)setLabour(p=>p.map(x=>x.id===editId?{...x,...entry}:x));
+    else setLabour(p=>[{id:nid,...entry},...p]);
+    setSavedId(nid);showToast("✅ "+(lang==="kn"?"ಉಳಿಸಲಾಗಿದೆ":"Saved"));
     setTimeout(()=>{setSavedId(null);setForm(E);setShow(false);setEditId(null);},1600);
   };
   const addWorker=()=>{
@@ -1917,156 +2012,84 @@ function LabourTab({farm,labour,setLabour,workers,setWorkers,showToast}){
     setForm(prev=>({...prev,workerName:newW.name,workerId:w.id,dailyRate:newW.rate||""}));
     setNewW({name:"",mobile:"",rate:""});setShowWF(false);
   };
-  const del=id=>{setLabour(p=>p.filter(x=>x.id!==id));showToast("🗑 "+t("delete"));};
+  const del=id=>{setLabour(p=>p.filter(x=>x.id!==id));};
   const totalWages=labour.reduce((a,l)=>a+(+l.totalWages||0),0);
-
   return(
     <div>
-      <Card style={{background:"#E8F5E9",marginBottom:14}}>
-        <div style={{fontSize:17,color:"#2E7D32"}}>{t("totalWages")}</div>
-        <div style={{fontSize:24,fontWeight:800,color:"#1B5E20",marginTop:4}}>{fmtCur(totalWages)}</div>
-        <div style={{fontSize:17,color:"#2E7D32",marginTop:4}}>{labour.length} entries · {workers.length} {t("workerList").toLowerCase()}</div>
-      </Card>
-      <Btn onClick={()=>{setShow(!show);setEditId(null);setForm(E);}} col="#2E7D32" full icon="👷">{t("addLabour")}</Btn>
+      <div style={{background:"#2E7D32",borderRadius:18,padding:16,marginBottom:14,color:"#fff"}}>
+        <div style={{fontSize:14,opacity:.8}}>{lang==="kn"?"ಒಟ್ಟು ಕೂಲಿ":"Total Wages"}</div>
+        <div style={{fontSize:28,fontWeight:800,marginTop:4}}>{fmtCur(totalWages)}</div>
+        <div style={{fontSize:13,opacity:.7,marginTop:4}}>{labour.length} entries · {workers.length} workers</div>
+      </div>
+      <button onClick={()=>{setShow(!show);setEditId(null);setForm(E);}}
+        style={{width:"100%",background:"#2E7D32",color:"#fff",border:"none",borderRadius:16,padding:15,fontSize:17,fontWeight:700,cursor:"pointer",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+        {show?"✕ "+(lang==="kn"?"ರದ್ದು":"Cancel"):"👷 "+(lang==="kn"?"ಕಾರ್ಮಿಕ ಸೇರಿಸಿ":"Add Labour")}
+      </button>
       {show&&(
-        <Card style={{border:"2px solid #A5D6A7",marginTop:14}}>
-          <div style={{fontSize:17,fontWeight:700,color:"#1B5E20",marginBottom:14}}>👷 {t("addLabour")}</div>
-          <Field label={t("date")||"Date"} required><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></Field>
-          <Field label={t("workerName")+" *"} mb={6}>
-            <select value={form.workerId} onChange={e=>{const w=workers.find(x=>x.id===e.target.value);if(w){setForm(p=>({...p,workerName:w.name,workerId:w.id,dailyRate:w.rate||p.dailyRate}));}else{setForm(p=>({...p,workerId:"",workerName:""}));}}}
-              style={{marginBottom:8}}>
-              <option value="">— {t("selectWorker")} —</option>
+        <div style={{background:"#fff",borderRadius:18,padding:18,border:"2px solid #A5D6A7",marginBottom:14}}>
+          <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ದಿನಾಂಕ":"Date"}</div><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></div>
+          <div style={{marginBottom:8}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಕಾರ್ಮಿಕ ಆಯ್ಕೆ":"Select Worker"}</div>
+            <select value={form.workerId} onChange={e=>{const w=workers.find(x=>x.id===e.target.value);if(w){setForm(p=>({...p,workerName:w.name,workerId:w.id,dailyRate:w.rate||p.dailyRate}));}else{setForm(p=>({...p,workerId:"",workerName:""}));}}}>
+              <option value="">— {lang==="kn"?"ಆಯ್ಕೆ ಮಾಡಿ":"Select"} —</option>
               {workers.map(w=><option key={w.id} value={w.id}>{w.name}{w.mobile?" ("+w.mobile+")":""}</option>)}
             </select>
-          </Field>
-          {!showWF&&<button onClick={()=>setShowWF(true)} style={{background:"none",border:"1.5px dashed #A5D6A7",color:"#2E7D32",borderRadius:10,padding:"7px 14px",fontSize:17,fontWeight:600,cursor:"pointer",marginBottom:10}}>{t("newWorker")}</button>}
-          {showWF&&(
-            <div style={{background:"#E8F5E9",borderRadius:12,padding:12,marginBottom:10}}>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
-                <input value={newW.name} onChange={e=>setNewW({...newW,name:e.target.value})} placeholder="ಹೆಸರು *"/>
-                <input value={newW.mobile} onChange={e=>setNewW({...newW,mobile:e.target.value})} placeholder="ಮೊಬೈಲ್"/>
-              </div>
-              <input type="number" value={newW.rate} onChange={e=>setNewW({...newW,rate:e.target.value})} placeholder={t("dailyRate")} style={{marginBottom:8}}/>
-              <div style={{display:"flex",gap:8}}><Btn onClick={addWorker} col="#2E7D32" sm>+ {t("save")}</Btn><Btn onClick={()=>setShowWF(false)} light col="#555" sm>{t("cancel")}</Btn></div>
-            </div>
-          )}
-          {!form.workerId&&<Field label={t("workerName")+" (manual)"} mb={10}><input value={form.workerName} onChange={e=>setForm({...form,workerName:e.target.value})} placeholder="ಕಾರ್ಮಿಕ ಹೆಸರು"/></Field>}
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-            <Field label={t("days")}><input type="number" value={form.days} onChange={e=>{setForm(p=>({...p,days:e.target.value}));}} onBlur={calcWages} placeholder="1"/></Field>
-            <Field label={t("dailyRate")}><input type="number" value={form.dailyRate} onChange={e=>{setForm(p=>({...p,dailyRate:e.target.value}));}} onBlur={calcWages} placeholder="500"/></Field>
           </div>
-          <Field label={t("totalWages")}>
-            <div style={{padding:"12px 14px",background:"#E8F5E9",borderRadius:12,fontSize:18,fontWeight:700,color:"#1B5E20"}}>
-              {fmtCur((+form.days||0)*(+form.dailyRate||0))||"₹0"}
-            </div>
-          </Field>
-          <Field label={t("taskDone2")} mb={14}><input value={form.taskDone} onChange={e=>setForm({...form,taskDone:e.target.value})} placeholder="ಏನು ಕೆಲಸ ಮಾಡಿದರು?"/></Field>
-          <div style={{display:"flex",gap:10}}><Btn onClick={save} col="#2E7D32" full>💾 {t("save")}</Btn><Btn onClick={()=>{setShow(false);setEditId(null);}} light col="#555" sm>{t("cancel")}</Btn></div>
-        </Card>
+          {!showWF&&<button onClick={()=>setShowWF(true)} style={{background:"none",border:"1.5px dashed #A5D6A7",color:"#2E7D32",borderRadius:10,padding:"8px 14px",fontSize:13,fontWeight:600,cursor:"pointer",marginBottom:10}}>+ {lang==="kn"?"ಹೊಸ ಕಾರ್ಮಿಕ":"New Worker"}</button>}
+          {showWF&&<div style={{background:"#E8F5E9",borderRadius:12,padding:12,marginBottom:10}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}><input value={newW.name} onChange={e=>setNewW({...newW,name:e.target.value})} placeholder={lang==="kn"?"ಹೆಸರು *":"Name *"}/><input value={newW.mobile} onChange={e=>setNewW({...newW,mobile:e.target.value})} placeholder={lang==="kn"?"ಮೊಬೈಲ್":"Mobile"}/></div>
+            <input type="number" value={newW.rate} onChange={e=>setNewW({...newW,rate:e.target.value})} placeholder={lang==="kn"?"ದಿನದ ದರ (₹)":"Daily Rate (₹)"} style={{marginBottom:8}}/>
+            <div style={{display:"flex",gap:8}}><button onClick={addWorker} style={{background:"#2E7D32",color:"#fff",border:"none",borderRadius:10,padding:"9px 16px",fontSize:14,fontWeight:700,cursor:"pointer"}}>+ {lang==="kn"?"ಉಳಿಸಿ":"Save"}</button><button onClick={()=>setShowWF(false)} style={{background:"#eee",border:"none",borderRadius:10,padding:"9px 14px",fontSize:14,cursor:"pointer"}}>{lang==="kn"?"ರದ್ದು":"Cancel"}</button></div>
+          </div>}
+          {!form.workerId&&<div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಕಾರ್ಮಿಕ ಹೆಸರು":"Worker Name"}</div><input value={form.workerName} onChange={e=>setForm({...form,workerName:e.target.value})} placeholder={lang==="kn"?"ಕಾರ್ಮಿಕ ಹೆಸರು":"Worker name"}/></div>}
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+            <div><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ದಿನಗಳು":"Days"}</div><input type="number" value={form.days} onChange={e=>setForm(p=>({...p,days:e.target.value}))} onBlur={calc} placeholder="1"/></div>
+            <div><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ದಿನದ ದರ (₹)":"Daily Rate (₹)"}</div><input type="number" value={form.dailyRate} onChange={e=>setForm(p=>({...p,dailyRate:e.target.value}))} onBlur={calc} placeholder="500"/></div>
+          </div>
+          <div style={{background:"#E8F5E9",borderRadius:12,padding:"12px 14px",fontSize:18,fontWeight:800,color:"#1B5E20",marginBottom:12}}>
+            {lang==="kn"?"ಒಟ್ಟು ಕೂಲಿ: ":"Total: "}{fmtCur((+form.days||0)*(+form.dailyRate||0))}
+          </div>
+          <div style={{marginBottom:14}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಮಾಡಿದ ಕೆಲಸ":"Work Done"}</div><input value={form.taskDone} onChange={e=>setForm({...form,taskDone:e.target.value})} placeholder={lang==="kn"?"ಏನು ಕೆಲಸ ಮಾಡಿದರು?":"What work was done?"}/></div>
+          <div style={{display:"flex",gap:10}}>
+            <button onClick={save} style={{flex:1,background:"#2E7D32",color:"#fff",border:"none",borderRadius:14,padding:14,fontSize:17,fontWeight:700,cursor:"pointer"}}>💾 {lang==="kn"?"ಉಳಿಸಿ":"Save"}</button>
+            <button onClick={()=>{setShow(false);setEditId(null);}} style={{background:"#f0f0f0",border:"none",color:"#555",borderRadius:14,padding:"14px 18px",fontSize:17,fontWeight:600,cursor:"pointer"}}>{lang==="kn"?"ರದ್ದು":"Cancel"}</button>
+          </div>
+        </div>
       )}
-      <div style={{marginTop:14}}>
-        {labour.length===0&&<Empty icon="👷" text={t("noActivity")}/>}
-        {labour.map(l=>{const isSaved=savedId===l.id;return(
-          <Card key={l.id} style={{border:`1.5px solid ${isSaved?"#A5D6A7":"transparent"}`,transition:"border .4s"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
-              <div>
-                <div style={{fontWeight:700,fontSize:15}}>{l.workerName}</div>
-                <div style={{fontSize:17,color:"#888",marginTop:2}}>{fmt(l.date)} · {l.days} {t("days")} × {fmtCur(l.dailyRate)}</div>
-                {l.taskDone&&<div style={{fontSize:17,color:"#555",marginTop:3}}>📋 {l.taskDone}</div>}
-              </div>
-              <div style={{fontSize:18,fontWeight:800,color:"#2E7D32"}}>{fmtCur(l.totalWages)}</div>
+      {labour.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:"#aaa"}}><div style={{fontSize:48,marginBottom:12}}>👷</div><div style={{fontSize:16}}>{lang==="kn"?"ಕಾರ್ಮಿಕ ದಾಖಲೆ ಇಲ್ಲ":"No labour entries"}</div></div>}
+      {labour.map(l=>{const saved=savedId===l.id;return(
+        <div key={l.id} style={{background:"#fff",borderRadius:18,padding:16,marginBottom:12,boxShadow:"0 2px 10px rgba(0,0,0,.07)",border:saved?"2px solid #A5D6A7":"2px solid transparent",transition:"border .4s"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
+            <div>
+              <div style={{fontWeight:700,fontSize:16}}>{l.workerName}</div>
+              <div style={{fontSize:14,color:"#888",marginTop:2}}>{fmt(l.date)} · {l.days} {lang==="kn"?"ದಿನ":"days"} × {fmtCur(l.dailyRate)}</div>
+              {l.taskDone&&<div style={{fontSize:13,color:"#555",marginTop:3}}>📋 {l.taskDone}</div>}
             </div>
-            <div style={{display:"flex",gap:8}}>
-              <button onClick={()=>{setForm({...l});setEditId(l.id);setShow(true);}} style={{flex:1,background:"#E8F5E9",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#2E7D32"}}>✏️ {t("edit")}</button>
-              <button onClick={()=>del(l.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {t("delete")}</button>
-            </div>
-          </Card>
-        );})}
-      </div>
-
-      {/* ═══ BACKUP & RESTORE ═══ */}
-      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
-        <div style={{fontSize:17,fontWeight:700,marginBottom:12,color:"#333"}}>
-          ☁️ {lang==="kn"?"ಡೇಟಾ ಬ್ಯಾಕಪ್ & ಮರುಸ್ಥಾಪನೆ":"Data Backup & Restore"}
+            <div style={{fontSize:20,fontWeight:800,color:"#2E7D32"}}>{fmtCur(l.totalWages)}</div>
+          </div>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>{setForm({...l});setEditId(l.id);setShow(true);}} style={{flex:1,background:"#E8F5E9",border:"none",borderRadius:12,padding:10,fontSize:15,fontWeight:600,cursor:"pointer",color:"#2E7D32"}}>✏️ {lang==="kn"?"ಸಂಪಾದಿಸಿ":"Edit"}</button>
+            <button onClick={()=>del(l.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:12,padding:10,fontSize:15,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {lang==="kn"?"ಅಳಿಸಿ":"Delete"}</button>
+          </div>
         </div>
-        <button onClick={()=>{
-          const allData={};
-          Object.keys(localStorage).filter(k=>k.startsWith("nt:")).forEach(k=>{
-            try{allData[k]=JSON.parse(localStorage.getItem(k));}catch{}
-          });
-          allData["_exportedAt"]=new Date().toISOString();
-          const blob=new Blob([JSON.stringify(allData,null,2)],{type:"application/json"});
-          const url=URL.createObjectURL(blob);
-          const a=document.createElement("a");
-          a.href=url;
-          a.download="NammaThota-backup-"+new Date().toISOString().slice(0,10)+".json";
-          a.click();
-          URL.revokeObjectURL(url);
-          showToast(lang==="kn"?"✅ ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಆಗಿದೆ":"✅ Backup downloaded");
-        }} style={{width:"100%",background:"#E8F5E9",border:"2px solid #A5D6A7",color:"#1B5E20",
-          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
-          marginBottom:10,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-          📥 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ":"Download Backup (.json)"}
-        </button>
-        <label style={{width:"100%",background:"#E3F2FD",border:"2px solid #90CAF9",color:"#1565C0",
-          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
-          display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:8}}>
-          📤 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಮರುಸ್ಥಾಪಿಸಿ":"Restore from Backup"}
-          <input type="file" accept=".json" style={{display:"none"}}
-            onChange={e=>{
-              const file=e.target.files[0];if(!file)return;
-              const reader=new FileReader();
-              reader.onload=ev=>{
-                try{
-                  const data=JSON.parse(ev.target.result);
-                  if(!data["nt:global:users"]){showToast(lang==="kn"?"ತಪ್ಪಾದ ಫೈಲ್":"Invalid backup file","warn");return;}
-                  if(!window.confirm(lang==="kn"?"ಎಲ್ಲಾ ಡೇಟಾ ಮರುಸ್ಥಾಪಿಸುವುದೇ?":"Restore all data? Current data will be overwritten."))return;
-                  Object.keys(data).filter(k=>k.startsWith("nt:")).forEach(k=>{
-                    localStorage.setItem(k,JSON.stringify(data[k]));
-                    sbSet(k,data[k]);
-                  });
-                  showToast(lang==="kn"?"✅ ಮರುಸ್ಥಾಪಿಸಲಾಗಿದೆ — ಮರುಲೋಡ್...":"✅ Restored — Reloading...");
-                  setTimeout(()=>window.location.reload(),1500);
-                }catch(ex){showToast(lang==="kn"?"ಫೈಲ್ ಓದಲಾಗಲಿಲ್ಲ":"Could not read file","error");}
-              };
-              reader.readAsText(file);
-              e.target.value="";
-            }}/>
-        </label>
-        <div style={{fontSize:13,color:"#888",textAlign:"center",lineHeight:1.6}}>
-          {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ → Google Drive ಗೆ ಹಾಕಿ ಸುರಕ್ಷಿತವಾಗಿ ಇರಿಸಿ":"Download backup → Upload to Google Drive to keep it safe"}
-        </div>
-      </div>
-
-      {/* ═══ SIGN OUT ═══ */}
-      <button onClick={()=>{if(window.confirm(lang==="kn"?"ನಿಜವಾಗಿಯೂ Sign Out ಮಾಡುವುದೇ?":"Sign out of NammaThota?"))onLogout&&onLogout();}}
-        style={{width:"100%",background:"#FFEBEE",border:"2px solid #FFCDD2",
-          color:"#C62828",borderRadius:18,padding:18,fontSize:18,
-          fontWeight:700,cursor:"pointer",display:"flex",
-          alignItems:"center",justifyContent:"center",gap:10,marginBottom:16}}>
-        🚪 {lang==="kn"?"ಸೈನ್ ಔಟ್":"Sign Out"}
-      </button>
-      <div style={{textAlign:"center",fontSize:13,color:"#ccc",marginBottom:8}}>
-        ನಮ್ಮ ತೋಟ · CodeTrail Technologies
-      </div>
+      );})}
     </div>
   );
 }
 
-/* ── Finance Page ───────────────────────────────── */
+/* ── Finance Page ────────────────────────────────── */
 function FinancePage({farm,expenses,setExpenses,purchases,setPurchases,payments,setPayments,income,setIncome,trips,allTasks,supervisors,user,showToast}){
-  const{t}=useLang();
+  const{t,lang}=useLang();
   const[tab,setTab]=useState("expenses");
-  const tabs=[["expenses","💸 "+t("expenses")],["purchases","🛒 "+t("purchases")],["payments","💳 "+t("payments")],["income","🌾 "+t("income")]];
+  const tabs=[["expenses","💸 "+(lang==="kn"?"ಖರ್ಚು":"Expenses")],["purchases","🛒 "+(lang==="kn"?"ಖರೀದಿ":"Purchases")],["payments","💳 "+(lang==="kn"?"ಪಾವತಿ":"Payments")],["income","🌾 "+(lang==="kn"?"ಆದಾಯ":"Income")]];
   return(
     <div style={{padding:"14px 14px 24px"}}>
-      <div style={{fontSize:17,fontWeight:700,marginBottom:14}}>💰 {t("financeTitle")}</div>
+      <div style={{fontSize:17,fontWeight:700,marginBottom:14}}>💰 {lang==="kn"?"ಹಣಕಾಸು":"Finance"}</div>
       <div style={{display:"flex",gap:6,marginBottom:16,overflowX:"auto",paddingBottom:4}}>
         {tabs.map(([id,lb])=>(
           <button key={id} onClick={()=>setTab(id)}
-            style={{padding:"12px 18px",borderRadius:20,border:`2px solid ${tab===id?"#E65100":"#ddd"}`,
+            style={{padding:"12px 18px",borderRadius:20,border:"2px solid "+(tab===id?"#E65100":"#ddd"),
               background:tab===id?"#E65100":"#fff",color:tab===id?"#fff":"#555",
-              fontSize:17,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
+              fontSize:15,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
             {lb}
           </button>
         ))}
@@ -2079,6 +2102,7 @@ function FinancePage({farm,expenses,setExpenses,purchases,setPurchases,payments,
   );
 }
 
+/* ── Expenses Tab ───────────────────────────────── */
 function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,showToast}){
   const{t,lang}=useLang();
   const E={date:today(),cat:"wage",desc:"",amount:"",tripId:"",taskId:"",note:""};
@@ -2086,247 +2110,92 @@ function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,showToast}){
   const[show,setShow]=useState(false);
   const[editId,setEditId]=useState(null);
   const[savedId,setSavedId]=useState(null);
-
-  const getLabel=c=>c?(c.icon+" "+(lang==="kn"?c.kn:c.en)):"";
-
+  const getC=id=>ECAT.find(c=>c.id===id)||ECAT[ECAT.length-1];
   const handleSave=()=>{
     if(!form.amount){showToast(lang==="kn"?"ಮೊತ್ತ ನಮೂದಿಸಿ":"Enter amount","warn");return;}
     const nid=editId||uid();
-    if(editId){setExpenses(p=>p.map(x=>x.id===editId?{...x,...form}:x));}
-    else{setExpenses(p=>[{id:nid,...form},...p]);}
-    setSavedId(nid);
-    showToast("✅ "+(lang==="kn"?"ಉಳಿಸಲಾಗಿದೆ":"Saved"));
+    if(editId)setExpenses(p=>p.map(x=>x.id===editId?{...x,...form}:x));
+    else setExpenses(p=>[{id:nid,...form},...p]);
+    setSavedId(nid);showToast("✅ "+(lang==="kn"?"ಉಳಿಸಲಾಗಿದೆ":"Saved"));
     setTimeout(()=>{setSavedId(null);setForm(E);setShow(false);setEditId(null);},1600);
   };
-
-  const handleDelete=id=>{
-    if(window.confirm(lang==="kn"?"ಈ ಖರ್ಚು ಅಳಿಸುವುದೇ?":"Delete this expense?"))
-      setExpenses(p=>p.filter(x=>x.id!==id));
-  };
-
+  const handleDelete=id=>{if(window.confirm(lang==="kn"?"ಅಳಿಸುವುದೇ?":"Delete?"))setExpenses(p=>p.filter(x=>x.id!==id));};
   const total=expenses.reduce((a,e)=>a+(+e.amount||0),0);
-
-  const activeBorder="2px solid #E65100";
-  const inactiveBorder="2px solid #eee";
-  const activeBg="#FFF3E0";
-  const inactiveBg="#fafafa";
-
   return(
     <div>
-      {/* Total card */}
       <div style={{background:"#E65100",borderRadius:18,padding:16,marginBottom:14,color:"#fff"}}>
         <div style={{fontSize:14,opacity:.8}}>{lang==="kn"?"ಒಟ್ಟು ಖರ್ಚು":"Total Expenses"}</div>
         <div style={{fontSize:28,fontWeight:800,marginTop:4}}>{fmtCur(total)}</div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:10}}>
-          {ECAT.map(c=>{
-            const s=expenses.filter(e=>e.cat===c.id).reduce((a,e)=>a+(+e.amount||0),0);
-            if(!s)return null;
-            return(
-              <div key={c.id} style={{background:"rgba(255,255,255,.2)",borderRadius:20,padding:"4px 12px",fontSize:13,color:"#fff"}}>
-                {c.icon} {lang==="kn"?c.kn:c.en}: {fmtCur(s)}
-              </div>
-            );
-          })}
+          {ECAT.map(c=>{const s=expenses.filter(e=>e.cat===c.id).reduce((a,e)=>a+(+e.amount||0),0);if(!s)return null;return(<div key={c.id} style={{background:"rgba(255,255,255,.2)",borderRadius:20,padding:"4px 12px",fontSize:12,color:"#fff"}}>{c.icon} {lang==="kn"?c.kn:c.en}: {fmtCur(s)}</div>);})}
         </div>
       </div>
-
-      {/* Add button */}
       <button onClick={()=>{setShow(!show);setEditId(null);setForm(E);}}
-        style={{width:"100%",background:"#E65100",color:"#fff",border:"none",
-          borderRadius:16,padding:15,fontSize:17,fontWeight:700,cursor:"pointer",
-          marginBottom:14,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+        style={{width:"100%",background:"#E65100",color:"#fff",border:"none",borderRadius:16,padding:15,fontSize:17,fontWeight:700,cursor:"pointer",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
         {show?"✕ "+(lang==="kn"?"ರದ್ದು":"Cancel"):"➕ "+(lang==="kn"?"ಖರ್ಚು ಸೇರಿಸಿ":"Add Expense")}
       </button>
-
-      {/* Form */}
       {show&&(
-        <div style={{background:"#fff",borderRadius:18,padding:18,
-          border:"2px solid #FFCC80",marginBottom:14,
-          boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
-
-          <div style={{fontSize:17,fontWeight:700,color:"#E65100",marginBottom:16}}>
-            {editId?(lang==="kn"?"ಸಂಪಾದಿಸಿ":"Edit"):(lang==="kn"?"ಹೊಸ":"New")} {lang==="kn"?"ಖರ್ಚು":"Expense"}
-          </div>
-
-          {/* Date */}
+        <div style={{background:"#fff",borderRadius:18,padding:18,border:"2px solid #FFCC80",marginBottom:14}}>
+          <div style={{marginBottom:14}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>📅 {lang==="kn"?"ದಿನಾಂಕ *":"Date *"}</div><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></div>
           <div style={{marginBottom:14}}>
-            <div style={{fontSize:14,fontWeight:600,color:"#333",marginBottom:6}}>
-              📅 {lang==="kn"?"ದಿನಾಂಕ *":"Date *"}
-            </div>
-            <input type="date" value={form.date}
-              onChange={e=>setForm({...form,date:e.target.value})}/>
-          </div>
-
-          {/* Category grid */}
-          <div style={{marginBottom:14}}>
-            <div style={{fontSize:14,fontWeight:600,color:"#333",marginBottom:8}}>
-              🏷️ {lang==="kn"?"ವರ್ಗ ಆಯ್ಕೆ ಮಾಡಿ *":"Select Category *"}
-            </div>
+            <div style={{fontSize:14,fontWeight:600,color:"#333",marginBottom:8}}>🏷️ {lang==="kn"?"ವರ್ಗ ಆಯ್ಕೆ ಮಾಡಿ *":"Select Category *"}</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
               {ECAT.map(c=>{
                 const active=form.cat===c.id;
                 return(
-                  <div key={c.id}
-                    onClick={()=>setForm({...form,cat:c.id})}
-                    style={{
-                      padding:"12px 10px",borderRadius:14,cursor:"pointer",
-                      border:active?activeBorder:inactiveBorder,
-                      background:active?activeBg:inactiveBg,
-                      display:"flex",alignItems:"center",gap:8,
-                    }}>
+                  <div key={c.id} onClick={()=>setForm({...form,cat:c.id})}
+                    style={{padding:"12px 10px",borderRadius:14,cursor:"pointer",border:"2px solid "+(active?"#E65100":"#eee"),background:active?"#FFF3E0":"#fafafa",display:"flex",alignItems:"center",gap:8}}>
                     <span style={{fontSize:22}}>{c.icon}</span>
                     <div style={{flex:1}}>
-                      <div style={{fontSize:14,fontWeight:active?700:500,
-                        color:active?"#E65100":"#333",lineHeight:1.3}}>
-                        {lang==="kn"?c.kn:c.en}
-                      </div>
+                      <div style={{fontSize:14,fontWeight:active?700:500,color:active?"#E65100":"#333"}}>{lang==="kn"?c.kn:c.en}</div>
                     </div>
-                    {active&&<span style={{fontSize:16,flexShrink:0}}>✅</span>}
+                    {active&&<span style={{fontSize:16}}>✅</span>}
                   </div>
                 );
               })}
             </div>
           </div>
-
-          {/* Description */}
-          <div style={{marginBottom:12}}>
-            <div style={{fontSize:14,fontWeight:600,color:"#333",marginBottom:6}}>
-              📝 {lang==="kn"?"ವಿವರ":"Description"}
-            </div>
-            <input value={form.desc}
-              onChange={e=>setForm({...form,desc:e.target.value})}
-              placeholder={lang==="kn"?"ಖರ್ಚಿನ ವಿವರ...":"Description..."}/>
-          </div>
-
-          {/* Amount */}
-          <div style={{marginBottom:12}}>
-            <div style={{fontSize:14,fontWeight:600,color:"#333",marginBottom:6}}>
-              💰 {lang==="kn"?"ಮೊತ್ತ (₹) *":"Amount (₹) *"}
-            </div>
-            <input type="number" inputMode="numeric"
-              value={form.amount}
-              onChange={e=>setForm({...form,amount:e.target.value})}
-              placeholder="0"/>
-          </div>
-
-          {/* Link to Task */}
-          <div style={{marginBottom:12}}>
-            <div style={{fontSize:14,fontWeight:600,color:"#333",marginBottom:6}}>
-              📋 {lang==="kn"?"ಕೆಲಸಕ್ಕೆ ಲಿಂಕ್ (ಐಚ್ಛಿಕ)":"Link to Task (Optional)"}
-            </div>
-            <select value={form.taskId}
-              onChange={e=>setForm({...form,taskId:e.target.value})}>
+          <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>📝 {lang==="kn"?"ವಿವರ":"Description"}</div><input value={form.desc} onChange={e=>setForm({...form,desc:e.target.value})} placeholder={lang==="kn"?"ಖರ್ಚಿನ ವಿವರ...":"Description..."}/></div>
+          <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>💰 {lang==="kn"?"ಮೊತ್ತ (₹) *":"Amount (₹) *"}</div><input type="number" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} placeholder="0"/></div>
+          <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>📋 {lang==="kn"?"ಕೆಲಸಕ್ಕೆ ಲಿಂಕ್ (ಐಚ್ಛಿಕ)":"Link to Task (Optional)"}</div>
+            <select value={form.taskId} onChange={e=>setForm({...form,taskId:e.target.value})}>
               <option value="">— {lang==="kn"?"ಆಯ್ಕೆ":"Select"} —</option>
-              {(allTasks||[]).map(tg=>(
-                <option key={tg.id} value={tg.id}>
-                  {tg.id}: {lang==="kn"?tg.kn:tg.en}
-                </option>
-              ))}
+              {(allTasks||[]).map(tg=>(<option key={tg.id} value={tg.id}>{tg.id}: {lang==="kn"?tg.kn:tg.en}</option>))}
             </select>
           </div>
-
-          {/* Link to Trip */}
-          <div style={{marginBottom:12}}>
-            <div style={{fontSize:14,fontWeight:600,color:"#333",marginBottom:6}}>
-              🚗 {lang==="kn"?"ಪ್ರಯಾಣಕ್ಕೆ ಲಿಂಕ್ (ಐಚ್ಛಿಕ)":"Link to Trip (Optional)"}
-            </div>
-            <select value={form.tripId}
-              onChange={e=>setForm({...form,tripId:e.target.value})}>
+          <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>🚗 {lang==="kn"?"ಪ್ರಯಾಣಕ್ಕೆ ಲಿಂಕ್ (ಐಚ್ಛಿಕ)":"Link to Trip (Optional)"}</div>
+            <select value={form.tripId} onChange={e=>setForm({...form,tripId:e.target.value})}>
               <option value="">— {lang==="kn"?"ಆಯ್ಕೆ":"Select"} —</option>
-              {trips.map(tr=>(
-                <option key={tr.id} value={tr.id}>
-                  {fmt(tr.date)}: {tr.from}→{tr.to}
-                </option>
-              ))}
+              {trips.map(tr=>(<option key={tr.id} value={tr.id}>{fmt(tr.date)}: {tr.from}→{tr.to}</option>))}
             </select>
           </div>
-
-          {/* Note */}
-          <div style={{marginBottom:16}}>
-            <div style={{fontSize:14,fontWeight:600,color:"#333",marginBottom:6}}>
-              🗒️ {lang==="kn"?"ಟಿಪ್ಪಣಿ (ಐಚ್ಛಿಕ)":"Note (Optional)"}
-            </div>
-            <textarea value={form.note}
-              onChange={e=>setForm({...form,note:e.target.value})}
-              rows={2}
-              placeholder={lang==="kn"?"ಟಿಪ್ಪಣಿ...":"Note..."}/>
-          </div>
-
+          <div style={{marginBottom:16}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>🗒️ {lang==="kn"?"ಟಿಪ್ಪಣಿ (ಐಚ್ಛಿಕ)":"Note (Optional)"}</div><textarea value={form.note} onChange={e=>setForm({...form,note:e.target.value})} rows={2} placeholder={lang==="kn"?"ಟಿಪ್ಪಣಿ...":"Note..."}/></div>
           <div style={{display:"flex",gap:10}}>
-            <button onClick={handleSave}
-              style={{flex:1,background:"#E65100",color:"#fff",border:"none",
-                borderRadius:14,padding:14,fontSize:17,fontWeight:700,cursor:"pointer"}}>
-              💾 {lang==="kn"?"ಉಳಿಸಿ":"Save"}
-            </button>
-            <button onClick={()=>{setShow(false);setEditId(null);setForm(E);}}
-              style={{background:"#f0f0f0",border:"none",color:"#555",
-                borderRadius:14,padding:"14px 18px",fontSize:17,fontWeight:600,cursor:"pointer"}}>
-              {lang==="kn"?"ರದ್ದು":"Cancel"}
-            </button>
+            <button onClick={handleSave} style={{flex:1,background:"#E65100",color:"#fff",border:"none",borderRadius:14,padding:14,fontSize:17,fontWeight:700,cursor:"pointer"}}>💾 {lang==="kn"?"ಉಳಿಸಿ":"Save"}</button>
+            <button onClick={()=>{setShow(false);setEditId(null);setForm(E);}} style={{background:"#f0f0f0",border:"none",color:"#555",borderRadius:14,padding:"14px 18px",fontSize:17,fontWeight:600,cursor:"pointer"}}>{lang==="kn"?"ರದ್ದು":"Cancel"}</button>
           </div>
         </div>
       )}
-
-      {/* List */}
-      {expenses.length===0&&(
-        <div style={{textAlign:"center",padding:"40px 20px",color:"#aaa"}}>
-          <div style={{fontSize:48,marginBottom:12}}>💸</div>
-          <div style={{fontSize:16}}>{lang==="kn"?"ಯಾವುದೇ ಖರ್ಚು ಇಲ್ಲ":"No expenses yet"}</div>
-        </div>
-      )}
-
+      {expenses.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:"#aaa"}}><div style={{fontSize:48,marginBottom:12}}>💸</div><div style={{fontSize:16}}>{lang==="kn"?"ಯಾವುದೇ ಖರ್ಚು ಇಲ್ಲ":"No expenses yet"}</div></div>}
       {expenses.map(e=>{
-        const c=ECAT.find(x=>x.id===e.cat)||ECAT[ECAT.length-1];
-        const linked=(allTasks||[]).find(tg=>tg.id===e.taskId);
-        const saved=savedId===e.id;
+        const c=getC(e.cat);const linked=(allTasks||[]).find(tg=>tg.id===e.taskId);const saved=savedId===e.id;
         return(
-          <div key={e.id} style={{background:"#fff",borderRadius:18,padding:16,
-            marginBottom:12,boxShadow:"0 2px 10px rgba(0,0,0,.07)",
-            border:saved?"2px solid #FFCC80":"2px solid transparent",
-            transition:"border .4s"}}>
-            <div style={{display:"flex",justifyContent:"space-between",
-              alignItems:"flex-start",marginBottom:10}}>
+          <div key={e.id} style={{background:"#fff",borderRadius:18,padding:16,marginBottom:12,boxShadow:"0 2px 10px rgba(0,0,0,.07)",border:saved?"2px solid #FFCC80":"2px solid transparent",transition:"border .4s"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
               <div style={{display:"flex",alignItems:"center",gap:12}}>
-                <div style={{width:46,height:46,background:"#FFF3E0",borderRadius:14,
-                  display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>
-                  {c.icon}
-                </div>
+                <div style={{width:46,height:46,background:"#FFF3E0",borderRadius:14,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>{c.icon}</div>
                 <div>
-                  <div style={{fontWeight:700,fontSize:16,color:"#333"}}>
-                    {lang==="kn"?c.kn:c.en}
-                  </div>
-                  <div style={{fontSize:14,color:"#888",marginTop:2}}>
-                    📅 {fmt(e.date)}{e.desc?" · "+e.desc:""}
-                  </div>
-                  {linked&&(
-                    <div style={{fontSize:13,color:"#1B5E20",marginTop:4,
-                      background:"#E8F5E9",borderRadius:8,padding:"2px 8px",
-                      display:"inline-block"}}>
-                      📋 {lang==="kn"?linked.kn:linked.en}
-                    </div>
-                  )}
-                  {e.note&&(
-                    <div style={{fontSize:13,color:"#aaa",marginTop:3,fontStyle:"italic"}}>
-                      {'"'}{e.note}{'"'}
-                    </div>
-                  )}
+                  <div style={{fontWeight:700,fontSize:16,color:"#333"}}>{lang==="kn"?c.kn:c.en}</div>
+                  <div style={{fontSize:14,color:"#888",marginTop:2}}>📅 {fmt(e.date)}{e.desc?" · "+e.desc:""}</div>
+                  {linked&&<div style={{fontSize:13,color:"#1B5E20",marginTop:4,background:"#E8F5E9",borderRadius:8,padding:"2px 8px",display:"inline-block"}}>📋 {lang==="kn"?linked.kn:linked.en}</div>}
+                  {e.note&&<div style={{fontSize:13,color:"#aaa",marginTop:3,fontStyle:"italic"}}>"{e.note}"</div>}
                 </div>
               </div>
-              <div style={{fontSize:20,fontWeight:800,color:"#E65100",flexShrink:0,marginLeft:8}}>
-                {fmtCur(e.amount)}
-              </div>
+              <div style={{fontSize:20,fontWeight:800,color:"#E65100",flexShrink:0,marginLeft:8}}>{fmtCur(e.amount)}</div>
             </div>
             <div style={{display:"flex",gap:8}}>
-              <button onClick={()=>{setForm({...e});setEditId(e.id);setShow(true);}}
-                style={{flex:1,background:"#FFF3E0",border:"none",borderRadius:12,
-                  padding:10,fontSize:15,fontWeight:600,cursor:"pointer",color:"#E65100"}}>
-                ✏️ {lang==="kn"?"ಸಂಪಾದಿಸಿ":"Edit"}
-              </button>
-              <button onClick={()=>handleDelete(e.id)}
-                style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:12,
-                  padding:10,fontSize:15,fontWeight:600,cursor:"pointer",color:"#C62828"}}>
-                🗑 {lang==="kn"?"ಅಳಿಸಿ":"Delete"}
-              </button>
+              <button onClick={()=>{setForm({...e});setEditId(e.id);setShow(true);}} style={{flex:1,background:"#FFF3E0",border:"none",borderRadius:12,padding:10,fontSize:15,fontWeight:600,cursor:"pointer",color:"#E65100"}}>✏️ {lang==="kn"?"ಸಂಪಾದಿಸಿ":"Edit"}</button>
+              <button onClick={()=>handleDelete(e.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:12,padding:10,fontSize:15,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {lang==="kn"?"ಅಳಿಸಿ":"Delete"}</button>
             </div>
           </div>
         );
@@ -2336,437 +2205,188 @@ function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,showToast}){
 }
 
 
+/* ── Purchases Tab ───────────────────────────────── */
 function PurchasesTab({farm,purchases,setPurchases,showToast}){
   const{t,lang}=useLang();
   const E={date:today(),item:"",vendor:"",qty:"",unit:"ಕೆ.ಜಿ",amount:"",gst:"",gstAmt:"",note:"",receipt:null};
-  const[form,setForm]=useState(E);const[show,setShow]=useState(false);const[editId,setEditId]=useState(null);const[savedId,setSavedId]=useState(null);const[uploading,setUploading]=useState(false);
+  const[form,setForm]=useState(E);const[show,setShow]=useState(false);const[editId,setEditId]=useState(null);const[savedId,setSavedId]=useState(null);const[uploading,setUploading]=useState(false);const[viewR,setViewR]=useState(null);
   const fileRef=useRef();
   const pickReceipt=async e=>{const f=e.target.files[0];if(!f)return;setUploading(true);const d=await compress(f);setForm(p=>({...p,receipt:d}));setUploading(false);};
   const save=()=>{
-    if(!form.item){showToast(t("itemName")+" "+t("required"),"warn");return;}
+    if(!form.item){showToast(lang==="kn"?"ಐಟಂ ಹೆಸರು ಬೇಕು":"Item name required","warn");return;}
     const nid=editId||uid();
-    if(editId)setPurchases(p=>p.map(x=>x.id===editId?{...x,...form}:x));else setPurchases(p=>[{id:nid,...form},...p]);
-    setSavedId(nid);showToast("✅ "+t("saved"));
+    if(editId)setPurchases(p=>p.map(x=>x.id===editId?{...x,...form}:x));
+    else setPurchases(p=>[{id:nid,...form},...p]);
+    setSavedId(nid);showToast("✅ "+(lang==="kn"?"ಉಳಿಸಲಾಗಿದೆ":"Saved"));
     setTimeout(()=>{setSavedId(null);setForm(E);setShow(false);setEditId(null);},1600);
   };
-  const del=id=>{setPurchases(p=>p.filter(x=>x.id!==id));showToast("🗑 "+t("delete"));};
+  const del=id=>{setPurchases(p=>p.filter(x=>x.id!==id));};
   const total=purchases.reduce((a,p)=>a+(+p.amount||0),0);
-  const[viewR,setViewR]=useState(null);
   return(
     <div>
       {viewR&&<div onClick={()=>setViewR(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.93)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:20}}>
         <img src={viewR} alt="" style={{maxWidth:"100%",maxHeight:"75vh",borderRadius:14,objectFit:"contain"}}/>
-        <button onClick={()=>setViewR(null)} style={{marginTop:16,background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:20,padding:"10px 28px",fontSize:18,cursor:"pointer"}}>✕</button>
+        <button onClick={()=>setViewR(null)} style={{marginTop:16,background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:20,padding:"10px 28px",fontSize:14,cursor:"pointer"}}>✕</button>
       </div>}
-      <Card style={{background:"#6A1B9A",marginBottom:14}}>
-        <div style={{color:"rgba(255,255,255,.8)",fontSize:12}}>{t("totalPurchases")}</div>
-        <div style={{color:"#fff",fontSize:24,fontWeight:800,marginTop:4}}>{fmtCur(total)}</div>
-        <div style={{color:"rgba(255,255,255,.7)",fontSize:17,marginTop:4}}>{purchases.length} items</div>
-      </Card>
-      <Btn onClick={()=>{setShow(!show);setEditId(null);setForm(E);}} col="#6A1B9A" full>{t("addPurchase")}</Btn>
+      <div style={{background:"#6A1B9A",borderRadius:18,padding:16,marginBottom:14,color:"#fff"}}>
+        <div style={{fontSize:14,opacity:.8}}>{lang==="kn"?"ಒಟ್ಟು ಖರೀದಿ":"Total Purchases"}</div>
+        <div style={{fontSize:28,fontWeight:800,marginTop:4}}>{fmtCur(total)}</div>
+        <div style={{fontSize:13,opacity:.7,marginTop:4}}>{purchases.length} items</div>
+      </div>
+      <button onClick={()=>{setShow(!show);setEditId(null);setForm(E);}}
+        style={{width:"100%",background:"#6A1B9A",color:"#fff",border:"none",borderRadius:16,padding:15,fontSize:17,fontWeight:700,cursor:"pointer",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+        {show?"✕ "+(lang==="kn"?"ರದ್ದು":"Cancel"):"🛒 "+(lang==="kn"?"ಖರೀದಿ ಸೇರಿಸಿ":"Add Purchase")}
+      </button>
       {show&&(
-        <Card style={{border:"2px solid #CE93D8",marginTop:14}}>
-          <Field label={t("date")||"Date"} required><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></Field>
-          <Field label={t("itemName")+" *"}><input value={form.item} onChange={e=>setForm({...form,item:e.target.value})} placeholder="ಗೊಬ್ಬರ, ಸಸಿ, ಪೈಪ್..."/></Field>
-          <Field label={t("vendor")}><input value={form.vendor} onChange={e=>setForm({...form,vendor:e.target.value})} placeholder="ಅಂಗಡಿ ಹೆಸರು"/></Field>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-            <Field label={t("qty")}><input type="number" value={form.qty} onChange={e=>setForm({...form,qty:e.target.value})} placeholder="0"/></Field>
-            <Field label={t("unit")}><select value={form.unit} onChange={e=>setForm({...form,unit:e.target.value})}>{UNITS.map(u=><option key={u}>{u}</option>)}</select></Field>
+        <div style={{background:"#fff",borderRadius:18,padding:18,border:"2px solid #CE93D8",marginBottom:14}}>
+          <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ದಿನಾಂಕ":"Date"}</div><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></div>
+          <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಐಟಂ ಹೆಸರು *":"Item Name *"}</div><input value={form.item} onChange={e=>setForm({...form,item:e.target.value})} placeholder={lang==="kn"?"ಗೊಬ್ಬರ, ಸಸಿ, ಪೈಪ್...":"Fertilizer, saplings, pipes..."}/></div>
+          <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಅಂಗಡಿ":"Vendor"}</div><input value={form.vendor} onChange={e=>setForm({...form,vendor:e.target.value})} placeholder={lang==="kn"?"ಅಂಗಡಿ ಹೆಸರು":"Shop/Vendor name"}/></div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+            <div><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಪ್ರಮಾಣ":"Qty"}</div><input type="number" value={form.qty} onChange={e=>setForm({...form,qty:e.target.value})} placeholder="0"/></div>
+            <div><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಘಟಕ":"Unit"}</div><select value={form.unit} onChange={e=>setForm({...form,unit:e.target.value})}>{"ಕೆ.ಜಿ,ಗ್ರಾಂ,ಲೀ,Bags,Nos,ಟ್ರಕ್,ಲೋಡ್,Acres,Meters,Feet,Tons".split(",").map(u=><option key={u}>{u}</option>)}</select></div>
           </div>
-          <Field label={t("amount")+" *"}><input type="number" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} placeholder="0"/></Field>
-          {/* GST */}
+          <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಮೊತ್ತ (₹) *":"Amount (₹) *"}</div><input type="number" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} placeholder="0"/></div>
           <div style={{background:"#E3F2FD",borderRadius:14,padding:"12px 14px",marginBottom:12}}>
-            <div style={{fontSize:14,fontWeight:700,color:"#1565C0",marginBottom:10}}>
-              🏛️ {lang==="kn"?"GST ವಿವರ (ಐಚ್ಛಿಕ)":"GST Details (Optional)"}
-            </div>
+            <div style={{fontSize:14,fontWeight:700,color:"#1565C0",marginBottom:10}}>🏛️ {lang==="kn"?"GST ವಿವರ (ಐಚ್ಛಿಕ)":"GST Details (Optional)"}</div>
             <div style={{display:"flex",gap:10}}>
-              <div style={{flex:1}}>
-                <div style={{fontSize:13,color:"#555",marginBottom:5}}>{lang==="kn"?"GST %":"GST %"}</div>
-                <select value={form.gst} onChange={e=>{
-                  const pct=e.target.value;
-                  const gstAmt=pct?Math.round((+form.amount||0)*+pct/100):"";
-                  setForm({...form,gst:pct,gstAmt:gstAmt});
-                }}>
-                  <option value="">—</option>
-                  {["0","5","12","18","28"].map(r=><option key={r} value={r}>{r}%</option>)}
+              <div style={{flex:1}}><div style={{fontSize:13,color:"#555",marginBottom:5}}>GST %</div>
+                <select value={form.gst} onChange={e=>{const pct=e.target.value;const gstAmt=pct?Math.round((+form.amount||0)*+pct/100):"";setForm({...form,gst:pct,gstAmt:gstAmt});}}>
+                  <option value="">—</option>{"0,5,12,18,28".split(",").map(r=><option key={r} value={r}>{r}%</option>)}
                 </select>
               </div>
-              <div style={{flex:1}}>
-                <div style={{fontSize:13,color:"#555",marginBottom:5}}>{lang==="kn"?"GST ಮೊತ್ತ (₹)":"GST Amount (₹)"}</div>
-                <input type="number" value={form.gstAmt}
-                  onChange={e=>setForm({...form,gstAmt:e.target.value})}
-                  placeholder="0" inputMode="numeric"/>
-              </div>
+              <div style={{flex:1}}><div style={{fontSize:13,color:"#555",marginBottom:5}}>{lang==="kn"?"GST ಮೊತ್ತ (₹)":"GST Amount (₹)"}</div><input type="number" value={form.gstAmt} onChange={e=>setForm({...form,gstAmt:e.target.value})} placeholder="0"/></div>
             </div>
-            {form.gst&&form.amount&&(
-              <div style={{marginTop:8,fontSize:13,color:"#1565C0",fontWeight:600}}>
-                {lang==="kn"?"ಒಟ್ಟು (ಮೂಲ + GST):":"Total (Base + GST):"} {fmtCur((+form.amount||0)+(+form.gstAmt||0))}
-              </div>
-            )}
+            {form.gst&&form.amount&&<div style={{marginTop:8,fontSize:13,color:"#1565C0",fontWeight:600}}>{lang==="kn"?"ಒಟ್ಟು:":"Total:"} {fmtCur((+form.amount||0)+(+form.gstAmt||0))}</div>}
           </div>
-          <Field label={t("receipt")} mb={14}>
-            <div onClick={()=>fileRef.current.click()} style={{border:"2px dashed #CE93D8",borderRadius:12,padding:14,textAlign:"center",cursor:"pointer",background:"#fafafa"}}>
-              {uploading?"⏳ Processing...":form.receipt?<img src={form.receipt} alt="" style={{maxHeight:100,maxWidth:"100%",borderRadius:8}}/>:<><div style={{fontSize:28,marginBottom:6}}>📷</div><div style={{fontSize:18,color:"#6A1B9A",fontWeight:600}}>{t("receipt")}</div></>}
+          <div style={{marginBottom:14}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ರಸೀದಿ ಫೋಟೋ":"Receipt Photo"}</div>
+            <div onClick={()=>fileRef.current.click()} style={{border:"2px dashed #CE93D8",borderRadius:12,padding:14,textAlign:"center",cursor:"pointer",background:"#fafafa",minHeight:70,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+              {uploading?"⏳":form.receipt?<img src={form.receipt} alt="" style={{maxHeight:100,maxWidth:"100%",borderRadius:8}}/>:<><div style={{fontSize:28,marginBottom:4}}>📷</div><div style={{fontSize:14,color:"#6A1B9A",fontWeight:600}}>{lang==="kn"?"ರಸೀದಿ ಫೋಟೋ":"Upload Receipt"}</div></>}
             </div>
             <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={pickReceipt}/>
-          </Field>
-          <Field label={t("noteSave")} mb={14}><textarea value={form.note} onChange={e=>setForm({...form,note:e.target.value})} rows={2} placeholder="ಟಿಪ್ಪಣಿ..."/></Field>
-          <div style={{display:"flex",gap:10}}><Btn onClick={save} col="#6A1B9A" full>💾 {t("save")}</Btn><Btn onClick={()=>{setShow(false);setEditId(null);}} light col="#555" sm>{t("cancel")}</Btn></div>
-        </Card>
+          </div>
+          <div style={{marginBottom:14}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಟಿಪ್ಪಣಿ":"Note"}</div><textarea value={form.note} onChange={e=>setForm({...form,note:e.target.value})} rows={2}/></div>
+          <div style={{display:"flex",gap:10}}>
+            <button onClick={save} style={{flex:1,background:"#6A1B9A",color:"#fff",border:"none",borderRadius:14,padding:14,fontSize:17,fontWeight:700,cursor:"pointer"}}>💾 {lang==="kn"?"ಉಳಿಸಿ":"Save"}</button>
+            <button onClick={()=>{setShow(false);setEditId(null);}} style={{background:"#f0f0f0",border:"none",color:"#555",borderRadius:14,padding:"14px 18px",fontSize:17,fontWeight:600,cursor:"pointer"}}>{lang==="kn"?"ರದ್ದು":"Cancel"}</button>
+          </div>
+        </div>
       )}
-      <div style={{marginTop:14}}>
-        {purchases.length===0&&<Empty icon="🛒" text={t("noActivity")}/>}
-        {purchases.map(p=>{const isSaved=savedId===p.id;return(
-          <Card key={p.id} style={{border:`1.5px solid ${isSaved?"#CE93D8":"transparent"}`,transition:"border .4s"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
-              <div style={{flex:1}}>
-                <div style={{fontWeight:700,fontSize:15}}>{p.item}</div>
-                <div style={{fontSize:17,color:"#888",marginTop:2}}>{fmt(p.date)}{p.vendor?" · "+p.vendor:""}</div>
-                {p.qty&&<div style={{fontSize:17,color:"#555",marginTop:2}}>{p.qty} {p.unit}</div>}
-                {p.gst&&<div style={{fontSize:14,color:"#1565C0",marginTop:4,background:"#E3F2FD",borderRadius:8,padding:"3px 10px",display:"inline-block"}}>🏛️ GST {p.gst}% = {fmtCur(p.gstAmt||0)} · {lang==="kn"?"ಒಟ್ಟು:":"Total:"} {fmtCur((+p.amount||0)+(+p.gstAmt||0))}</div>}
-                {p.note&&<div style={{fontSize:17,color:"#888",fontStyle:"italic",marginTop:3}}>"{p.note}"</div>}
-              </div>
-              <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6}}>
-                <div style={{fontSize:18,fontWeight:800,color:"#6A1B9A"}}>{fmtCur(p.amount)}</div>
-                {p.receipt&&<img src={p.receipt} alt="" onClick={()=>setViewR(p.receipt)} style={{width:40,height:40,objectFit:"cover",borderRadius:8,cursor:"pointer",border:"2px solid #CE93D8"}}/>}
-              </div>
+      {purchases.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:"#aaa"}}><div style={{fontSize:48,marginBottom:12}}>🛒</div><div style={{fontSize:16}}>{lang==="kn"?"ಯಾವುದೇ ಖರೀದಿ ಇಲ್ಲ":"No purchases yet"}</div></div>}
+      {purchases.map(p=>{const saved=savedId===p.id;return(
+        <div key={p.id} style={{background:"#fff",borderRadius:18,padding:16,marginBottom:12,boxShadow:"0 2px 10px rgba(0,0,0,.07)",border:saved?"2px solid #CE93D8":"2px solid transparent",transition:"border .4s"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:700,fontSize:16}}>{p.item}</div>
+              <div style={{fontSize:14,color:"#888",marginTop:2}}>{fmt(p.date)}{p.vendor?" · "+p.vendor:""}</div>
+              {p.qty&&<div style={{fontSize:14,color:"#555",marginTop:2}}>{p.qty} {p.unit}</div>}
+              {p.gst&&<div style={{fontSize:13,color:"#1565C0",marginTop:3,background:"#E3F2FD",borderRadius:8,padding:"2px 8px",display:"inline-block"}}>🏛️ GST {p.gst}% = {fmtCur(p.gstAmt||0)} · {lang==="kn"?"ಒಟ್ಟು:":"Total:"} {fmtCur((+p.amount||0)+(+p.gstAmt||0))}</div>}
+              {p.note&&<div style={{fontSize:13,color:"#888",fontStyle:"italic",marginTop:3}}>"{p.note}"</div>}
             </div>
-            <div style={{display:"flex",gap:8}}>
-              <button onClick={()=>{setForm({...p});setEditId(p.id);setShow(true);}} style={{flex:1,background:"#F3E5F5",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#6A1B9A"}}>✏️ {t("edit")}</button>
-              <button onClick={()=>del(p.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {t("delete")}</button>
+            <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6}}>
+              <div style={{fontSize:20,fontWeight:800,color:"#6A1B9A"}}>{fmtCur(p.amount)}</div>
+              {p.receipt&&<img src={p.receipt} alt="" onClick={()=>setViewR(p.receipt)} style={{width:40,height:40,objectFit:"cover",borderRadius:8,cursor:"pointer",border:"2px solid #CE93D8"}}/>}
             </div>
-          </Card>
-        );})}
-      </div>
-
-      {/* ═══ BACKUP & RESTORE ═══ */}
-      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
-        <div style={{fontSize:17,fontWeight:700,marginBottom:12,color:"#333"}}>
-          ☁️ {lang==="kn"?"ಡೇಟಾ ಬ್ಯಾಕಪ್ & ಮರುಸ್ಥಾಪನೆ":"Data Backup & Restore"}
+          </div>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>{setForm({...p});setEditId(p.id);setShow(true);}} style={{flex:1,background:"#F3E5F5",border:"none",borderRadius:12,padding:10,fontSize:15,fontWeight:600,cursor:"pointer",color:"#6A1B9A"}}>✏️ {lang==="kn"?"ಸಂಪಾದಿಸಿ":"Edit"}</button>
+            <button onClick={()=>del(p.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:12,padding:10,fontSize:15,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {lang==="kn"?"ಅಳಿಸಿ":"Delete"}</button>
+          </div>
         </div>
-        <button onClick={()=>{
-          const allData={};
-          Object.keys(localStorage).filter(k=>k.startsWith("nt:")).forEach(k=>{
-            try{allData[k]=JSON.parse(localStorage.getItem(k));}catch{}
-          });
-          allData["_exportedAt"]=new Date().toISOString();
-          const blob=new Blob([JSON.stringify(allData,null,2)],{type:"application/json"});
-          const url=URL.createObjectURL(blob);
-          const a=document.createElement("a");
-          a.href=url;
-          a.download="NammaThota-backup-"+new Date().toISOString().slice(0,10)+".json";
-          a.click();
-          URL.revokeObjectURL(url);
-          showToast(lang==="kn"?"✅ ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಆಗಿದೆ":"✅ Backup downloaded");
-        }} style={{width:"100%",background:"#E8F5E9",border:"2px solid #A5D6A7",color:"#1B5E20",
-          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
-          marginBottom:10,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-          📥 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ":"Download Backup (.json)"}
-        </button>
-        <label style={{width:"100%",background:"#E3F2FD",border:"2px solid #90CAF9",color:"#1565C0",
-          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
-          display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:8}}>
-          📤 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಮರುಸ್ಥಾಪಿಸಿ":"Restore from Backup"}
-          <input type="file" accept=".json" style={{display:"none"}}
-            onChange={e=>{
-              const file=e.target.files[0];if(!file)return;
-              const reader=new FileReader();
-              reader.onload=ev=>{
-                try{
-                  const data=JSON.parse(ev.target.result);
-                  if(!data["nt:global:users"]){showToast(lang==="kn"?"ತಪ್ಪಾದ ಫೈಲ್":"Invalid backup file","warn");return;}
-                  if(!window.confirm(lang==="kn"?"ಎಲ್ಲಾ ಡೇಟಾ ಮರುಸ್ಥಾಪಿಸುವುದೇ?":"Restore all data? Current data will be overwritten."))return;
-                  Object.keys(data).filter(k=>k.startsWith("nt:")).forEach(k=>{
-                    localStorage.setItem(k,JSON.stringify(data[k]));
-                    sbSet(k,data[k]);
-                  });
-                  showToast(lang==="kn"?"✅ ಮರುಸ್ಥಾಪಿಸಲಾಗಿದೆ — ಮರುಲೋಡ್...":"✅ Restored — Reloading...");
-                  setTimeout(()=>window.location.reload(),1500);
-                }catch(ex){showToast(lang==="kn"?"ಫೈಲ್ ಓದಲಾಗಲಿಲ್ಲ":"Could not read file","error");}
-              };
-              reader.readAsText(file);
-              e.target.value="";
-            }}/>
-        </label>
-        <div style={{fontSize:13,color:"#888",textAlign:"center",lineHeight:1.6}}>
-          {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ → Google Drive ಗೆ ಹಾಕಿ ಸುರಕ್ಷಿತವಾಗಿ ಇರಿಸಿ":"Download backup → Upload to Google Drive to keep it safe"}
-        </div>
-      </div>
-
-      {/* ═══ SIGN OUT ═══ */}
-      <button onClick={()=>{if(window.confirm(lang==="kn"?"ನಿಜವಾಗಿಯೂ Sign Out ಮಾಡುವುದೇ?":"Sign out of NammaThota?"))onLogout&&onLogout();}}
-        style={{width:"100%",background:"#FFEBEE",border:"2px solid #FFCDD2",
-          color:"#C62828",borderRadius:18,padding:18,fontSize:18,
-          fontWeight:700,cursor:"pointer",display:"flex",
-          alignItems:"center",justifyContent:"center",gap:10,marginBottom:16}}>
-        🚪 {lang==="kn"?"ಸೈನ್ ಔಟ್":"Sign Out"}
-      </button>
-      <div style={{textAlign:"center",fontSize:13,color:"#ccc",marginBottom:8}}>
-        ನಮ್ಮ ತೋಟ · CodeTrail Technologies
-      </div>
+      );})}
     </div>
   );
 }
 
+/* ── Payments Tab ────────────────────────────────── */
 function PaymentsTab({farm,payments,setPayments,supervisors,user,showToast}){
   const{t,lang}=useLang();
   const isOwner=user.role==="owner";
+  const PAY_TYPES=["advance","claim","salary"];
+  const PAY_ICONS={advance:"💵",claim:"📋",salary:"💰"};
+  const PAY_COLS={advance:"#0277BD",claim:"#E65100",salary:"#2E7D32"};
+  const payLabels={advance:lang==="kn"?"ಮುಂಗಡ":"Advance",claim:lang==="kn"?"ಬಿಲ್ ಕ್ಲೇಮ್":"Bill Claim",salary:lang==="kn"?"ಸಂಬಳ":"Salary"};
   const[payType,setPayType]=useState("advance");
   const E={date:today(),type:"advance",amount:"",desc:"",supervisorId:"",note:""};
   const[form,setForm]=useState(E);const[show,setShow]=useState(false);const[savedId,setSavedId]=useState(null);
   const save=()=>{
-    if(!form.amount){showToast(t("amount")+" "+t("required"),"warn");return;}
+    if(!form.amount){showToast(lang==="kn"?"ಮೊತ್ತ ಬೇಕು":"Amount required","warn");return;}
     const nid=uid();
     setPayments(p=>[{id:nid,...form,type:payType,addedBy:user.id,addedByName:dispName(user)||user.id},...p]);
-    setSavedId(nid);showToast("✅ "+t("saved"));
+    setSavedId(nid);showToast("✅ "+(lang==="kn"?"ಉಳಿಸಲಾಗಿದೆ":"Saved"));
     setTimeout(()=>{setSavedId(null);setForm(E);setShow(false);},1600);
   };
-  const del=id=>{setPayments(p=>p.filter(x=>x.id!==id));showToast("🗑 "+t("delete"));};
+  const del=id=>{setPayments(p=>p.filter(x=>x.id!==id));};
   const totAdv=payments.filter(p=>p.type==="advance").reduce((a,p)=>a+(+p.amount||0),0);
   const totCl=payments.filter(p=>p.type==="claim").reduce((a,p)=>a+(+p.amount||0),0);
   const totSal=payments.filter(p=>p.type==="salary").reduce((a,p)=>a+(+p.amount||0),0);
   const balance=totAdv-totCl;
-  const payLabels={advance:t("advanceGiven"),claim:t("billClaim"),salary:t("salary")};
   return(
     <div>
       <div style={{background:balance>=0?"#1B5E20":"#C62828",borderRadius:16,padding:"14px 16px",color:"#fff",marginBottom:14}}>
-        <div style={{fontSize:17,opacity:.8}}>{t("balance")}</div>
+        <div style={{fontSize:13,opacity:.8}}>{lang==="kn"?"ಬಾಕಿ (ಮುಂಗಡ - ಕ್ಲೇಮ್)":"Balance (Advance - Claims)"}</div>
         <div style={{fontSize:24,fontWeight:800,marginTop:4}}>{balance>=0?"▲ ":"▼ "}{fmtCur(Math.abs(balance))}</div>
-        <div style={{fontSize:17,opacity:.7,marginTop:6}}>{balance>=0?"Supervisor owes this advance":"Owner needs to reimburse"}</div>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:14}}>
         {[["advance","#0277BD","#E3F2FD",totAdv],["claim","#E65100","#FFF3E0",totCl],["salary","#2E7D32","#E8F5E9",totSal]].map(([type,col,bg,val])=>(
           <div key={type} style={{background:bg,borderRadius:14,padding:"11px 10px",textAlign:"center"}}>
-            <div style={{fontSize:16}}>{PAY_ICONS[type]}</div>
-            <div style={{fontSize:18,fontWeight:700,color:col,marginTop:4}}>{fmtCur(val)}</div>
-            <div style={{fontSize:18,color:col,opacity:.8,marginTop:2}}>{payLabels[type]}</div>
+            <div style={{fontSize:18}}>{PAY_ICONS[type]}</div>
+            <div style={{fontSize:16,fontWeight:700,color:col,marginTop:4}}>{fmtCur(val)}</div>
+            <div style={{fontSize:12,color:col,opacity:.8,marginTop:2}}>{payLabels[type]}</div>
           </div>
         ))}
       </div>
-      {isOwner&&<Btn onClick={()=>setShow(!show)} col="#0277BD" full>{t("addPayment")}</Btn>}
-      {!isOwner&&(
-        <div style={{background:"#E3F2FD",borderRadius:14,padding:14,marginBottom:14}}>
-          <div style={{fontSize:18,fontWeight:700,color:"#0277BD",marginBottom:6}}>📋 {t("billClaim")}</div>
-          <div style={{fontSize:17,color:"#0277BD",marginBottom:12}}>{t("claimNote")}</div>
-          <Btn onClick={()=>{setPayType("claim");setShow(true);}} col="#E65100" full>{t("addClaim")}</Btn>
-        </div>
-      )}
-      {show&&(
-        <Card style={{border:"2px solid #90CAF9",marginTop:14}}>
-          <div style={{fontSize:18,fontWeight:700,color:"#0277BD",marginBottom:12}}>{t("addPayment")}</div>
-          {isOwner&&(
-            <div style={{display:"flex",gap:8,marginBottom:14}}>
-              {PAY_TYPES.map(pt=>(
-                <div key={pt} onClick={()=>setPayType(pt)}
-                  style={{flex:1,padding:"10px 6px",textAlign:"center",borderRadius:12,cursor:"pointer",
-                    border:`1.5px solid ${payType===pt?PAY_COLS[pt]:"#ddd"}`,
-                    background:payType===pt?PAY_COLS[pt]+"18":"#fff",
-                    fontWeight:payType===pt?700:400,fontSize:17,color:payType===pt?PAY_COLS[pt]:"#555"}}>
-                  <div style={{fontSize:18,marginBottom:3}}>{PAY_ICONS[pt]}</div>
-                  {payLabels[pt]}
-                </div>
-              ))}
-            </div>
-          )}
-          <div style={{background:"#F0F4F0",borderRadius:10,padding:"8px 12px",marginBottom:12,fontSize:17,color:"#555"}}>{payType==="advance"?t("advanceNote"):payType==="claim"?t("claimNote"):t("salary")}</div>
-          <Field label={t("date")||"Date"} required><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></Field>
-          {isOwner&&supervisors.length>0&&<Field label={t("supervisor")||"Supervisor"}><select value={form.supervisorId} onChange={e=>setForm({...form,supervisorId:e.target.value})}><option value="">— All —</option>{supervisors.map(s=><option key={s.id} value={s.id}>{dispName(s)}</option>)}</select></Field>}
-          <Field label={t("description")}><input value={form.desc} onChange={e=>setForm({...form,desc:e.target.value})} placeholder={payType==="claim"?"Bill description":"Purpose"}/></Field>
-          <Field label={t("amount")+" *"}><input type="number" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} placeholder="0"/></Field>
-          {/* GST */}
-          <div style={{background:"#E3F2FD",borderRadius:14,padding:"12px 14px",marginBottom:12}}>
-            <div style={{fontSize:14,fontWeight:700,color:"#1565C0",marginBottom:10}}>
-              🏛️ {lang==="kn"?"GST ವಿವರ (ಐಚ್ಛಿಕ)":"GST Details (Optional)"}
-            </div>
-            <div style={{display:"flex",gap:10}}>
-              <div style={{flex:1}}>
-                <div style={{fontSize:13,color:"#555",marginBottom:5}}>{lang==="kn"?"GST %":"GST %"}</div>
-                <select value={form.gst} onChange={e=>{
-                  const pct=e.target.value;
-                  const gstAmt=pct?Math.round((+form.amount||0)*+pct/100):"";
-                  setForm({...form,gst:pct,gstAmt:gstAmt});
-                }}>
-                  <option value="">—</option>
-                  {["0","5","12","18","28"].map(r=><option key={r} value={r}>{r}%</option>)}
-                </select>
-              </div>
-              <div style={{flex:1}}>
-                <div style={{fontSize:13,color:"#555",marginBottom:5}}>{lang==="kn"?"GST ಮೊತ್ತ (₹)":"GST Amount (₹)"}</div>
-                <input type="number" value={form.gstAmt}
-                  onChange={e=>setForm({...form,gstAmt:e.target.value})}
-                  placeholder="0" inputMode="numeric"/>
-              </div>
-            </div>
-            {form.gst&&form.amount&&(
-              <div style={{marginTop:8,fontSize:13,color:"#1565C0",fontWeight:600}}>
-                {lang==="kn"?"ಒಟ್ಟು (ಮೂಲ + GST):":"Total (Base + GST):"} {fmtCur((+form.amount||0)+(+form.gstAmt||0))}
-              </div>
-            )}
-          </div>
-          <Field label={t("noteSave")} mb={14}><textarea value={form.note} onChange={e=>setForm({...form,note:e.target.value})} rows={2}/></Field>
-          <div style={{display:"flex",gap:10}}><Btn onClick={save} col="#0277BD" full>💾 {t("save")}</Btn><Btn onClick={()=>setShow(false)} light col="#555" sm>{t("cancel")}</Btn></div>
-        </Card>
-      )}
-      <div style={{marginTop:14}}>
-        {payments.length===0&&<Empty icon="💳" text={t("noActivity")}/>}
-        {payments.map(p=>{const isSaved=savedId===p.id;const sup=supervisors.find(s=>s.id===p.supervisorId);return(
-          <Card key={p.id} style={{border:`1.5px solid ${isSaved?PAY_COLS[p.type]+"60":"transparent"}`,transition:"border .4s"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
-              <div style={{display:"flex",alignItems:"center",gap:10}}>
-                <div style={{width:42,height:42,background:PAY_COLS[p.type]+"18",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{PAY_ICONS[p.type]}</div>
-                <div>
-                  <div style={{fontWeight:700,fontSize:18,color:PAY_COLS[p.type]}}>{payLabels[p.type]}</div>
-                  <div style={{fontSize:17,color:"#888"}}>{fmt(p.date)}{sup?" · 👷"+dispName(sup):""}</div>
-                  {p.desc&&<div style={{fontSize:17,color:"#555",marginTop:2}}>{p.desc}</div>}
-                </div>
-              </div>
-              <div style={{fontSize:18,fontWeight:800,color:PAY_COLS[p.type]}}>{fmtCur(p.amount)}</div>
-            </div>
-            {p.note&&<div style={{fontSize:17,color:"#888",fontStyle:"italic",marginBottom:6}}>"{p.note}"</div>}
-            <div style={{fontSize:17,color:"#aaa",marginBottom:8}}>By: {p.addedByName||p.addedBy}</div>
-            <button onClick={()=>del(p.id)} style={{width:"100%",background:"#FFEBEE",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {t("delete")}</button>
-          </Card>
-        );})}
-      </div>
-
-      {/* ═══ BACKUP & RESTORE ═══ */}
-      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
-        <div style={{fontSize:17,fontWeight:700,marginBottom:12,color:"#333"}}>
-          ☁️ {lang==="kn"?"ಡೇಟಾ ಬ್ಯಾಕಪ್ & ಮರುಸ್ಥಾಪನೆ":"Data Backup & Restore"}
-        </div>
-        <button onClick={()=>{
-          const allData={};
-          Object.keys(localStorage).filter(k=>k.startsWith("nt:")).forEach(k=>{
-            try{allData[k]=JSON.parse(localStorage.getItem(k));}catch{}
-          });
-          allData["_exportedAt"]=new Date().toISOString();
-          const blob=new Blob([JSON.stringify(allData,null,2)],{type:"application/json"});
-          const url=URL.createObjectURL(blob);
-          const a=document.createElement("a");
-          a.href=url;
-          a.download="NammaThota-backup-"+new Date().toISOString().slice(0,10)+".json";
-          a.click();
-          URL.revokeObjectURL(url);
-          showToast(lang==="kn"?"✅ ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಆಗಿದೆ":"✅ Backup downloaded");
-        }} style={{width:"100%",background:"#E8F5E9",border:"2px solid #A5D6A7",color:"#1B5E20",
-          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
-          marginBottom:10,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-          📥 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ":"Download Backup (.json)"}
-        </button>
-        <label style={{width:"100%",background:"#E3F2FD",border:"2px solid #90CAF9",color:"#1565C0",
-          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
-          display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:8}}>
-          📤 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಮರುಸ್ಥಾಪಿಸಿ":"Restore from Backup"}
-          <input type="file" accept=".json" style={{display:"none"}}
-            onChange={e=>{
-              const file=e.target.files[0];if(!file)return;
-              const reader=new FileReader();
-              reader.onload=ev=>{
-                try{
-                  const data=JSON.parse(ev.target.result);
-                  if(!data["nt:global:users"]){showToast(lang==="kn"?"ತಪ್ಪಾದ ಫೈಲ್":"Invalid backup file","warn");return;}
-                  if(!window.confirm(lang==="kn"?"ಎಲ್ಲಾ ಡೇಟಾ ಮರುಸ್ಥಾಪಿಸುವುದೇ?":"Restore all data? Current data will be overwritten."))return;
-                  Object.keys(data).filter(k=>k.startsWith("nt:")).forEach(k=>{
-                    localStorage.setItem(k,JSON.stringify(data[k]));
-                    sbSet(k,data[k]);
-                  });
-                  showToast(lang==="kn"?"✅ ಮರುಸ್ಥಾಪಿಸಲಾಗಿದೆ — ಮರುಲೋಡ್...":"✅ Restored — Reloading...");
-                  setTimeout(()=>window.location.reload(),1500);
-                }catch(ex){showToast(lang==="kn"?"ಫೈಲ್ ಓದಲಾಗಲಿಲ್ಲ":"Could not read file","error");}
-              };
-              reader.readAsText(file);
-              e.target.value="";
-            }}/>
-        </label>
-        <div style={{fontSize:13,color:"#888",textAlign:"center",lineHeight:1.6}}>
-          {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ → Google Drive ಗೆ ಹಾಕಿ ಸುರಕ್ಷಿತವಾಗಿ ಇರಿಸಿ":"Download backup → Upload to Google Drive to keep it safe"}
-        </div>
-      </div>
-
-      {/* ═══ SIGN OUT ═══ */}
-      <button onClick={()=>{if(window.confirm(lang==="kn"?"ನಿಜವಾಗಿಯೂ Sign Out ಮಾಡುವುದೇ?":"Sign out of NammaThota?"))onLogout&&onLogout();}}
-        style={{width:"100%",background:"#FFEBEE",border:"2px solid #FFCDD2",
-          color:"#C62828",borderRadius:18,padding:18,fontSize:18,
-          fontWeight:700,cursor:"pointer",display:"flex",
-          alignItems:"center",justifyContent:"center",gap:10,marginBottom:16}}>
-        🚪 {lang==="kn"?"ಸೈನ್ ಔಟ್":"Sign Out"}
+      <button onClick={()=>setShow(!show)}
+        style={{width:"100%",background:"#0277BD",color:"#fff",border:"none",borderRadius:16,padding:15,fontSize:17,fontWeight:700,cursor:"pointer",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+        {show?"✕ "+(lang==="kn"?"ರದ್ದು":"Cancel"):"➕ "+(lang==="kn"?"ಪಾವತಿ ಸೇರಿಸಿ":"Add Payment")}
       </button>
-      <div style={{textAlign:"center",fontSize:13,color:"#ccc",marginBottom:8}}>
-        ನಮ್ಮ ತೋಟ · CodeTrail Technologies
-      </div>
-    </div>
-  );
-}
-
-/* ── More Page ──────────────────────────────────── */
-function MorePage({farm,docs,setDocs,user,onManage,onProfile,onReport,onLogout,showToast}){
-  const{t,lang}=useLang();const isOwner=user.role==="owner";
-  const[view,setView]=useState(null);
-  const[showForm,setShowForm]=useState(false);
-  const[form,setForm]=useState({date:today(),title:"",type:DOC_TYPES[6],note:"",imgData:null});
-  const[uploading,setUploading]=useState(false);const[savedId,setSavedId]=useState(null);
-  const fileRef=useRef();
-  const pickFile=async e=>{const f=e.target.files[0];if(!f)return;setUploading(true);const d=await compress(f);setForm(p=>({...p,imgData:d}));setUploading(false);};
-  const save=()=>{
-    if(!form.title){showToast(t("docTitle")+" "+t("required"),"warn");return;}
-    const nid=uid();setDocs(p=>[{id:nid,...form},...p]);setSavedId(nid);showToast("✅ "+t("saved"));
-    setTimeout(()=>{setSavedId(null);setForm({date:today(),title:"",type:DOC_TYPES[6],note:"",imgData:null});setShowForm(false);},1600);
-  };
-  const del=id=>{if(window.confirm(t("delete")+"?"))setDocs(p=>p.filter(d=>d.id!==id));};
-  const menuItems=[
-    {icon:"📷",label:t("documents"),action:null},
-    {icon:"📊",label:t("reports"),action:onReport},
-    ...(isOwner?[{icon:"⚙️",label:t("manageApp"),action:onManage,pinProtected:true}]:[]),
-    {icon:"👤",label:t("profileTitle"),action:onProfile},
-  ];
-  return(
-    <div style={{padding:"14px 14px 24px"}}>
-      <div style={{fontSize:17,fontWeight:700,marginBottom:14}}>☰ {t("moreTitle")}</div>
-      {/* Menu cards */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:20}}>
-        {menuItems.filter(m=>m.action).map(m=>(
-          <div key={m.label} onClick={m.action} style={{background:"#fff",borderRadius:16,padding:"16px 14px",cursor:"pointer",boxShadow:"0 2px 8px rgba(0,0,0,.06)",display:"flex",alignItems:"center",gap:10}}>
-            <span style={{fontSize:24}}>{m.icon}</span>
-            <span style={{fontSize:18,fontWeight:600,color:"#333"}}>{m.label}</span>
+      {show&&(
+        <div style={{background:"#fff",borderRadius:18,padding:18,border:"2px solid #90CAF9",marginBottom:14}}>
+          <div style={{display:"flex",gap:8,marginBottom:14}}>
+            {PAY_TYPES.map(pt=>(
+              <div key={pt} onClick={()=>setPayType(pt)}
+                style={{flex:1,padding:"10px 6px",textAlign:"center",borderRadius:12,cursor:"pointer",
+                  border:"2px solid "+(payType===pt?PAY_COLS[pt]:"#ddd"),
+                  background:payType===pt?PAY_COLS[pt]+"18":"#fff",
+                  fontWeight:payType===pt?700:400,fontSize:13,color:payType===pt?PAY_COLS[pt]:"#555"}}>
+                <div style={{fontSize:20,marginBottom:3}}>{PAY_ICONS[pt]}</div>
+                {payLabels[pt]}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      {/* Documents section */}
-      <SHdr title={"📷 "+t("documents")} action={<Btn onClick={()=>setShowForm(!showForm)} sm col="#00695C">{t("addDoc")}</Btn>}/>
-      {view&&<div onClick={()=>setView(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.93)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:20}}>
-        <img src={view.imgData} alt="" style={{maxWidth:"100%",maxHeight:"72vh",borderRadius:14,objectFit:"contain"}}/>
-        <div style={{color:"#fff",marginTop:12,textAlign:"center",fontSize:14}}>{view.title}<br/><span style={{fontSize:17,opacity:.7}}>{view.type} · {fmt(view.date)}</span></div>
-        <button onClick={()=>setView(null)} style={{marginTop:14,background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:20,padding:"10px 28px",fontSize:18,cursor:"pointer"}}>✕</button>
-      </div>}
-      {showForm&&(
-        <Card style={{border:"2px solid #80CBC4",marginBottom:14}}>
-          <Field label={t("date")||"Date"}><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></Field>
-          <Field label={t("docTitle")+" *"}><input value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="Sale deed, Receipt..."/></Field>
-          <Field label={t("docType")}><select value={form.type} onChange={e=>setForm({...form,type:e.target.value})}>{DOC_TYPES.map(dt=><option key={dt}>{dt}</option>)}</select></Field>
-          <Field label={t("noteSave")} mb={14}><textarea value={form.note} onChange={e=>setForm({...form,note:e.target.value})} rows={2}/></Field>
-          <div onClick={()=>fileRef.current.click()} style={{border:"2px dashed #80CBC4",borderRadius:12,padding:16,textAlign:"center",cursor:"pointer",background:"#f9fffe",marginBottom:14,minHeight:80,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-            {uploading?"⏳":form.imgData?<img src={form.imgData} alt="" style={{maxHeight:120,maxWidth:"100%",borderRadius:8}}/>:<><div style={{fontSize:32,marginBottom:6}}>📷</div><div style={{fontSize:18,color:"#00695C",fontWeight:600}}>{t("docUpload")}</div></>}
+          <div style={{background:"#F0F4F0",borderRadius:10,padding:"8px 12px",marginBottom:12,fontSize:13,color:"#555"}}>
+            {payType==="advance"?(lang==="kn"?"ಮೇಲ್ವಿಚಾರಕರಿಗೆ ಮುಂಗಡ ನೀಡಿದ ಹಣ":"Money given to supervisor in advance"):payType==="claim"?(lang==="kn"?"ಮೇಲ್ವಿಚಾರಕರು ಪಾವತಿಸಿದ ಬಿಲ್ ಮರುಪಾವತಿ":"Bill paid by supervisor — reimbursement"):(lang==="kn"?"ಮೇಲ್ವಿಚಾರಕರ ಸಂಬಳ":"Supervisor salary")}
           </div>
-          <input ref={fileRef} type="file" accept="image/*,application/pdf" capture="environment" style={{display:"none"}} onChange={pickFile}/>
-          <div style={{display:"flex",gap:10}}><Btn onClick={save} col="#00695C" full>💾 {t("save")}</Btn><Btn onClick={()=>setShowForm(false)} light col="#555" sm>{t("cancel")}</Btn></div>
-        </Card>
+          <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ದಿನಾಂಕ":"Date"}</div><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></div>
+          {supervisors.length>0&&<div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಮೇಲ್ವಿಚಾರಕ":"Supervisor"}</div><select value={form.supervisorId} onChange={e=>setForm({...form,supervisorId:e.target.value})}><option value="">— All —</option>{supervisors.map(s=><option key={s.id} value={s.id}>{dispName(s)}</option>)}</select></div>}
+          <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ವಿವರ":"Description"}</div><input value={form.desc} onChange={e=>setForm({...form,desc:e.target.value})} placeholder={payType==="claim"?lang==="kn"?"ಬಿಲ್ ವಿವರ":"Bill description":payType==="salary"?lang==="kn"?"ತಿಂಗಳು":"Month/Period":"Purpose"}/></div>
+          <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಮೊತ್ತ (₹) *":"Amount (₹) *"}</div><input type="number" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} placeholder="0"/></div>
+          <div style={{marginBottom:14}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಟಿಪ್ಪಣಿ":"Note"}</div><textarea value={form.note} onChange={e=>setForm({...form,note:e.target.value})} rows={2}/></div>
+          <div style={{display:"flex",gap:10}}>
+            <button onClick={save} style={{flex:1,background:"#0277BD",color:"#fff",border:"none",borderRadius:14,padding:14,fontSize:17,fontWeight:700,cursor:"pointer"}}>💾 {lang==="kn"?"ಉಳಿಸಿ":"Save"}</button>
+            <button onClick={()=>setShow(false)} style={{background:"#f0f0f0",border:"none",color:"#555",borderRadius:14,padding:"14px 18px",fontSize:17,fontWeight:600,cursor:"pointer"}}>{lang==="kn"?"ರದ್ದು":"Cancel"}</button>
+          </div>
+        </div>
       )}
-      {docs.length===0&&<Empty icon="📄" text={t("noActivity")}/>}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-        {docs.map(d=>{const isSaved=savedId===d.id;return(
-          <div key={d.id} style={{background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 2px 8px rgba(0,0,0,.08)",border:`1.5px solid ${isSaved?"#80CBC4":"transparent"}`,transition:"border .4s"}}>
-            <div onClick={()=>d.imgData&&setView(d)} style={{cursor:d.imgData?"pointer":"default"}}>
-              {d.imgData?<img src={d.imgData} alt="" style={{width:"100%",height:90,objectFit:"cover"}}/>:<div style={{height:90,background:"#E0F2F1",display:"flex",alignItems:"center",justifyContent:"center",fontSize:38}}>📄</div>}
+      {payments.length===0&&<div style={{textAlign:"center",padding:"40px 20px",color:"#aaa"}}><div style={{fontSize:48,marginBottom:12}}>💳</div><div style={{fontSize:16}}>{lang==="kn"?"ಯಾವುದೇ ಪಾವತಿ ಇಲ್ಲ":"No payments yet"}</div></div>}
+      {payments.map(p=>{const saved=savedId===p.id;const sup=supervisors.find(s=>s.id===p.supervisorId);return(
+        <div key={p.id} style={{background:"#fff",borderRadius:18,padding:16,marginBottom:12,boxShadow:"0 2px 10px rgba(0,0,0,.07)",border:saved?("2px solid "+PAY_COLS[p.type]+"60"):"2px solid transparent",transition:"border .4s"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
+            <div style={{display:"flex",alignItems:"center",gap:10}}>
+              <div style={{width:44,height:44,background:PAY_COLS[p.type]+"18",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>{PAY_ICONS[p.type]}</div>
+              <div>
+                <div style={{fontWeight:700,fontSize:16,color:PAY_COLS[p.type]}}>{payLabels[p.type]}</div>
+                <div style={{fontSize:13,color:"#888"}}>{fmt(p.date)}{sup?" · 👷"+dispName(sup):""}</div>
+                {p.desc&&<div style={{fontSize:13,color:"#555",marginTop:2}}>{p.desc}</div>}
+              </div>
             </div>
-            <div style={{padding:"9px 10px 8px"}}>
-              <div style={{fontSize:17,fontWeight:700,color:"#00695C",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{d.title}</div>
-              <div style={{fontSize:18,color:"#888",marginTop:2}}>{d.type.split(" — ")[0]} · {fmt(d.date)}</div>
-              <button onClick={()=>del(d.id)} style={{marginTop:7,background:"#FFEBEE",border:"none",borderRadius:8,padding:"5px",fontSize:17,fontWeight:600,cursor:"pointer",color:"#C62828",width:"100%"}}>🗑 {t("delete")}</button>
-            </div>
+            <div style={{fontSize:20,fontWeight:800,color:PAY_COLS[p.type]}}>{fmtCur(p.amount)}</div>
           </div>
-        );})}
-      </div>
-      <div style={{textAlign:"center",marginTop:20,fontSize:17,color:"#ccc"}}>CodeTrail Technologies Private Limited</div>
+          {p.note&&<div style={{fontSize:13,color:"#888",fontStyle:"italic",marginBottom:6}}>"{p.note}"</div>}
+          <div style={{fontSize:12,color:"#aaa",marginBottom:8}}>By: {p.addedByName||p.addedBy}</div>
+          <button onClick={()=>del(p.id)} style={{width:"100%",background:"#FFEBEE",border:"none",borderRadius:12,padding:10,fontSize:15,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {lang==="kn"?"ಅಳಿಸಿ":"Delete"}</button>
+        </div>
+      );})}
     </div>
   );
 }
@@ -2948,116 +2568,265 @@ function IncomeTab({farm,income,setIncome,showToast}){
 
 /* ── Report Page ────────────────────────────────── */
 function ReportPage({farm,tasks,expenses,purchases,payments,income,labour,trips,docs,allTasks,user,onBack}){
-  const{t}=useLang();
+  const{t,lang}=useLang();
   const[df,setDf]=useState(new Date(Date.now()-30*864e5).toISOString().slice(0,10));
   const[dt,setDt]=useState(today());
-  const fE=expenses.filter(e=>e.date>=df&&e.date<=dt);
-  const fP=purchases.filter(p=>p.date>=df&&p.date<=dt);
-  const fT=trips.filter(x=>x.date>=df&&x.date<=dt);
-  const fL=labour.filter(x=>x.date>=df&&x.date<=dt);
-  const fPay=payments.filter(x=>x.date>=df&&x.date<=dt);
-  const gen=()=>{
-    const doneSub=allTasks.reduce((a,tg)=>a+tg.sub.filter((_,i)=>(tasks[tg.id+"-"+i]?.status||"pending")==="taskDone").length,0);
-    const totalSub=allTasks.reduce((a,tg)=>a+tg.sub.length,0);
-    const tE=fE.reduce((a,e)=>a+(+e.amount||0),0);
-    const tP=fP.reduce((a,p)=>a+(+p.amount||0),0);
-    const tL=fL.reduce((a,l)=>a+(+l.totalWages||0),0);
-    const fInc=(income||[]).filter(x=>x.date>=df&&x.date<=dt);
-    const tInc=fInc.reduce((a,x)=>a+(+x.totalAmt||0),0);
-    const tAdv=fPay.filter(p=>p.type==="advance").reduce((a,p)=>a+(+p.amount||0),0);
-    const tCl=fPay.filter(p=>p.type==="claim").reduce((a,p)=>a+(+p.amount||0),0);
-    const tSal=fPay.filter(p=>p.type==="salary").reduce((a,p)=>a+(+p.amount||0),0);
-    const taskRows=allTasks.map(tg=>tg.sub.map((s,i)=>{const tk=tasks[tg.id+"-"+i]||{};const st=STATUS_CFG[tk.status||"pending"];return`<tr><td>${tg.id}</td><td>${tg.kn}</td><td>${s}</td><td style="color:${st.col};font-weight:700">${st.icon} ${tk.status||"pending"}</td><td>${tk.startDate||""}</td><td>${tk.doneDate||""}</td><td>${(tk.note||"").substring(0,50)}</td></tr>`;}).join("")).join("");
-    const expRows=fE.map(e=>`<tr><td>${fmt(e.date)}</td><td>${ECAT.find(c=>c.id===e.cat)?.icon||""} ${e.cat}</td><td>${e.desc||""}</td><td style="text-align:right;font-weight:700;color:#E65100">${fmtCur(e.amount)}</td></tr>`).join("");
-    const labRows=fL.map(l=>`<tr><td>${fmt(l.date)}</td><td>${l.workerName}</td><td>${l.days} days × ${fmtCur(l.dailyRate)}</td><td style="text-align:right;font-weight:700;color:#2E7D32">${fmtCur(l.totalWages)}</td><td>${l.taskDone||""}</td></tr>`).join("");
-    const purRows=fP.map(p=>`<tr><td>${fmt(p.date)}</td><td><b>${p.item}</b></td><td>${p.vendor||""}</td><td>${p.qty||""} ${p.unit||""}</td><td style="text-align:right;font-weight:700;color:#6A1B9A">${fmtCur(p.amount)}</td></tr>`).join("");
-    const tripRows=fT.map((tr,i)=>`<tr><td>${i+1}</td><td>${fmt(tr.date)}</td><td>${tr.from}→${tr.to}</td><td>${tr.km||""}km</td><td>${tr.vehicle}</td><td>₹${tr.fuelAmt||0}</td><td>${tr.outcome||""}</td></tr>`).join("");
-    const payRows=fPay.map(p=>`<tr><td>${fmt(p.date)}</td><td style="color:${PAY_COLS[p.type]};font-weight:700">${PAY_ICONS[p.type]} ${p.type}</td><td>${p.desc||""}</td><td>${p.addedByName||""}</td><td style="text-align:right;font-weight:700">${fmtCur(p.amount)}</td></tr>`).join("");
-    const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${farm.name} — Report</title>
-<style>
-*{box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:13px;color:#1a1a1a;margin:0;padding:20px;background:#fff}
-.hdr{background:${farm.col};color:#fff;padding:20px 24px;border-radius:12px;margin-bottom:24px}
-.hdr h1{margin:0;font-size:20px}.hdr p{margin:4px 0 0;opacity:.8;font-size:12px}
-.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
-.stat{background:${farm.col}12;border-radius:10px;padding:12px;border-left:4px solid ${farm.col}}
-.stat-val{font-size:18px;font-weight:800;color:${farm.col}}.stat-lbl{font-size:11px;color:#666;margin-top:4px}
-h2{font-size:14px;color:${farm.col};border-bottom:2px solid ${farm.col}30;padding-bottom:6px;margin:22px 0 10px}
-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px}
-th{background:${farm.col};color:#fff;padding:8px 10px;text-align:left;font-size:11px}
-td{padding:7px 10px;border-bottom:1px solid #f0f0f0}tr:nth-child(even){background:#f9f9f9}
-.trow td{background:${farm.col}15;font-weight:700}
-.footer{margin-top:30px;padding-top:14px;border-top:1px solid #ddd;font-size:11px;color:#aaa;text-align:center}
-@media print{.btn{display:none}body{padding:10px}}</style></head><body>
-<button class="btn" onclick="window.print()" style="float:right;background:${farm.col};color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;cursor:pointer;margin-bottom:12px">🖨️ Print / PDF</button>
-<div class="hdr"><h1>${farm.icon} ${farm.name}</h1><p>${farm.type}${farm.location?.village?" · "+farm.location.village+", "+farm.location.district:""}</p><p>Report: ${fmt(df)} to ${fmt(dt)} · Generated: ${fmt(today())} · By: ${dispName(user)||user.id}</p></div>
-<div class="summary">
-<div class="stat"><div class="stat-val">${doneSub}/${totalSub}</div><div class="stat-lbl">📋 Tasks Done</div></div>
-<div class="stat"><div class="stat-val">${fmtCur(tE+tL)}</div><div class="stat-lbl">💸 Total Expenses + Wages</div></div>
-<div class="stat"><div class="stat-val">${fmtCur(tP)}</div><div class="stat-lbl">🛒 Purchases</div></div>
-<div class="stat"><div class="stat-val">${fT.length} trips · ${fT.reduce((a,x)=>a+(+x.km||0),0)}km</div><div class="stat-lbl">🚗 Trips</div></div>
-<div class="stat"><div class="stat-val">${fmtCur(tAdv-tCl)}</div><div class="stat-lbl">💳 Supervisor Balance</div></div>
-<div class="stat"><div class="stat-val">${docs.length} files</div><div class="stat-lbl">📷 Documents</div></div>
-</div>
-${farm.budget?.devBudget?`<h2>💰 Budget Overview</h2><div class="summary"><div class="stat"><div class="stat-val">${fmtCur(farm.budget.devBudget)}</div><div class="stat-lbl">Development Budget</div></div><div class="stat"><div class="stat-val">${fmtCur(tE+tP+tL)}</div><div class="stat-lbl">Total Spent</div></div><div class="stat"><div class="stat-val">${fmtCur(+(farm.budget.devBudget)-(tE+tP+tL))}</div><div class="stat-lbl">Remaining</div></div></div>`:""}
-<h2>📋 Task Status</h2><table><tr><th>ID</th><th>Main Task</th><th>Sub Task</th><th>Status</th><th>Start</th><th>Done</th><th>Notes</th></tr>${taskRows||"<tr><td colspan='7' style='text-align:center;color:#aaa'>No tasks</td></tr>"}</table>
-<h2>💸 Daily Expenses</h2><table><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th></tr>${expRows||"<tr><td colspan='4' style='text-align:center;color:#aaa'>No expenses</td></tr>"}<tr class="trow"><td colspan="3"><b>Total</b></td><td style="text-align:right">${fmtCur(tE)}</td></tr></table>
-<h2>👷 Labour / Attendance</h2><table><tr><th>Date</th><th>Worker</th><th>Days × Rate</th><th>Wages</th><th>Work Done</th></tr>${labRows||"<tr><td colspan='5' style='text-align:center;color:#aaa'>No labour entries</td></tr>"}<tr class="trow"><td colspan="3"><b>Total Wages</b></td><td style="text-align:right">${fmtCur(tL)}</td><td></td></tr></table>
-<h2>🛒 Purchases</h2><table><tr><th>Date</th><th>Item</th><th>Vendor</th><th>Qty</th><th>Amount</th></tr>${purRows||"<tr><td colspan='5' style='text-align:center;color:#aaa'>No purchases</td></tr>"}<tr class="trow"><td colspan="4"><b>Total</b></td><td style="text-align:right">${fmtCur(tP)}</td></tr></table>
-<h2>🚗 Trip Log</h2><table><tr><th>#</th><th>Date</th><th>Route</th><th>KM</th><th>Vehicle</th><th>Fuel</th><th>Outcome</th></tr>${tripRows||"<tr><td colspan='7' style='text-align:center;color:#aaa'>No trips</td></tr>"}</table>
-<h2>💳 Supervisor Payments</h2><table><tr><th>Date</th><th>Type</th><th>Description</th><th>By</th><th>Amount</th></tr>${payRows||"<tr><td colspan='5' style='text-align:center;color:#aaa'>No payments</td></tr>"}<tr class="trow"><td colspan="4">Advance Total</td><td style="text-align:right">${fmtCur(tAdv)}</td></tr><tr class="trow"><td colspan="4">Claims Total</td><td style="text-align:right">${fmtCur(tCl)}</td></tr><tr class="trow"><td colspan="4">Salary Total</td><td style="text-align:right">${fmtCur(tSal)}</td></tr><tr class="trow"><td colspan="4"><b>Balance (Advance - Claims)</b></td><td style="text-align:right"><b>${fmtCur(tAdv-tCl)}</b></td></tr></table>
-<div class="footer"><p>${t("reportBy")} · ${new Date().toLocaleString("en-IN")}</p><p>${t("codeby")}</p></div></body></html>`;
+  const[allFarms,setAllFarms]=useState([]);
+  const[selFarmId,setSelFarmId]=useState(farm.id);
+  const[farmData,setFarmData]=useState({tasks,expenses,purchases,payments,income,labour,trips,docs,allTasks});
+
+  useEffect(()=>{
+    dbGet(gk("farms")).then(f=>setAllFarms(f||[farm]));
+  },[]);
+
+  useEffect(()=>{
+    if(selFarmId===farm.id){
+      setFarmData({tasks,expenses,purchases,payments,income,labour,trips,docs,allTasks});
+      return;
+    }
+    // Load data for selected farm
+    Promise.all([
+      dbGet(fk(selFarmId,"tasks")),dbGet(fk(selFarmId,"ctasks")),
+      dbGet(fk(selFarmId,"expenses")),dbGet(fk(selFarmId,"purchases")),
+      dbGet(fk(selFarmId,"payments")),dbGet(fk(selFarmId,"income")),
+      dbGet(fk(selFarmId,"labour")),dbGet(fk(selFarmId,"trips")),dbGet(fk(selFarmId,"docs")),
+    ]).then(([tk,ct,ex,pu,py,inc,lb,tr,dc])=>{
+      const ctasks=ct||[];
+      const at=[...DEFAULT_TASK_GROUPS,...ctasks.filter(g=>!g.id.endsWith("_ov"))];
+      setFarmData({tasks:tk||{},expenses:ex||[],purchases:pu||[],payments:py||[],
+        income:inc||[],labour:lb||[],trips:tr||[],docs:dc||[],allTasks:at});
+    });
+  },[selFarmId]);
+
+  const selFarm=allFarms.find(f=>f.id===selFarmId)||farm;
+  const fd=farmData;
+
+  const fE=fd.expenses.filter(e=>e.date>=df&&e.date<=dt);
+  const fP=fd.purchases.filter(p=>p.date>=df&&p.date<=dt);
+  const fT=fd.trips.filter(x=>x.date>=df&&x.date<=dt);
+  const fL=fd.labour.filter(x=>x.date>=df&&x.date<=dt);
+  const fPay=fd.payments.filter(x=>x.date>=df&&x.date<=dt);
+  const fInc=fd.income.filter(x=>x.date>=df&&x.date<=dt);
+
+  const tE=fE.reduce((a,e)=>a+(+e.amount||0),0);
+  const tP=fP.reduce((a,p)=>a+(+p.amount||0),0);
+  const tL=fL.reduce((a,l)=>a+(+l.totalWages||0),0);
+  const tInc=fInc.reduce((a,x)=>a+(+x.totalAmt||0),0);
+  const tAdv=fPay.filter(p=>p.type==="advance").reduce((a,p)=>a+(+p.amount||0),0);
+  const tCl=fPay.filter(p=>p.type==="claim").reduce((a,p)=>a+(+p.amount||0),0);
+  const tSal=fPay.filter(p=>p.type==="salary").reduce((a,p)=>a+(+p.amount||0),0);
+  const doneSub=fd.allTasks.reduce((a,tg)=>a+tg.sub.filter((_,i)=>(fd.tasks[tg.id+"-"+i]?.status||"pending")==="taskDone").length,0);
+  const totalSub=fd.allTasks.reduce((a,tg)=>a+tg.sub.length,0);
+
+  const genPDF=()=>{
+    const taskRows=fd.allTasks.map(tg=>tg.sub.map((s,i)=>{
+      const tk=fd.tasks[tg.id+"-"+i]||{};
+      const st=STATUS_CFG[tk.status||"pending"];
+      return "<tr><td>"+tg.id+"</td><td>"+tg.kn+"</td><td>"+s+"</td><td style='color:"+st.col+";font-weight:700'>"+st.icon+" "+(tk.status||"pending")+"</td><td>"+(tk.startDate||"")+"</td><td>"+(tk.doneDate||"")+"</td><td>"+((tk.note||"").substring(0,40))+"</td></tr>";
+    }).join("")).join("");
+    const expRows=fE.map(e=>{const c=ECAT.find(x=>x.id===e.cat)||ECAT[ECAT.length-1];return "<tr><td>"+fmt(e.date)+"</td><td>"+c.icon+" "+c.en+"</td><td>"+(e.desc||"")+"</td><td style='text-align:right;color:#E65100;font-weight:700'>"+fmtCur(e.amount)+"</td></tr>";}).join("");
+    const labRows=fL.map(l=>"<tr><td>"+fmt(l.date)+"</td><td>"+l.workerName+"</td><td>"+l.days+" days × "+fmtCur(l.dailyRate)+"</td><td style='text-align:right;color:#2E7D32;font-weight:700'>"+fmtCur(l.totalWages)+"</td></tr>").join("");
+    const purRows=fP.map(p=>"<tr><td>"+fmt(p.date)+"</td><td><b>"+p.item+"</b></td><td>"+(p.vendor||"")+"</td><td>"+(p.qty||"")+" "+(p.unit||"")+(p.gst?" · GST "+p.gst+"%":"")+"</td><td style='text-align:right;color:#6A1B9A;font-weight:700'>"+fmtCur(p.amount)+"</td></tr>").join("");
+    const incRows=fInc.map(x=>"<tr><td>"+fmt(x.date)+"</td><td>"+x.crop+"</td><td>"+(x.buyer||"")+"</td><td>"+x.payMode+"</td><td style='text-align:right;color:#1B5E20;font-weight:700'>"+fmtCur(x.totalAmt)+"</td></tr>").join("");
+    const payRows=fPay.map(p=>"<tr><td>"+fmt(p.date)+"</td><td style='color:"+PAY_COLS[p.type]+";font-weight:700'>"+PAY_ICONS[p.type]+" "+p.type+"</td><td>"+(p.desc||"")+"</td><td>"+(p.addedByName||"")+"</td><td style='text-align:right;font-weight:700'>"+fmtCur(p.amount)+"</td></tr>").join("");
+
+    const html="<!DOCTYPE html><html><head><meta charset='UTF-8'/><title>"+selFarm.name+" Report</title><style>*{box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:12px;margin:0;padding:20px;color:#1a1a1a}.hdr{background:"+selFarm.col+";color:#fff;padding:18px 22px;border-radius:10px;margin-bottom:20px}.hdr h1{margin:0;font-size:20px}.hdr p{margin:4px 0 0;opacity:.8;font-size:12px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}.stat{background:"+selFarm.col+"12;border-radius:8px;padding:10px;border-left:3px solid "+selFarm.col+"}.stat-val{font-size:16px;font-weight:800;color:"+selFarm.col+"}.stat-lbl{font-size:10px;color:#666;margin-top:3px}h2{font-size:13px;color:"+selFarm.col+";border-bottom:2px solid "+selFarm.col+"30;padding-bottom:5px;margin:18px 0 8px}table{width:100%;border-collapse:collapse;font-size:11px}th{background:"+selFarm.col+";color:#fff;padding:7px 8px;text-align:left;font-size:10px}td{padding:6px 8px;border-bottom:1px solid #f0f0f0}tr:nth-child(even){background:#f9f9f9}.trow td{background:"+selFarm.col+"15;font-weight:700}.footer{margin-top:25px;padding-top:12px;border-top:1px solid #ddd;font-size:10px;color:#aaa;text-align:center}@media print{.noprint{display:none}body{padding:10px}}</style></head><body>"
+      +"<button class='noprint' onclick='window.print()' style='float:right;background:"+selFarm.col+";color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;cursor:pointer;margin-bottom:12px'>🖨️ Print / Save PDF</button>"
+      +"<div class='hdr'><h1>"+selFarm.icon+" "+selFarm.name+"</h1><p>"+selFarm.type+(selFarm.location?.village?" · "+selFarm.location.village+", "+selFarm.location.district:"")+"</p><p>Report: "+fmt(df)+" to "+fmt(dt)+" · By: "+(dispName(user)||user.id)+"</p></div>"
+      +"<div class='stats'><div class='stat'><div class='stat-val'>"+doneSub+"/"+totalSub+"</div><div class='stat-lbl'>📋 Tasks Done</div></div>"
+      +"<div class='stat'><div class='stat-val'>"+fmtCur(tE+tL)+"</div><div class='stat-lbl'>💸 Expenses + Wages</div></div>"
+      +"<div class='stat'><div class='stat-val'>"+fmtCur(tInc)+"</div><div class='stat-lbl'>🌾 Income</div></div>"
+      +"<div class='stat'><div class='stat-val'>"+fmtCur(tInc-tE-tL-tP)+"</div><div class='stat-lbl'>📈 Profit / Loss</div></div>"
+      +"<div class='stat'><div class='stat-val'>"+fmtCur(tP)+"</div><div class='stat-lbl'>🛒 Purchases</div></div>"
+      +"<div class='stat'><div class='stat-val'>"+fmtCur(tAdv-tCl)+"</div><div class='stat-lbl'>💳 Supervisor Balance</div></div></div>"
+      +"<h2>📋 Tasks</h2><table><tr><th>ID</th><th>Main</th><th>Sub Task</th><th>Status</th><th>Start</th><th>Done</th><th>Note</th></tr>"+(taskRows||"<tr><td colspan='7' style='text-align:center;color:#aaa'>No tasks</td></tr>")+"</table>"
+      +"<h2>💸 Expenses</h2><table><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th></tr>"+(expRows||"<tr><td colspan='4' style='text-align:center;color:#aaa'>No expenses</td></tr>")+"<tr class='trow'><td colspan='3'><b>Total</b></td><td style='text-align:right'>"+fmtCur(tE)+"</td></tr></table>"
+      +"<h2>👷 Labour / Wages</h2><table><tr><th>Date</th><th>Worker</th><th>Days × Rate</th><th>Wages</th></tr>"+(labRows||"<tr><td colspan='4' style='text-align:center;color:#aaa'>No labour</td></tr>")+"<tr class='trow'><td colspan='3'><b>Total</b></td><td style='text-align:right'>"+fmtCur(tL)+"</td></tr></table>"
+      +"<h2>🛒 Purchases</h2><table><tr><th>Date</th><th>Item</th><th>Vendor</th><th>Qty/GST</th><th>Amount</th></tr>"+(purRows||"<tr><td colspan='5' style='text-align:center;color:#aaa'>No purchases</td></tr>")+"<tr class='trow'><td colspan='4'><b>Total</b></td><td style='text-align:right'>"+fmtCur(tP)+"</td></tr></table>"
+      +"<h2>🌾 Income</h2><table><tr><th>Date</th><th>Crop</th><th>Buyer</th><th>Mode</th><th>Amount</th></tr>"+(incRows||"<tr><td colspan='5' style='text-align:center;color:#aaa'>No income</td></tr>")+"<tr class='trow'><td colspan='4'><b>Total</b></td><td style='text-align:right'>"+fmtCur(tInc)+"</td></tr></table>"
+      +"<h2>💳 Supervisor Payments</h2><table><tr><th>Date</th><th>Type</th><th>Description</th><th>By</th><th>Amount</th></tr>"+(payRows||"<tr><td colspan='5' style='text-align:center;color:#aaa'>No payments</td></tr>")+"<tr class='trow'><td colspan='4'>Advance Total</td><td style='text-align:right'>"+fmtCur(tAdv)+"</td></tr><tr class='trow'><td colspan='4'>Claims Total</td><td style='text-align:right'>"+fmtCur(tCl)+"</td></tr><tr class='trow'><td colspan='4'>Salary Total</td><td style='text-align:right'>"+fmtCur(tSal)+"</td></tr><tr class='trow'><td colspan='4'><b>Balance</b></td><td style='text-align:right'><b>"+fmtCur(tAdv-tCl)+"</b></td></tr></table>"
+      +"<div class='footer'><p>ನಮ್ಮ ತೋಟ — NammaThota · "+new Date().toLocaleString("en-IN")+"</p><p>CodeTrail Technologies Private Limited</p></div></body></html>";
+
     const w=window.open("","_blank");w.document.write(html);w.document.close();
   };
+
+  const genExcel=()=>{
+    // Build CSV data for Excel
+    const rows=[];
+    rows.push(["NammaThota Report — "+selFarm.name]);
+    rows.push(["Period: "+fmt(df)+" to "+fmt(dt),"","Generated: "+fmt(today())]);
+    rows.push([]);
+    rows.push(["SUMMARY"]);
+    rows.push(["Tasks Done",doneSub+"/"+totalSub]);
+    rows.push(["Total Expenses",tE]);
+    rows.push(["Total Wages",tL]);
+    rows.push(["Total Purchases",tP]);
+    rows.push(["Total Income",tInc]);
+    rows.push(["Profit/Loss",tInc-tE-tL-tP]);
+    rows.push(["Supervisor Balance",tAdv-tCl]);
+    rows.push([]);
+    rows.push(["EXPENSES"]);
+    rows.push(["Date","Category","Description","Amount"]);
+    fE.forEach(e=>{const c=ECAT.find(x=>x.id===e.cat)||ECAT[ECAT.length-1];rows.push([e.date,c.en,e.desc||"",+e.amount]);});
+    rows.push(["","","Total",tE]);
+    rows.push([]);
+    rows.push(["LABOUR / WAGES"]);
+    rows.push(["Date","Worker","Days","Daily Rate","Total Wages","Work Done"]);
+    fL.forEach(l=>rows.push([l.date,l.workerName,+l.days,+l.dailyRate,+l.totalWages,l.taskDone||""]));
+    rows.push(["","","","Total",tL]);
+    rows.push([]);
+    rows.push(["PURCHASES"]);
+    rows.push(["Date","Item","Vendor","Qty","Unit","GST%","GST Amt","Amount"]);
+    fP.forEach(p=>rows.push([p.date,p.item,p.vendor||"",p.qty||"",p.unit||"",p.gst||"",+p.gstAmt||0,+p.amount]));
+    rows.push(["","","","","","","Total",tP]);
+    rows.push([]);
+    rows.push(["INCOME"]);
+    rows.push(["Date","Crop/Item","Buyer","Market","Qty","Rate","Total","Payment Mode"]);
+    fInc.forEach(x=>rows.push([x.date,x.crop||"",x.buyer||"",x.market||"",x.qty||"",x.ratePerUnit||"",+x.totalAmt,x.payMode||""]));
+    rows.push(["","","","","","","Total",tInc]);
+    rows.push([]);
+    rows.push(["SUPERVISOR PAYMENTS"]);
+    rows.push(["Date","Type","Description","By","Amount"]);
+    fPay.forEach(p=>rows.push([p.date,p.type,p.desc||"",p.addedByName||"",+p.amount]));
+    rows.push(["","","","Advance Total",tAdv]);
+    rows.push(["","","","Claims Total",tCl]);
+    rows.push(["","","","Salary Total",tSal]);
+    rows.push(["","","","Balance",tAdv-tCl]);
+
+    const csv=rows.map(r=>r.map(c=>{
+      const s=String(c);
+      return s.includes(",")?"""+s+""":s;
+    }).join(",")).join("
+");
+
+    const bom="﻿"; // BOM for Excel UTF-8
+    const blob=new Blob([bom+csv],{type:"text/csv;charset=utf-8;"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;
+    a.download=selFarm.name+"-Report-"+df+"-to-"+dt+".csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return(
     <div style={{minHeight:"100vh",background:"#F0F4F0"}}>
       <div style={{background:"#37474F",padding:"14px 16px",display:"flex",alignItems:"center",gap:12,color:"#fff"}}>
-        <button onClick={onBack} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"8px 14px",fontSize:18,cursor:"pointer"}}>‹ {t("back")}</button>
-        <div style={{fontSize:17,fontWeight:700}}>📊 {t("reportTitle")}</div>
+        <button onClick={onBack} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"8px 14px",fontSize:14,cursor:"pointer"}}>‹ {lang==="kn"?"ಹಿಂದೆ":"Back"}</button>
+        <div style={{fontSize:17,fontWeight:700}}>📊 {lang==="kn"?"ವರದಿ":"Report"}</div>
       </div>
       <div style={{padding:16}}>
-        <Card>
-          <Field label={t("dateFrom")} required><input type="date" value={df} onChange={e=>setDf(e.target.value)}/></Field>
-          <Field label={t("dateTo")} required mb={16}><input type="date" value={dt} onChange={e=>setDt(e.target.value)}/></Field>
-          <Btn onClick={gen} col={farm.col} full>📄 {t("generateReport")}</Btn>
-          <div style={{fontSize:17,color:"#888",textAlign:"center",marginTop:10}}>Opens in new tab → Print or Save as PDF</div>
-        </Card>
-        <Card>
-          <div style={{fontSize:18,fontWeight:700,marginBottom:12}}>{t("preview")}</div>
+
+        {/* Farm selector — only for owner */}
+        {user.role==="owner"&&allFarms.length>1&&(
+          <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+            <div style={{fontSize:15,fontWeight:700,marginBottom:10}}>🌾 {lang==="kn"?"Farm ಆಯ್ಕೆ ಮಾಡಿ":"Select Farm"}</div>
+            {allFarms.map(f=>(
+              <div key={f.id} onClick={()=>setSelFarmId(f.id)}
+                style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",
+                  borderRadius:14,marginBottom:8,cursor:"pointer",
+                  border:"2px solid "+(selFarmId===f.id?f.col:"#eee"),
+                  background:selFarmId===f.id?f.col+"10":"#fafafa"}}>
+                <div style={{width:40,height:40,background:f.col,borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>{f.icon}</div>
+                <div style={{flex:1}}>
+                  <div style={{fontWeight:700,fontSize:15,color:selFarmId===f.id?f.col:"#333"}}>{f.name}</div>
+                  <div style={{fontSize:13,color:"#888"}}>{f.type}</div>
+                </div>
+                {selFarmId===f.id&&<span style={{fontSize:20}}>✅</span>}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Date range */}
+        <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+          <div style={{fontSize:15,fontWeight:700,marginBottom:12}}>📅 {lang==="kn"?"ಅವಧಿ ಆಯ್ಕೆ ಮಾಡಿ":"Select Period"}</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+            <div><div style={{fontSize:13,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಆರಂಭ":"From"}</div><input type="date" value={df} onChange={e=>setDf(e.target.value)}/></div>
+            <div><div style={{fontSize:13,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಕೊನೆ":"To"}</div><input type="date" value={dt} onChange={e=>setDt(e.target.value)}/></div>
+          </div>
+          {/* Quick ranges */}
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {[
+              [lang==="kn"?"ಈ ತಿಂಗಳು":"This Month", ()=>{const n=new Date();setDf(n.toISOString().slice(0,7)+"-01");setDt(today());}],
+              [lang==="kn"?"ಕಳೆದ ತಿಂಗಳು":"Last Month", ()=>{const n=new Date();n.setMonth(n.getMonth()-1);const y=n.getFullYear(),m=String(n.getMonth()+1).padStart(2,"0");setDf(y+"-"+m+"-01");setDt(y+"-"+m+"-"+new Date(y,n.getMonth()+1,0).getDate());}],
+              [lang==="kn"?"ಈ ವರ್ಷ":"This Year", ()=>{setDf(new Date().getFullYear()+"-01-01");setDt(today());}],
+              [lang==="kn"?"ಎಲ್ಲಾ":"All Time", ()=>{setDf("2020-01-01");setDt(today());}],
+            ].map(([lb,fn])=>(
+              <button key={lb} onClick={fn}
+                style={{background:"#F0F4F0",border:"1.5px solid #ddd",borderRadius:20,
+                  padding:"7px 14px",fontSize:13,fontWeight:600,cursor:"pointer",color:"#555"}}>
+                {lb}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Preview */}
+        <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+          <div style={{fontSize:15,fontWeight:700,marginBottom:12}}>👁️ {lang==="kn"?"ಮುನ್ನೋಟ":"Preview"} — {selFarm.name}</div>
           {[
-            ["📋",`${allTasks.reduce((a,tg)=>a+tg.sub.filter((_,i)=>(tasks[tg.id+"-"+i]?.status||"pending")==="taskDone").length,0)}/${allTasks.reduce((a,tg)=>a+tg.sub.length,0)}`],
-            ["💸",fmtCur(fE.reduce((a,e)=>a+(+e.amount||0),0))+" expenses"],
-            ["👷",fmtCur(fL.reduce((a,l)=>a+(+l.totalWages||0),0))+" wages"],
-            ["🛒",fmtCur(fP.reduce((a,p)=>a+(+p.amount||0),0))+" purchases"],
-            ["🚗",fT.length+" trips"],
-            ["💳",fmtCur(fPay.filter(p=>p.type==="advance").reduce((a,p)=>a+(+p.amount||0),0)-fPay.filter(p=>p.type==="claim").reduce((a,p)=>a+(+p.amount||0),0))+" balance"],
-          ].map(([ic,v])=>(
-            <div key={ic} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 0",borderBottom:"1px solid #f5f5f5"}}>
-              <span style={{fontSize:18,width:26}}>{ic}</span>
-              <span style={{fontSize:18,fontWeight:500,color:"#333"}}>{v}</span>
+            {icon:"📋",label:lang==="kn"?"ಕೆಲಸ":"Tasks",val:doneSub+"/"+totalSub},
+            {icon:"💸",label:lang==="kn"?"ಖರ್ಚು":"Expenses",val:fmtCur(tE)},
+            {icon:"👷",label:lang==="kn"?"ಕೂಲಿ":"Wages",val:fmtCur(tL)},
+            {icon:"🛒",label:lang==="kn"?"ಖರೀದಿ":"Purchases",val:fmtCur(tP)},
+            {icon:"🌾",label:lang==="kn"?"ಆದಾಯ":"Income",val:fmtCur(tInc)},
+            {icon:"📈",label:lang==="kn"?"ಲಾಭ/ನಷ್ಟ":"Profit/Loss",val:fmtCur(tInc-tE-tL-tP)},
+            {icon:"💳",label:lang==="kn"?"ಪಾವತಿ ಬಾಕಿ":"Pay Balance",val:fmtCur(tAdv-tCl)},
+          ].map(s=>(
+            <div key={s.label} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 0",borderBottom:"1px solid #f5f5f5"}}>
+              <span style={{fontSize:20,width:28}}>{s.icon}</span>
+              <div style={{flex:1,fontSize:15,fontWeight:500}}>{s.label}</div>
+              <div style={{fontSize:15,fontWeight:700,color:"#333"}}>{s.val}</div>
             </div>
           ))}
-        </Card>
+        </div>
+
+        {/* Export buttons */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:14}}>
+          <button onClick={genPDF}
+            style={{background:"#1B5E20",color:"#fff",border:"none",borderRadius:16,
+              padding:"16px 10px",fontSize:15,fontWeight:700,cursor:"pointer",
+              display:"flex",flexDirection:"column",alignItems:"center",gap:6}}>
+            <span style={{fontSize:28}}>📄</span>
+            {lang==="kn"?"PDF / Print":"PDF / Print"}
+          </button>
+          <button onClick={genExcel}
+            style={{background:"#1565C0",color:"#fff",border:"none",borderRadius:16,
+              padding:"16px 10px",fontSize:15,fontWeight:700,cursor:"pointer",
+              display:"flex",flexDirection:"column",alignItems:"center",gap:6}}>
+            <span style={{fontSize:28}}>📊</span>
+            {lang==="kn"?"Excel / CSV":"Excel / CSV"}
+          </button>
+        </div>
+        <div style={{fontSize:13,color:"#888",textAlign:"center",marginBottom:20}}>
+          {lang==="kn"?"PDF — ಹೊಸ tab ನಲ್ಲಿ ತೆರೆಯುತ್ತದೆ, Print / Save as PDF · Excel — .csv ಡೌನ್‌ಲೋಡ್ (Excel ನಲ್ಲಿ ತೆರೆಯಿರಿ)":"PDF — opens in new tab, Print / Save as PDF · Excel — downloads .csv (open in Excel)"}
+        </div>
       </div>
     </div>
   );
 }
 
-/* ── Manage Page ────────────────────────────────── */
+
 function ManagePage({user,onBack,showToast}){
-  const{t}=useLang();
+  const{t,lang}=useLang();
   const[tab,setTab]=useState("farms");
+  const tabs=[
+    ["farms", "🌾 "+(lang==="kn"?"Farms & Projects":"Farms & Projects")],
+    ["users", "👥 "+(lang==="kn"?"Users & Access":"Users & Access")],
+  ];
   return(
     <div style={{minHeight:"100vh",background:"#F0F4F0"}}>
       <div style={{background:"#37474F",padding:"14px 16px",display:"flex",alignItems:"center",gap:12,color:"#fff"}}>
-        <button onClick={onBack} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"8px 14px",fontSize:18,cursor:"pointer"}}>‹ {t("back")}</button>
-        <div style={{fontSize:17,fontWeight:700}}>{t("manageTitle")}</div>
+        <button onClick={onBack} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"8px 14px",fontSize:17,cursor:"pointer"}}>‹ {lang==="kn"?"ಹಿಂದೆ":"Back"}</button>
+        <div style={{fontSize:17,fontWeight:700}}>⚙️ {lang==="kn"?"ನಿರ್ವಹಣೆ":"Manage"} — NammaThota</div>
       </div>
-      <div style={{display:"flex",padding:"12px 16px 0",gap:8,overflowX:"auto"}}>
-        {[[t("farmsTab"),"farms"],[t("usersTab"),"users"],[t("accessTab"),"access"]].map(([lb,id])=>(
+      <div style={{display:"flex",padding:"12px 16px 0",gap:10}}>
+        {tabs.map(([id,lb])=>(
           <button key={id} onClick={()=>setTab(id)}
-            style={{background:tab===id?"#37474F":"#fff",color:tab===id?"#fff":"#555",
-              border:`1.5px solid ${tab===id?"#37474F":"#ddd"}`,borderRadius:20,
-              padding:"8px 16px",fontSize:18,fontWeight:600,whiteSpace:"nowrap",flexShrink:0,cursor:"pointer"}}>
+            style={{flex:1,background:tab===id?"#37474F":"#fff",color:tab===id?"#fff":"#555",
+              border:"2px solid "+(tab===id?"#37474F":"#ddd"),borderRadius:16,
+              padding:"12px 16px",fontSize:16,fontWeight:700,cursor:"pointer"}}>
             {lb}
           </button>
         ))}
@@ -3065,7 +2834,6 @@ function ManagePage({user,onBack,showToast}){
       <div style={{padding:16}}>
         {tab==="farms"&&<ManageFarms showToast={showToast}/>}
         {tab==="users"&&<ManageUsers showToast={showToast}/>}
-        {tab==="access"&&<ManageAccess/>}
       </div>
     </div>
   );
