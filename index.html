@@ -309,7 +309,18 @@ const DEFAULT_TASK_GROUPS=[
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 const today=()=>new Date().toISOString().slice(0,10);
 const fmt=d=>d?new Date(d).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"2-digit"}):"—";
-const fmtCur=n=>"₹"+(+n||0).toLocaleString("en-IN");
+const fmtCur=n=>{
+  const v=+n||0;
+  if(v>=10000000) return "₹"+(v/10000000).toFixed(2).replace(/\.?0+$/,"")+" ಕೋಟಿ";
+  if(v>=100000)   return "₹"+(v/100000).toFixed(2).replace(/\.?0+$/,"")+" ಲಕ್ಷ";
+  if(v>=1000)     return "₹"+(v/1000).toFixed(1).replace(/\.?0+$/,"")+"K";
+  return "₹"+v.toLocaleString("en-IN");
+};
+/* Full format — used in reports and totals */
+const fmtCurFull=n=>{
+  const v=+n||0;
+  return "₹"+v.toLocaleString("en-IN",{maximumFractionDigits:0});
+};
 const compress=file=>new Promise(res=>{const img=new Image();img.onload=()=>{const MAX=500,s=Math.min(MAX/img.width,MAX/img.height,1),c=document.createElement("canvas");c.width=img.width*s;c.height=img.height*s;c.getContext("2d").drawImage(img,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",0.55));};img.src=URL.createObjectURL(file);});
 const dispName=u=>{if(!u)return"";if(u.firstName||u.lastName)return((u.firstName||"")+" "+(u.lastName||"")).trim();return u.name||u.id;};
 const calcTotalPlants=(acres,ppa)=>acres&&ppa?Math.round(+acres * +ppa):0;
@@ -686,22 +697,26 @@ function Login({onLogin}){
               border:"2px solid rgba(255,255,255,.3)",fontSize:48}}>🌾</div>
           </div>
           <div style={{fontSize:38,fontWeight:900,color:"#fff",letterSpacing:"-0.03em",lineHeight:1}}>ನಮ್ಮ ತೋಟ</div>
-          <div style={{fontSize:18,color:"rgba(255,255,255,.7)",marginTop:6,letterSpacing:"0.05em",textTransform:"uppercase",fontWeight:600}}>NammaThota</div>
-          <div style={{fontSize:18,color:"rgba(255,255,255,.65)",marginTop:6,fontStyle:"italic"}}>{t("tagline")}</div>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,marginTop:10}}>
-            <div style={{height:1,width:40,background:"rgba(255,255,255,.25)"}}/>
-            <div style={{fontSize:17,color:"rgba(255,255,255,.45)",letterSpacing:"0.04em"}}>☁️ CLOUD SYNCED</div>
-            <div style={{height:1,width:40,background:"rgba(255,255,255,.25)"}}/>
+          <div style={{fontSize:16,color:"rgba(255,255,255,.65)",marginTop:6,letterSpacing:"0.06em",textTransform:"uppercase",fontWeight:600}}>NammaThota</div>
+          <div style={{fontSize:17,color:"rgba(255,255,255,.75)",marginTop:8,fontStyle:"italic"}}>{t("tagline")}</div>
+          <div style={{fontSize:14,color:"rgba(255,255,255,.45)",marginTop:8}}>
+            ☁️ {lang==="kn"?"ಕ್ಲೌಡ್ ಸಿಂಕ್ ಆಗಿದೆ":"Cloud Synced"}
           </div>
         </div>
-        <div style={{background:"#fff",borderRadius:22,padding:24,boxShadow:"0 20px 60px rgba(0,0,0,.3)"}}>
+        <div style={{background:"#fff",borderRadius:22,padding:24,boxShadow:"0 20px 60px rgba(0,0,0,.3)"}} autoComplete="off">
           <Field label={t("userId")} required>
-            <input value={uid_} onChange={e=>setUid(e.target.value)} placeholder="owner / sup1"
-              autoCapitalize="none" autoCorrect="off" autoComplete="off" style={inp}/>
+            <input value={uid_} onChange={e=>setUid(e.target.value)} placeholder={lang==="kn"?"ನಿಮ್ಮ User ID":"Your User ID"}
+              autoCapitalize="none" autoCorrect="off"
+              autoComplete="off" autoSave="off"
+              data-form-type="other"
+              style={inp}/>
           </Field>
           <Field label={t("password")} required>
             <input type="password" value={pass} onChange={e=>setPass(e.target.value)}
-              placeholder="••••••••" onKeyDown={e=>e.key==="Enter"&&go()} style={inp}/>
+              placeholder={lang==="kn"?"ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ":"Enter Password"} onKeyDown={e=>e.key==="Enter"&&go()}
+              autoComplete="new-password"
+              data-form-type="other"
+              style={inp}/>
           </Field>
           {err&&<div style={{color:"#C62828",fontSize:18,textAlign:"center",marginBottom:12,
             background:"#FFEBEE",padding:"8px 12px",borderRadius:10}}>{err}</div>}
@@ -709,14 +724,16 @@ function Login({onLogin}){
             style={{width:"100%",padding:14,background:"#2E7D32",color:"#fff",border:"none",
               borderRadius:12,fontSize:18,fontWeight:700,cursor:"pointer",
               display:"flex",alignItems:"center",justifyContent:"center",gap:10,opacity:busy?.7:1}}>
-            {busy?<><Spinner size={18} col="#fff"/><span>{t("loggingIn")}</span></>:`${t("login")} →`}
+            {busy
+              ?<><Spinner size={18} col="#fff"/><span>{t("loggingIn")}</span></>
+              :<span>{t("login")} →</span>}
           </button>
           <div style={{marginTop:16,background:"#F1F8E9",borderRadius:12,padding:"12px 14px",
             fontSize:18,color:"#555",textAlign:"center",lineHeight:1.8}}>
-            {t("loginHint")}<br/>
+            {t("loginHint")}
           </div>
         </div>
-        <div style={{textAlign:"center",marginTop:20,fontSize:17,color:"rgba(255,255,255,.4)"}}>
+        <div style={{textAlign:"center",marginTop:20,fontSize:13,color:"rgba(255,255,255,.35)"}}>
           CodeTrail Technologies Private Limited
         </div>
       </div>
