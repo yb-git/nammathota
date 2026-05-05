@@ -129,8 +129,9 @@ en:{
   receipt:"Receipt Photo",
   supervPayNote:"Payments & claims between owner and supervisor",
   /* categories */
-  wage:"Daily Wage",fuel:"Fuel / Charging",food:"Food",
-  material:"Material",other:"Other",
+  wage:"Daily Wage",jcb:"JCB / Tractor",fuel:"Fuel / Charging",
+  food:"Food / Tea",fertilizer:"Fertilizer",material:"Material / Items",
+  govtfee:"Govt Fee / Tax",service:"Service Cost",transport:"Transport",other:"Other",
   /* more */
   moreTitle:"More",documents:"Documents",reports:"Reports",
   manageApp:"Manage App",profileTitle:"My Profile",language:"Language",
@@ -229,8 +230,9 @@ kn:{
   receipt:"ರಸೀದಿ ಫೋಟೋ",
   supervPayNote:"ಮಾಲೀಕರು ಮತ್ತು ಮೇಲ್ವಿಚಾರಕರ ನಡುವಿನ ಹಣ ವ್ಯವಹಾರ",
   /* categories */
-  wage:"ದಿನಗೂಲಿ",fuel:"ಇಂಧನ / ಚಾರ್ಜಿಂಗ್",food:"ಊಟ",
-  material:"ಸಾಮಗ್ರಿ",other:"ಇತರೆ",
+  wage:"ದಿನಗೂಲಿ",jcb:"JCB / ಟ್ರ್ಯಾಕ್ಟರ್",fuel:"ಇಂಧನ / ಚಾರ್ಜಿಂಗ್",
+  food:"ಊಟ / ತಿಂಡಿ",fertilizer:"ಗೊಬ್ಬರ",material:"ಸಾಮಗ್ರಿ / ಐಟಂ",
+  govtfee:"ಸರ್ಕಾರಿ ಶುಲ್ಕ",service:"ಸೇವಾ ವೆಚ್ಚ",transport:"ಸಾಗಣೆ",other:"ಇತರೆ",
   /* more */
   moreTitle:"ಹೆಚ್ಚಿನ ಆಯ್ಕೆ",documents:"ದಾಖಲೆಗಳು",reports:"ವರದಿಗಳು",
   manageApp:"ನಿರ್ವಹಣೆ",profileTitle:"ನನ್ನ ಪ್ರೊಫೈಲ್",language:"ಭಾಷೆ",
@@ -274,8 +276,16 @@ const PAY_TYPES=["advance","claim","salary"];
 const PAY_ICONS={advance:"💵",claim:"📋",salary:"💰"};
 const PAY_COLS={advance:"#0277BD",claim:"#E65100",salary:"#2E7D32"};
 const ECAT=[
-  {id:"wage",icon:"👷"},{id:"fuel",icon:"⛽"},{id:"food",icon:"🍱"},
-  {id:"material",icon:"📦"},{id:"other",icon:"📝"},
+  {id:"wage",      kn:"ದಿನಗೂಲಿ",          en:"Daily Wage",       icon:"👷"},
+  {id:"jcb",       kn:"JCB / ಟ್ರ್ಯಾಕ್ಟರ್", en:"JCB / Tractor",    icon:"🚜"},
+  {id:"fuel",      kn:"ಇಂಧನ",              en:"Fuel / Charging",  icon:"⛽"},
+  {id:"food",      kn:"ಊಟ / ತಿಂಡಿ",        en:"Food / Tea",       icon:"🍱"},
+  {id:"fertilizer",kn:"ಗೊಬ್ಬರ",            en:"Fertilizer",       icon:"🌿"},
+  {id:"material",  kn:"ಸಾಮಗ್ರಿ",           en:"Material / Items", icon:"📦"},
+  {id:"govtfee",   kn:"ಸರ್ಕಾರಿ ಶುಲ್ಕ",     en:"Govt Fee / Tax",   icon:"🏛️"},
+  {id:"service",   kn:"ಸೇವಾ ವೆಚ್ಚ",         en:"Service Cost",     icon:"🔧"},
+  {id:"transport", kn:"ಸಾಗಣೆ",             en:"Transport",        icon:"🚛"},
+  {id:"other",     kn:"ಇತರೆ",              en:"Other",            icon:"📝"},
 ];
 const STATUS_CFG={
   pending:   {icon:"⬜",col:"#757575",bg:"#F5F5F5"},
@@ -1463,7 +1473,21 @@ function TasksPage({farm,tasks,setTasks,customTasks,setCustomTasks,user,showToas
   const allTG=customTasks.filter(g=>!g.id.endsWith("_ov"));
 
   const isDirty=k=>{const d=drafts[k]||{};const s=tasks[k]||{};return Object.keys(d).some(f=>d[f]!==(s[f]||""));};
-  const mD=(k,f,v)=>setDrafts(p=>({...p,[k]:{...p[k],[f]:v}}));
+  const mD=(k,field,v)=>{
+    setDrafts(p=>({...p,[k]:{...p[k],[field]:v}}));
+    // Auto-propagate startDate to group if this is the first date set
+    if(field==="startDate"&&v){
+      const parts=k.split("-");
+      const tgId=parts.slice(0,-1).join("-");
+      const grpKey=tgId+"-group";
+      setTasks(prev=>{
+        if(!prev[grpKey]?.startDate){
+          return{...prev,[grpKey]:{...prev[grpKey],startDate:v}};
+        }
+        return prev;
+      });
+    }
+  };
   const saveT=k=>{
     setTasks(p=>({...p,[k]:{...p[k],...drafts[k]}}));
     setDrafts(p=>{const n={...p};delete n[k];return n;});
@@ -1471,8 +1495,72 @@ function TasksPage({farm,tasks,setTasks,customTasks,setCustomTasks,user,showToas
     setTimeout(()=>setSavedK(p=>{const n={...p};delete n[k];return n;}),2500);
   };
   const setSt=(k,st)=>{
-    setTasks(p=>({...p,[k]:{...p[k],status:st,doneDate:st==="taskDone"?today():(p[k]?.doneDate||null)}}));
-    setSavedK(p=>({...p,[k]:true}));showToast("✅ "+t("status")+" "+t("saved"));
+    // k = "T01-0" format — split to get group id and sub-task index
+    const parts=k.split("-");
+    const tgId=parts.slice(0,-1).join("-"); // e.g. "T01"
+    const doneDate=st==="taskDone"?today():null;
+
+    setTasks(prev=>{
+      const updated={...prev,[k]:{...prev[k],status:st,doneDate:doneDate||(prev[k]?.doneDate||null)}};
+
+      // Auto-update group status based on all sub-tasks
+      const tg=allTG.find(g=>g.id===tgId);
+      if(tg){
+        const subs=getSubs(tg);
+        const allStatuses=subs.map((_,i)=>{
+          const sk=tgId+"-"+i;
+          return sk===k?st:(updated[sk]?.status||"pending");
+        });
+        const allDone=allStatuses.every(s=>s==="taskDone");
+        const anyBlocked=allStatuses.some(s=>s==="blocked");
+        const anyInProgress=allStatuses.some(s=>s==="inProgress");
+        const anyDone=allStatuses.some(s=>s==="taskDone");
+
+        // Auto-set group-level status key
+        const grpKey=tgId+"-group";
+        let grpStatus="pending";
+        if(allDone) grpStatus="taskDone";
+        else if(anyBlocked) grpStatus="blocked";
+        else if(anyInProgress||anyDone) grpStatus="inProgress";
+
+        // Auto-set group done date = last sub-task done date
+        const doneDates=subs.map((_,i)=>{
+          const sk=tgId+"-"+i;
+          if(sk===k) return st==="taskDone"?today():null;
+          return updated[sk]?.doneDate||null;
+        }).filter(Boolean).sort();
+        const lastDoneDate=doneDates[doneDates.length-1]||null;
+
+        // Auto-set group start date = earliest sub-task start date
+        const startDates=subs.map((_,i)=>{
+          const sk=tgId+"-"+i;
+          return updated[sk]?.startDate||null;
+        }).filter(Boolean).sort();
+        const firstStartDate=startDates[0]||null;
+
+        updated[grpKey]={
+          ...updated[grpKey],
+          status:grpStatus,
+          doneDate:allDone?lastDoneDate:(updated[grpKey]?.doneDate||null),
+          startDate:firstStartDate||(updated[grpKey]?.startDate||null),
+        };
+
+        // Show toast with auto-complete message
+        if(allDone){
+          showToast(lang==="kn"
+            ?`✅ ${tg.kn} — ಎಲ್ಲಾ ಕೆಲಸ ಮುಗಿದಿದೆ!`
+            :`✅ ${tg.en} — All sub-tasks complete!`);
+        } else {
+          showToast("✅ "+t("status")+" "+t("saved"));
+        }
+      } else {
+        showToast("✅ "+t("status")+" "+t("saved"));
+      }
+
+      return updated;
+    });
+
+    setSavedK(p=>({...p,[k]:true}));
     setTimeout(()=>setSavedK(p=>{const n={...p};delete n[k];return n;}),2000);
   };
   const addMedia=(k,file)=>compress(file).then(d=>{
@@ -1536,9 +1624,11 @@ function TasksPage({farm,tasks,setTasks,customTasks,setCustomTasks,user,showToas
             <div style={{background:tg.col,padding:"13px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setOpen(isOpen?null:tg.id)}>
               <div style={{flex:1}}>
                 <div style={{color:"#fff",fontWeight:800,fontSize:15}}>{tg.id} — {tg.kn}</div>
-                <div style={{color:"rgba(255,255,255,.75)",fontSize:17,marginTop:2}}>
-                  {tg.en} · {done}/{subs.length} {t("taskDone")}
-                  {planned>0&&<span style={{marginLeft:8,opacity:.8}}>· {t("planned")}: {fmtCur(planned)}</span>}
+                <div style={{color:"rgba(255,255,255,.75)",fontSize:17,marginTop:2,display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+                  <span>{lang==="kn"?tg.kn:tg.en}</span>
+                  <span>· {done}/{subs.length}</span>
+                  {done===subs.length&&subs.length>0&&<span style={{background:"rgba(255,255,255,.25)",borderRadius:20,padding:"2px 10px",fontSize:13}}>✅ {lang==="kn"?"ಮುಗಿದಿದೆ":"Complete"}</span>}
+                  {planned>0&&<span style={{opacity:.8}}>· {fmtCur(planned)}</span>}
                 </div>
               </div>
               <div style={{display:"flex",alignItems:"center",gap:7}}>
@@ -1548,6 +1638,17 @@ function TasksPage({farm,tasks,setTasks,customTasks,setCustomTasks,user,showToas
               </div>
             </div>
             <div style={{height:5,background:tg.bg}}><div style={{height:5,width:(done/Math.max(subs.length,1)*100)+"%",background:tg.col,transition:"width .4s"}}/></div>
+            {/* Auto-computed group dates */}
+            {(()=>{
+              const grpKey=tg.id+"-group";
+              const grpData=tasks[grpKey]||{};
+              return(grpData.startDate||grpData.doneDate)?(
+                <div style={{display:"flex",gap:12,padding:"5px 14px",background:tg.bg,fontSize:13,color:tg.col}}>
+                  {grpData.startDate&&<span>🗓 {lang==="kn"?"ಶುರು:":"Start:"} {fmt(grpData.startDate)}</span>}
+                  {grpData.doneDate&&<span>✅ {lang==="kn"?"ಮುಗಿದ:":"Done:"} {fmt(grpData.doneDate)}</span>}
+                </div>
+              ):null;
+            })()}
             {isOpen&&(
               <div style={{background:tg.bg}}>
                 {subs.map((sub,i)=>{
@@ -1808,7 +1909,7 @@ function LabourTab({farm,labour,setLabour,workers,setWorkers,showToast}){
 }
 
 /* ── Finance Page ───────────────────────────────── */
-function FinancePage({farm,expenses,setExpenses,purchases,setPurchases,payments,setPayments,income,setIncome,trips,supervisors,user,showToast}){
+function FinancePage({farm,expenses,setExpenses,purchases,setPurchases,payments,setPayments,income,setIncome,trips,allTasks,supervisors,user,showToast}){
   const{t}=useLang();
   const[tab,setTab]=useState("expenses");
   const tabs=[["expenses","💸 "+t("expenses")],["purchases","🛒 "+t("purchases")],["payments","💳 "+t("payments")],["income","🌾 "+t("income")]];
@@ -1825,7 +1926,7 @@ function FinancePage({farm,expenses,setExpenses,purchases,setPurchases,payments,
           </button>
         ))}
       </div>
-      {tab==="expenses"&&<ExpensesTab farm={farm} expenses={expenses} setExpenses={setExpenses} trips={trips} showToast={showToast}/>}
+      {tab==="expenses"&&<ExpensesTab farm={farm} expenses={expenses} setExpenses={setExpenses} trips={trips} allTasks={allTasks} showToast={showToast}/>}
       {tab==="purchases"&&<PurchasesTab farm={farm} purchases={purchases} setPurchases={setPurchases} showToast={showToast}/>}
       {tab==="payments"&&<PaymentsTab farm={farm} payments={payments} setPayments={setPayments} supervisors={supervisors} user={user} showToast={showToast}/>}
       {tab==="income"&&<IncomeTab farm={farm} income={income} setIncome={setIncome} showToast={showToast}/>}
@@ -1833,9 +1934,9 @@ function FinancePage({farm,expenses,setExpenses,purchases,setPurchases,payments,
   );
 }
 
-function ExpensesTab({farm,expenses,setExpenses,trips,showToast}){
-  const{t}=useLang();
-  const E={date:today(),cat:"fuel",desc:"",amount:"",tripId:"",note:""};
+function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,showToast}){
+  const{t,lang}=useLang();
+  const E={date:today(),cat:"wage",desc:"",amount:"",tripId:"",taskId:"",note:""};
   const[form,setForm]=useState(E);const[show,setShow]=useState(false);const[editId,setEditId]=useState(null);const[savedId,setSavedId]=useState(null);
   const save=()=>{
     if(!form.amount){showToast(t("amount")+" "+t("required"),"warn");return;}
@@ -1846,7 +1947,11 @@ function ExpensesTab({farm,expenses,setExpenses,trips,showToast}){
   };
   const del=id=>{setExpenses(p=>p.filter(x=>x.id!==id));showToast("🗑 "+t("delete"));};
   const total=expenses.reduce((a,e)=>a+(+e.amount||0),0);
-  const catLabel=id=>{const ec=ECAT.find(c=>c.id===id);return ec?ec.icon+" "+t(id):id;};
+  const catLabel=id=>{
+    const ec=ECAT.find(c=>c.id===id);
+    if(!ec)return id;
+    return ec.icon+" "+(lang==="kn"?ec.kn:ec.en);
+  };
   return(
     <div>
       <Card style={{background:"#E65100",marginBottom:14}}>
@@ -1864,6 +1969,12 @@ function ExpensesTab({farm,expenses,setExpenses,trips,showToast}){
           <Field label={t("description")}><input value={form.desc} onChange={e=>setForm({...form,desc:e.target.value})} placeholder="ವಿವರ..."/></Field>
           <Field label={t("amount")+" *"}><input type="number" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} placeholder="0"/></Field>
           <Field label={t("tripLink")}><select value={form.tripId} onChange={e=>setForm({...form,tripId:e.target.value})}><option value="">— {t("optional")} —</option>{trips.map(tr=><option key={tr.id} value={tr.id}>{fmt(tr.date)}: {tr.from}→{tr.to}</option>)}</select></Field>
+          <Field label={lang==="kn"?"ಕೆಲಸಕ್ಕೆ ಲಿಂಕ್ (ಐಚ್ಛಿಕ)":"Link to Task (Optional)"}>
+            <select value={form.taskId} onChange={e=>setForm({...form,taskId:e.target.value})}>
+              <option value="">— {t("optional")} —</option>
+              {(allTasks||[]).map(tg=><option key={tg.id} value={tg.id}>{tg.id}: {lang==="kn"?tg.kn:tg.en}</option>)}
+            </select>
+          </Field>
           <Field label={t("noteSave")} mb={14}><textarea value={form.note} onChange={e=>setForm({...form,note:e.target.value})} rows={2} placeholder="ಟಿಪ್ಪಣಿ..."/></Field>
           <div style={{display:"flex",gap:10}}><Btn onClick={save} col="#E65100" full>💾 {t("save")}</Btn><Btn onClick={()=>{setShow(false);setEditId(null);}} light col="#555" sm>{t("cancel")}</Btn></div>
         </Card>
@@ -1879,6 +1990,7 @@ function ExpensesTab({farm,expenses,setExpenses,trips,showToast}){
               </div>
               <div style={{fontSize:18,fontWeight:800,color:"#E65100"}}>{fmtCur(e.amount)}</div>
             </div>
+            {e.taskId&&<div style={{fontSize:15,color:"#1B5E20",marginBottom:4}}>📋 {(allTasks||[]).find(tg=>tg.id===e.taskId)?((lang==="kn"?(allTasks||[]).find(tg=>tg.id===e.taskId)?.kn:(allTasks||[]).find(tg=>tg.id===e.taskId)?.en)||e.taskId):e.taskId}</div>}
             {e.note&&<div style={{fontSize:17,color:"#888",fontStyle:"italic",marginBottom:8}}>"{e.note}"</div>}
             <div style={{display:"flex",gap:8}}>
               <button onClick={()=>{setForm({...e});setEditId(e.id);setShow(true);}} style={{flex:1,background:"#FFF3E0",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#E65100"}}>✏️ {t("edit")}</button>
@@ -2571,6 +2683,14 @@ function FarmApp({user,setUser,farm,onSwitch,onLogout,showToast}){
       if(p)setPurchases(p);if(d)setDocs(d);if(pay)setPayments(pay);if(inc)setIncome(inc);
       const supList=(users||[]).filter(u=>u.role==="sup"&&((farm.supervisorIds||[]).includes(u.id)||(u.farms||[]).includes(farm.id)));
       setSupervisors(supList);
+      // Migrate old expense categories to new IDs
+      if(e&&e.length>0){
+        const migrated=e.map(exp=>{
+          const old2new={"material":"material","wage":"wage","fuel":"fuel","food":"food","other":"other"};
+          return {...exp,cat:old2new[exp.cat]||exp.cat};
+        });
+        // Already handled — just keep as-is since IDs match
+      }
       // Seed default task groups on very first farm load
       // ct===null means never saved. ct===[] means user deleted all — respect that.
       // ct with T-style IDs means old data — keep it.
@@ -2655,7 +2775,7 @@ function FarmApp({user,setUser,farm,onSwitch,onLogout,showToast}){
         <DailyPage farm={farm} trips={trips} setTrips={setTrips} labour={labour} setLabour={setLabour} workers={workers} setWorkers={setWorkers} showToast={showToast}/>
       )}
       {page==="finance"&&(
-        <FinancePage farm={farm} expenses={expenses} setExpenses={setExpenses} purchases={purchases} setPurchases={setPurchases} payments={payments} setPayments={setPayments} income={income} setIncome={setIncome} trips={trips} supervisors={supervisors} user={user} showToast={showToast}/>
+        <FinancePage farm={farm} expenses={expenses} setExpenses={setExpenses} purchases={purchases} setPurchases={setPurchases} payments={payments} setPayments={setPayments} income={income} setIncome={setIncome} trips={trips} allTasks={allTasks} supervisors={supervisors} user={user} showToast={showToast}/>
       )}
       {page==="more"&&(
         <MorePage farm={farm} docs={docs} setDocs={setDocs} user={user} onManage={isOwner?()=>requirePin("manage"):null} onProfile={()=>setOverlay("profile")} onReport={()=>requirePin("report")} onLogout={onLogout} showToast={showToast}/>
