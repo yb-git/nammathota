@@ -13,6 +13,8 @@ html,body{height:100%;overflow-x:hidden;-webkit-overflow-scrolling:touch;scroll-
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#F0F4F0;color:#1a1a1a;overscroll-behavior:none;-webkit-font-smoothing:antialiased}
 input,select,textarea,button{font-family:inherit;font-size:15px;-webkit-appearance:none}
 input,select,textarea{background:#fff;border:1.5px solid #D0D8D0;border-radius:12px;padding:12px 14px;width:100%;color:#1a1a1a;display:block}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 input:focus,select:focus,textarea:focus{border-color:#2E7D32;box-shadow:0 0 0 3px rgba(46,125,50,.1)}
 button{cursor:pointer;border:none;border-radius:12px;font-weight:600;transition:transform .1s,opacity .1s;-webkit-user-select:none;user-select:none}
 button:active{transform:scale(0.96)}
@@ -592,7 +594,7 @@ function PinGate({onVerified,onCancel}){
     else{
       const a=attempts+1;setAttempts(a);
       setErr(true);setShake(true);
-      setTimeout(()=>{setShake(false);setPin("");setErr(false);if(a>=3){setLocked(true);setLockSec(60);}
+      setTimeout(()=>{setShake(false);setPin("");setErr(false);if(a>=3){setLocked(true);setLockSec(300);}
       },600);
     }
   };
@@ -626,7 +628,7 @@ function PinGate({onVerified,onCancel}){
           <div style={{textAlign:"center",padding:"16px 0"}}>
             <div style={{fontSize:40,marginBottom:10}}>⏳</div>
             <div style={{fontSize:17,fontWeight:700,color:"#C62828"}}>
-              {lang==="kn"?"ತಾತ್ಕಾಲಿಕ ಲಾಕ್":"Temporarily Locked"}
+              {lang==="kn"?"3 ತಪ್ಪು PIN — ಲಾಕ್":"3 Wrong PINs — Locked"}
             </div>
             <div style={{fontSize:18,color:"#888",marginTop:6}}>{lockSec}s</div>
           </div>
@@ -1824,6 +1826,72 @@ function TripsTab({farm,trips,setTrips,showToast}){
           </Card>
         );})}
       </div>
+
+      {/* ═══ BACKUP & RESTORE ═══ */}
+      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+        <div style={{fontSize:17,fontWeight:700,marginBottom:12,color:"#333"}}>
+          ☁️ {lang==="kn"?"ಡೇಟಾ ಬ್ಯಾಕಪ್ & ಮರುಸ್ಥಾಪನೆ":"Data Backup & Restore"}
+        </div>
+        <button onClick={()=>{
+          const allData={};
+          Object.keys(localStorage).filter(k=>k.startsWith("nt:")).forEach(k=>{
+            try{allData[k]=JSON.parse(localStorage.getItem(k));}catch{}
+          });
+          allData["_exportedAt"]=new Date().toISOString();
+          const blob=new Blob([JSON.stringify(allData,null,2)],{type:"application/json"});
+          const url=URL.createObjectURL(blob);
+          const a=document.createElement("a");
+          a.href=url;
+          a.download="NammaThota-backup-"+new Date().toISOString().slice(0,10)+".json";
+          a.click();
+          URL.revokeObjectURL(url);
+          showToast(lang==="kn"?"✅ ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಆಗಿದೆ":"✅ Backup downloaded");
+        }} style={{width:"100%",background:"#E8F5E9",border:"2px solid #A5D6A7",color:"#1B5E20",
+          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
+          marginBottom:10,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+          📥 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ":"Download Backup (.json)"}
+        </button>
+        <label style={{width:"100%",background:"#E3F2FD",border:"2px solid #90CAF9",color:"#1565C0",
+          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
+          display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:8}}>
+          📤 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಮರುಸ್ಥಾಪಿಸಿ":"Restore from Backup"}
+          <input type="file" accept=".json" style={{display:"none"}}
+            onChange={e=>{
+              const file=e.target.files[0];if(!file)return;
+              const reader=new FileReader();
+              reader.onload=ev=>{
+                try{
+                  const data=JSON.parse(ev.target.result);
+                  if(!data["nt:global:users"]){showToast(lang==="kn"?"ತಪ್ಪಾದ ಫೈಲ್":"Invalid backup file","warn");return;}
+                  if(!window.confirm(lang==="kn"?"ಎಲ್ಲಾ ಡೇಟಾ ಮರುಸ್ಥಾಪಿಸುವುದೇ?":"Restore all data? Current data will be overwritten."))return;
+                  Object.keys(data).filter(k=>k.startsWith("nt:")).forEach(k=>{
+                    localStorage.setItem(k,JSON.stringify(data[k]));
+                    sbSet(k,data[k]);
+                  });
+                  showToast(lang==="kn"?"✅ ಮರುಸ್ಥಾಪಿಸಲಾಗಿದೆ — ಮರುಲೋಡ್...":"✅ Restored — Reloading...");
+                  setTimeout(()=>window.location.reload(),1500);
+                }catch(ex){showToast(lang==="kn"?"ಫೈಲ್ ಓದಲಾಗಲಿಲ್ಲ":"Could not read file","error");}
+              };
+              reader.readAsText(file);
+              e.target.value="";
+            }}/>
+        </label>
+        <div style={{fontSize:13,color:"#888",textAlign:"center",lineHeight:1.6}}>
+          {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ → Google Drive ಗೆ ಹಾಕಿ ಸುರಕ್ಷಿತವಾಗಿ ಇರಿಸಿ":"Download backup → Upload to Google Drive to keep it safe"}
+        </div>
+      </div>
+
+      {/* ═══ SIGN OUT ═══ */}
+      <button onClick={()=>{if(window.confirm(lang==="kn"?"ನಿಜವಾಗಿಯೂ Sign Out ಮಾಡುವುದೇ?":"Sign out of NammaThota?"))onLogout&&onLogout();}}
+        style={{width:"100%",background:"#FFEBEE",border:"2px solid #FFCDD2",
+          color:"#C62828",borderRadius:18,padding:18,fontSize:18,
+          fontWeight:700,cursor:"pointer",display:"flex",
+          alignItems:"center",justifyContent:"center",gap:10,marginBottom:16}}>
+        🚪 {lang==="kn"?"ಸೈನ್ ಔಟ್":"Sign Out"}
+      </button>
+      <div style={{textAlign:"center",fontSize:13,color:"#ccc",marginBottom:8}}>
+        ನಮ್ಮ ತೋಟ · CodeTrail Technologies
+      </div>
     </div>
   );
 }
@@ -1914,6 +1982,72 @@ function LabourTab({farm,labour,setLabour,workers,setWorkers,showToast}){
             </div>
           </Card>
         );})}
+      </div>
+
+      {/* ═══ BACKUP & RESTORE ═══ */}
+      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+        <div style={{fontSize:17,fontWeight:700,marginBottom:12,color:"#333"}}>
+          ☁️ {lang==="kn"?"ಡೇಟಾ ಬ್ಯಾಕಪ್ & ಮರುಸ್ಥಾಪನೆ":"Data Backup & Restore"}
+        </div>
+        <button onClick={()=>{
+          const allData={};
+          Object.keys(localStorage).filter(k=>k.startsWith("nt:")).forEach(k=>{
+            try{allData[k]=JSON.parse(localStorage.getItem(k));}catch{}
+          });
+          allData["_exportedAt"]=new Date().toISOString();
+          const blob=new Blob([JSON.stringify(allData,null,2)],{type:"application/json"});
+          const url=URL.createObjectURL(blob);
+          const a=document.createElement("a");
+          a.href=url;
+          a.download="NammaThota-backup-"+new Date().toISOString().slice(0,10)+".json";
+          a.click();
+          URL.revokeObjectURL(url);
+          showToast(lang==="kn"?"✅ ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಆಗಿದೆ":"✅ Backup downloaded");
+        }} style={{width:"100%",background:"#E8F5E9",border:"2px solid #A5D6A7",color:"#1B5E20",
+          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
+          marginBottom:10,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+          📥 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ":"Download Backup (.json)"}
+        </button>
+        <label style={{width:"100%",background:"#E3F2FD",border:"2px solid #90CAF9",color:"#1565C0",
+          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
+          display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:8}}>
+          📤 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಮರುಸ್ಥಾಪಿಸಿ":"Restore from Backup"}
+          <input type="file" accept=".json" style={{display:"none"}}
+            onChange={e=>{
+              const file=e.target.files[0];if(!file)return;
+              const reader=new FileReader();
+              reader.onload=ev=>{
+                try{
+                  const data=JSON.parse(ev.target.result);
+                  if(!data["nt:global:users"]){showToast(lang==="kn"?"ತಪ್ಪಾದ ಫೈಲ್":"Invalid backup file","warn");return;}
+                  if(!window.confirm(lang==="kn"?"ಎಲ್ಲಾ ಡೇಟಾ ಮರುಸ್ಥಾಪಿಸುವುದೇ?":"Restore all data? Current data will be overwritten."))return;
+                  Object.keys(data).filter(k=>k.startsWith("nt:")).forEach(k=>{
+                    localStorage.setItem(k,JSON.stringify(data[k]));
+                    sbSet(k,data[k]);
+                  });
+                  showToast(lang==="kn"?"✅ ಮರುಸ್ಥಾಪಿಸಲಾಗಿದೆ — ಮರುಲೋಡ್...":"✅ Restored — Reloading...");
+                  setTimeout(()=>window.location.reload(),1500);
+                }catch(ex){showToast(lang==="kn"?"ಫೈಲ್ ಓದಲಾಗಲಿಲ್ಲ":"Could not read file","error");}
+              };
+              reader.readAsText(file);
+              e.target.value="";
+            }}/>
+        </label>
+        <div style={{fontSize:13,color:"#888",textAlign:"center",lineHeight:1.6}}>
+          {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ → Google Drive ಗೆ ಹಾಕಿ ಸುರಕ್ಷಿತವಾಗಿ ಇರಿಸಿ":"Download backup → Upload to Google Drive to keep it safe"}
+        </div>
+      </div>
+
+      {/* ═══ SIGN OUT ═══ */}
+      <button onClick={()=>{if(window.confirm(lang==="kn"?"ನಿಜವಾಗಿಯೂ Sign Out ಮಾಡುವುದೇ?":"Sign out of NammaThota?"))onLogout&&onLogout();}}
+        style={{width:"100%",background:"#FFEBEE",border:"2px solid #FFCDD2",
+          color:"#C62828",borderRadius:18,padding:18,fontSize:18,
+          fontWeight:700,cursor:"pointer",display:"flex",
+          alignItems:"center",justifyContent:"center",gap:10,marginBottom:16}}>
+        🚪 {lang==="kn"?"ಸೈನ್ ಔಟ್":"Sign Out"}
+      </button>
+      <div style={{textAlign:"center",fontSize:13,color:"#ccc",marginBottom:8}}>
+        ನಮ್ಮ ತೋಟ · CodeTrail Technologies
       </div>
     </div>
   );
@@ -2304,12 +2438,78 @@ function PurchasesTab({farm,purchases,setPurchases,showToast}){
           </Card>
         );})}
       </div>
+
+      {/* ═══ BACKUP & RESTORE ═══ */}
+      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+        <div style={{fontSize:17,fontWeight:700,marginBottom:12,color:"#333"}}>
+          ☁️ {lang==="kn"?"ಡೇಟಾ ಬ್ಯಾಕಪ್ & ಮರುಸ್ಥಾಪನೆ":"Data Backup & Restore"}
+        </div>
+        <button onClick={()=>{
+          const allData={};
+          Object.keys(localStorage).filter(k=>k.startsWith("nt:")).forEach(k=>{
+            try{allData[k]=JSON.parse(localStorage.getItem(k));}catch{}
+          });
+          allData["_exportedAt"]=new Date().toISOString();
+          const blob=new Blob([JSON.stringify(allData,null,2)],{type:"application/json"});
+          const url=URL.createObjectURL(blob);
+          const a=document.createElement("a");
+          a.href=url;
+          a.download="NammaThota-backup-"+new Date().toISOString().slice(0,10)+".json";
+          a.click();
+          URL.revokeObjectURL(url);
+          showToast(lang==="kn"?"✅ ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಆಗಿದೆ":"✅ Backup downloaded");
+        }} style={{width:"100%",background:"#E8F5E9",border:"2px solid #A5D6A7",color:"#1B5E20",
+          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
+          marginBottom:10,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+          📥 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ":"Download Backup (.json)"}
+        </button>
+        <label style={{width:"100%",background:"#E3F2FD",border:"2px solid #90CAF9",color:"#1565C0",
+          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
+          display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:8}}>
+          📤 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಮರುಸ್ಥಾಪಿಸಿ":"Restore from Backup"}
+          <input type="file" accept=".json" style={{display:"none"}}
+            onChange={e=>{
+              const file=e.target.files[0];if(!file)return;
+              const reader=new FileReader();
+              reader.onload=ev=>{
+                try{
+                  const data=JSON.parse(ev.target.result);
+                  if(!data["nt:global:users"]){showToast(lang==="kn"?"ತಪ್ಪಾದ ಫೈಲ್":"Invalid backup file","warn");return;}
+                  if(!window.confirm(lang==="kn"?"ಎಲ್ಲಾ ಡೇಟಾ ಮರುಸ್ಥಾಪಿಸುವುದೇ?":"Restore all data? Current data will be overwritten."))return;
+                  Object.keys(data).filter(k=>k.startsWith("nt:")).forEach(k=>{
+                    localStorage.setItem(k,JSON.stringify(data[k]));
+                    sbSet(k,data[k]);
+                  });
+                  showToast(lang==="kn"?"✅ ಮರುಸ್ಥಾಪಿಸಲಾಗಿದೆ — ಮರುಲೋಡ್...":"✅ Restored — Reloading...");
+                  setTimeout(()=>window.location.reload(),1500);
+                }catch(ex){showToast(lang==="kn"?"ಫೈಲ್ ಓದಲಾಗಲಿಲ್ಲ":"Could not read file","error");}
+              };
+              reader.readAsText(file);
+              e.target.value="";
+            }}/>
+        </label>
+        <div style={{fontSize:13,color:"#888",textAlign:"center",lineHeight:1.6}}>
+          {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ → Google Drive ಗೆ ಹಾಕಿ ಸುರಕ್ಷಿತವಾಗಿ ಇರಿಸಿ":"Download backup → Upload to Google Drive to keep it safe"}
+        </div>
+      </div>
+
+      {/* ═══ SIGN OUT ═══ */}
+      <button onClick={()=>{if(window.confirm(lang==="kn"?"ನಿಜವಾಗಿಯೂ Sign Out ಮಾಡುವುದೇ?":"Sign out of NammaThota?"))onLogout&&onLogout();}}
+        style={{width:"100%",background:"#FFEBEE",border:"2px solid #FFCDD2",
+          color:"#C62828",borderRadius:18,padding:18,fontSize:18,
+          fontWeight:700,cursor:"pointer",display:"flex",
+          alignItems:"center",justifyContent:"center",gap:10,marginBottom:16}}>
+        🚪 {lang==="kn"?"ಸೈನ್ ಔಟ್":"Sign Out"}
+      </button>
+      <div style={{textAlign:"center",fontSize:13,color:"#ccc",marginBottom:8}}>
+        ನಮ್ಮ ತೋಟ · CodeTrail Technologies
+      </div>
     </div>
   );
 }
 
 function PaymentsTab({farm,payments,setPayments,supervisors,user,showToast}){
-  const{t}=useLang();
+  const{t,lang}=useLang();
   const isOwner=user.role==="owner";
   const[payType,setPayType]=useState("advance");
   const E={date:today(),type:"advance",amount:"",desc:"",supervisorId:"",note:""};
@@ -2428,12 +2628,78 @@ function PaymentsTab({farm,payments,setPayments,supervisors,user,showToast}){
           </Card>
         );})}
       </div>
+
+      {/* ═══ BACKUP & RESTORE ═══ */}
+      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+        <div style={{fontSize:17,fontWeight:700,marginBottom:12,color:"#333"}}>
+          ☁️ {lang==="kn"?"ಡೇಟಾ ಬ್ಯಾಕಪ್ & ಮರುಸ್ಥಾಪನೆ":"Data Backup & Restore"}
+        </div>
+        <button onClick={()=>{
+          const allData={};
+          Object.keys(localStorage).filter(k=>k.startsWith("nt:")).forEach(k=>{
+            try{allData[k]=JSON.parse(localStorage.getItem(k));}catch{}
+          });
+          allData["_exportedAt"]=new Date().toISOString();
+          const blob=new Blob([JSON.stringify(allData,null,2)],{type:"application/json"});
+          const url=URL.createObjectURL(blob);
+          const a=document.createElement("a");
+          a.href=url;
+          a.download="NammaThota-backup-"+new Date().toISOString().slice(0,10)+".json";
+          a.click();
+          URL.revokeObjectURL(url);
+          showToast(lang==="kn"?"✅ ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಆಗಿದೆ":"✅ Backup downloaded");
+        }} style={{width:"100%",background:"#E8F5E9",border:"2px solid #A5D6A7",color:"#1B5E20",
+          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
+          marginBottom:10,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+          📥 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ":"Download Backup (.json)"}
+        </button>
+        <label style={{width:"100%",background:"#E3F2FD",border:"2px solid #90CAF9",color:"#1565C0",
+          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
+          display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:8}}>
+          📤 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಮರುಸ್ಥಾಪಿಸಿ":"Restore from Backup"}
+          <input type="file" accept=".json" style={{display:"none"}}
+            onChange={e=>{
+              const file=e.target.files[0];if(!file)return;
+              const reader=new FileReader();
+              reader.onload=ev=>{
+                try{
+                  const data=JSON.parse(ev.target.result);
+                  if(!data["nt:global:users"]){showToast(lang==="kn"?"ತಪ್ಪಾದ ಫೈಲ್":"Invalid backup file","warn");return;}
+                  if(!window.confirm(lang==="kn"?"ಎಲ್ಲಾ ಡೇಟಾ ಮರುಸ್ಥಾಪಿಸುವುದೇ?":"Restore all data? Current data will be overwritten."))return;
+                  Object.keys(data).filter(k=>k.startsWith("nt:")).forEach(k=>{
+                    localStorage.setItem(k,JSON.stringify(data[k]));
+                    sbSet(k,data[k]);
+                  });
+                  showToast(lang==="kn"?"✅ ಮರುಸ್ಥಾಪಿಸಲಾಗಿದೆ — ಮರುಲೋಡ್...":"✅ Restored — Reloading...");
+                  setTimeout(()=>window.location.reload(),1500);
+                }catch(ex){showToast(lang==="kn"?"ಫೈಲ್ ಓದಲಾಗಲಿಲ್ಲ":"Could not read file","error");}
+              };
+              reader.readAsText(file);
+              e.target.value="";
+            }}/>
+        </label>
+        <div style={{fontSize:13,color:"#888",textAlign:"center",lineHeight:1.6}}>
+          {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ → Google Drive ಗೆ ಹಾಕಿ ಸುರಕ್ಷಿತವಾಗಿ ಇರಿಸಿ":"Download backup → Upload to Google Drive to keep it safe"}
+        </div>
+      </div>
+
+      {/* ═══ SIGN OUT ═══ */}
+      <button onClick={()=>{if(window.confirm(lang==="kn"?"ನಿಜವಾಗಿಯೂ Sign Out ಮಾಡುವುದೇ?":"Sign out of NammaThota?"))onLogout&&onLogout();}}
+        style={{width:"100%",background:"#FFEBEE",border:"2px solid #FFCDD2",
+          color:"#C62828",borderRadius:18,padding:18,fontSize:18,
+          fontWeight:700,cursor:"pointer",display:"flex",
+          alignItems:"center",justifyContent:"center",gap:10,marginBottom:16}}>
+        🚪 {lang==="kn"?"ಸೈನ್ ಔಟ್":"Sign Out"}
+      </button>
+      <div style={{textAlign:"center",fontSize:13,color:"#ccc",marginBottom:8}}>
+        ನಮ್ಮ ತೋಟ · CodeTrail Technologies
+      </div>
     </div>
   );
 }
 
 /* ── More Page ──────────────────────────────────── */
-function MorePage({farm,docs,setDocs,user,onManage,onProfile,onReport,showToast}){
+function MorePage({farm,docs,setDocs,user,onManage,onProfile,onReport,onLogout,showToast}){
   const{t,lang}=useLang();const isOwner=user.role==="owner";
   const[view,setView]=useState(null);
   const[showForm,setShowForm]=useState(false);
@@ -2609,6 +2875,72 @@ function IncomeTab({farm,income,setIncome,showToast}){
             </div>
           </Card>
         );})}
+      </div>
+
+      {/* ═══ BACKUP & RESTORE ═══ */}
+      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+        <div style={{fontSize:17,fontWeight:700,marginBottom:12,color:"#333"}}>
+          ☁️ {lang==="kn"?"ಡೇಟಾ ಬ್ಯಾಕಪ್ & ಮರುಸ್ಥಾಪನೆ":"Data Backup & Restore"}
+        </div>
+        <button onClick={()=>{
+          const allData={};
+          Object.keys(localStorage).filter(k=>k.startsWith("nt:")).forEach(k=>{
+            try{allData[k]=JSON.parse(localStorage.getItem(k));}catch{}
+          });
+          allData["_exportedAt"]=new Date().toISOString();
+          const blob=new Blob([JSON.stringify(allData,null,2)],{type:"application/json"});
+          const url=URL.createObjectURL(blob);
+          const a=document.createElement("a");
+          a.href=url;
+          a.download="NammaThota-backup-"+new Date().toISOString().slice(0,10)+".json";
+          a.click();
+          URL.revokeObjectURL(url);
+          showToast(lang==="kn"?"✅ ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಆಗಿದೆ":"✅ Backup downloaded");
+        }} style={{width:"100%",background:"#E8F5E9",border:"2px solid #A5D6A7",color:"#1B5E20",
+          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
+          marginBottom:10,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+          📥 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ":"Download Backup (.json)"}
+        </button>
+        <label style={{width:"100%",background:"#E3F2FD",border:"2px solid #90CAF9",color:"#1565C0",
+          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
+          display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:8}}>
+          📤 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಮರುಸ್ಥಾಪಿಸಿ":"Restore from Backup"}
+          <input type="file" accept=".json" style={{display:"none"}}
+            onChange={e=>{
+              const file=e.target.files[0];if(!file)return;
+              const reader=new FileReader();
+              reader.onload=ev=>{
+                try{
+                  const data=JSON.parse(ev.target.result);
+                  if(!data["nt:global:users"]){showToast(lang==="kn"?"ತಪ್ಪಾದ ಫೈಲ್":"Invalid backup file","warn");return;}
+                  if(!window.confirm(lang==="kn"?"ಎಲ್ಲಾ ಡೇಟಾ ಮರುಸ್ಥಾಪಿಸುವುದೇ?":"Restore all data? Current data will be overwritten."))return;
+                  Object.keys(data).filter(k=>k.startsWith("nt:")).forEach(k=>{
+                    localStorage.setItem(k,JSON.stringify(data[k]));
+                    sbSet(k,data[k]);
+                  });
+                  showToast(lang==="kn"?"✅ ಮರುಸ್ಥಾಪಿಸಲಾಗಿದೆ — ಮರುಲೋಡ್...":"✅ Restored — Reloading...");
+                  setTimeout(()=>window.location.reload(),1500);
+                }catch(ex){showToast(lang==="kn"?"ಫೈಲ್ ಓದಲಾಗಲಿಲ್ಲ":"Could not read file","error");}
+              };
+              reader.readAsText(file);
+              e.target.value="";
+            }}/>
+        </label>
+        <div style={{fontSize:13,color:"#888",textAlign:"center",lineHeight:1.6}}>
+          {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ → Google Drive ಗೆ ಹಾಕಿ ಸುರಕ್ಷಿತವಾಗಿ ಇರಿಸಿ":"Download backup → Upload to Google Drive to keep it safe"}
+        </div>
+      </div>
+
+      {/* ═══ SIGN OUT ═══ */}
+      <button onClick={()=>{if(window.confirm(lang==="kn"?"ನಿಜವಾಗಿಯೂ Sign Out ಮಾಡುವುದೇ?":"Sign out of NammaThota?"))onLogout&&onLogout();}}
+        style={{width:"100%",background:"#FFEBEE",border:"2px solid #FFCDD2",
+          color:"#C62828",borderRadius:18,padding:18,fontSize:18,
+          fontWeight:700,cursor:"pointer",display:"flex",
+          alignItems:"center",justifyContent:"center",gap:10,marginBottom:16}}>
+        🚪 {lang==="kn"?"ಸೈನ್ ಔಟ್":"Sign Out"}
+      </button>
+      <div style={{textAlign:"center",fontSize:13,color:"#ccc",marginBottom:8}}>
+        ನಮ್ಮ ತೋಟ · CodeTrail Technologies
       </div>
     </div>
   );
@@ -2951,15 +3283,9 @@ function FarmApp({user,setUser,farm,onSwitch,onLogout,showToast}){
         });
         // Already handled — just keep as-is since IDs match
       }
-      // Seed default task groups on very first farm load
-      // ct===null means never saved. ct===[] means user deleted all — respect that.
-      // ct with T-style IDs means old data — keep it.
-      const hasSeeded=ct!==null;
-      if(!hasSeeded){
-        const seeded=DEFAULT_TASK_GROUPS.map(tg=>({...tg,sub:[...tg.sub]}));
-        setCustomTasks(seeded);
-        dbSet(fk(farm.id,"ctasks"),seeded);
-      }
+      // DO NOT auto-seed default tasks — owner adds tasks manually
+      // Only restore if farm has existing task data
+      if(ct&&ct.length>0) setCustomTasks(ct);
       setLoaded(true);setSyncing(false);
     });
   },[farm.id]);
