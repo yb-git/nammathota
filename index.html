@@ -344,7 +344,7 @@ function Toast({msg,type}){
   const bg={success:"#2E7D32",warn:"#E65100",error:"#C62828"}[type]||"#2E7D32";
   return(
     <div style={{position:"fixed",top:64,left:16,right:16,background:bg,color:"#fff",
-      padding:"12px 18px",borderRadius:16,fontSize:14,fontWeight:700,zIndex:3000,
+      padding:"12px 18px",borderRadius:16,fontSize:18,fontWeight:700,zIndex:3000,
       textAlign:"center",boxShadow:"0 6px 24px rgba(0,0,0,.25)",animation:"fadeIn .2s ease"}}>
       {msg}
     </div>
@@ -381,10 +381,10 @@ function Field({label,children,mb=12,hint,required}){
   return(
     <div style={{marginBottom:mb}}>
       {label&&(
-        <div style={{fontSize:12,fontWeight:600,color:"#455",marginBottom:6,display:"flex",gap:4,alignItems:"center"}}>
+        <div style={{fontSize:17,fontWeight:600,color:"#455",marginBottom:6,display:"flex",gap:4,alignItems:"center"}}>
           {label}
           {required&&<span style={{color:"#C62828",fontSize:10}}>*</span>}
-          {hint&&<span style={{fontSize:10,color:"#888",fontWeight:400}}>({hint})</span>}
+          {hint&&<span style={{fontSize:18,color:"#888",fontWeight:400}}>({hint})</span>}
         </div>
       )}
       {children}
@@ -400,7 +400,7 @@ function SHdr({title,action,sub}){
         <div style={{fontSize:17,fontWeight:700,color:"#111"}}>{title}</div>
         {action}
       </div>
-      {sub&&<div style={{fontSize:12,color:"#888",marginTop:3}}>{sub}</div>}
+      {sub&&<div style={{fontSize:17,color:"#888",marginTop:3}}>{sub}</div>}
     </div>
   );
 }
@@ -410,8 +410,8 @@ function Empty({icon,text,sub}){
   return(
     <div style={{textAlign:"center",padding:"48px 20px",color:"#999"}}>
       <div style={{fontSize:52,marginBottom:12}}>{icon}</div>
-      <div style={{fontSize:15,fontWeight:600,color:"#666"}}>{text}</div>
-      {sub&&<div style={{fontSize:13,marginTop:6,color:"#aaa"}}>{sub}</div>}
+      <div style={{fontSize:17,fontWeight:600,color:"#666"}}>{text}</div>
+      {sub&&<div style={{fontSize:18,marginTop:6,color:"#aaa"}}>{sub}</div>}
     </div>
   );
 }
@@ -422,13 +422,13 @@ function SaveBar({dirty,saved,onSave}){
   if(!dirty&&!saved)return null;
   if(saved)return(
     <div style={{background:"#E8F5E9",border:"1.5px solid #A5D6A7",borderRadius:14,
-      padding:12,textAlign:"center",fontSize:14,fontWeight:700,color:"#2E7D32"}}>
+      padding:12,textAlign:"center",fontSize:18,fontWeight:700,color:"#2E7D32"}}>
       ✅ {t("saved")}
     </div>
   );
   return(
     <button onClick={onSave} style={{width:"100%",background:"#E65100",color:"#fff",border:"none",
-      borderRadius:14,padding:13,fontSize:15,fontWeight:700,cursor:"pointer"}}>
+      borderRadius:14,padding:13,fontSize:17,fontWeight:700,cursor:"pointer"}}>
       💾 {t("save")}
     </button>
   );
@@ -445,7 +445,7 @@ function LangToggle(){
   return(
     <button onClick={()=>setLang(lang==="kn"?"en":"kn")}
       style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",
-        borderRadius:20,padding:"5px 12px",fontSize:12,fontWeight:700,cursor:"pointer"}}>
+        borderRadius:20,padding:"5px 12px",fontSize:17,fontWeight:700,cursor:"pointer"}}>
       {lang==="kn"?"EN":"ಕನ್ನಡ"}
     </button>
   );
@@ -461,7 +461,7 @@ function StatusPicker({value,onChange,col}){
     <div style={{position:"relative"}}>
       <button onClick={()=>setOpen(o=>!o)}
         style={{background:cfg.bg,border:`1.5px solid ${col}40`,borderRadius:20,
-          padding:"7px 14px",fontSize:13,color:cfg.col,fontWeight:700,
+          padding:"7px 14px",fontSize:18,color:cfg.col,fontWeight:700,
           display:"flex",alignItems:"center",gap:6}}>
         {cfg.icon} {t(v)} ▾
       </button>
@@ -474,7 +474,7 @@ function StatusPicker({value,onChange,col}){
               style={{padding:"13px 16px",display:"flex",alignItems:"center",gap:10,
                 background:v===k?"#F1F8E9":"#fff",borderBottom:"1px solid #f5f5f5",cursor:"pointer"}}>
               <span style={{fontSize:18}}>{c.icon}</span>
-              <span style={{fontSize:14,fontWeight:600,color:c.col}}>{t(k)}</span>
+              <span style={{fontSize:18,fontWeight:600,color:c.col}}>{t(k)}</span>
             </div>
           );})}
         </div>
@@ -495,8 +495,8 @@ function ProgressRing({pct,size=72,col="#1B5E20",label,sub}){
           transform="rotate(-90 36 36)" style={{transition:"stroke-dasharray .5s"}}/>
         <text x="36" y="36" textAnchor="middle" dominantBaseline="central" fill={col} fontSize="14" fontWeight="700">{pct}%</text>
       </svg>
-      {label&&<div style={{fontSize:12,fontWeight:600,color:"#333",textAlign:"center"}}>{label}</div>}
-      {sub&&<div style={{fontSize:10,color:"#888",textAlign:"center"}}>{sub}</div>}
+      {label&&<div style={{fontSize:17,fontWeight:600,color:"#333",textAlign:"center"}}>{label}</div>}
+      {sub&&<div style={{fontSize:18,color:"#888",textAlign:"center"}}>{sub}</div>}
     </div>
   );
 }
@@ -510,7 +510,7 @@ function BudgetBar({label,planned,actual,col}){
   const barCol=over?"#C62828":col||"#2E7D32";
   return(
     <div style={{marginBottom:12}}>
-      <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}}>
+      <div style={{display:"flex",justifyContent:"space-between",fontSize:17,marginBottom:4}}>
         <span style={{fontWeight:600,color:"#333"}}>{label}</span>
         <span style={{color:over?"#C62828":"#555"}}>
           {fmtCur(actual)} / {fmtCur(planned)}
@@ -584,7 +584,7 @@ function PinGate({onVerified,onCancel}){
           <div style={{fontSize:18,fontWeight:800,color:"#1B5E20"}}>
             {lang==="kn"?"Owner PIN ದೃಢೀಕರಣ":"Owner PIN Required"}
           </div>
-          <div style={{fontSize:13,color:"#888",marginTop:6,lineHeight:1.5}}>
+          <div style={{fontSize:18,color:"#888",marginTop:6,lineHeight:1.5}}>
             {lang==="kn"?"ಈ ವಿಭಾಗವನ್ನು ತೆರೆಯಲು 6-ಅಂಕಿ PIN ನಮೂದಿಸಿ":"Enter your 6-digit PIN to access this section"}
           </div>
         </div>
@@ -592,10 +592,10 @@ function PinGate({onVerified,onCancel}){
         {locked?(
           <div style={{textAlign:"center",padding:"16px 0"}}>
             <div style={{fontSize:40,marginBottom:10}}>⏳</div>
-            <div style={{fontSize:15,fontWeight:700,color:"#C62828"}}>
+            <div style={{fontSize:17,fontWeight:700,color:"#C62828"}}>
               {lang==="kn"?"ತಾತ್ಕಾಲಿಕ ಲಾಕ್":"Temporarily Locked"}
             </div>
-            <div style={{fontSize:13,color:"#888",marginTop:6}}>{lockSec}s</div>
+            <div style={{fontSize:18,color:"#888",marginTop:6}}>{lockSec}s</div>
           </div>
         ):(
           <>
@@ -638,13 +638,13 @@ function PinGate({onVerified,onCancel}){
               ))}
             </div>
 
-            {err&&<div style={{textAlign:"center",fontSize:13,color:"#C62828",fontWeight:600,marginBottom:12}}>
+            {err&&<div style={{textAlign:"center",fontSize:18,color:"#C62828",fontWeight:600,marginBottom:12}}>
               {lang==="kn"?"❌ ತಪ್ಪಾದ PIN":"❌ Incorrect PIN"}{attempts>1?` (${attempts}/3)`:""}
             </div>}
 
             <button onClick={onCancel}
               style={{width:"100%",background:"none",border:"1.5px solid #ddd",borderRadius:12,
-                padding:"11px",fontSize:14,color:"#888",cursor:"pointer",fontWeight:600}}>
+                padding:"11px",fontSize:18,color:"#888",cursor:"pointer",fontWeight:600}}>
               {lang==="kn"?"ರದ್ದು / Cancel":"Cancel"}
             </button>
           </>
@@ -667,7 +667,7 @@ function Login({onLogin}){
     if(u){onLogin(u);}else{setErr(t("loginFailed"));}
     setBusy(false);
   };
-  const inp={width:"100%",padding:"14px",fontSize:15,border:"1.5px solid #C8E6C9",
+  const inp={width:"100%",padding:"14px",fontSize:17,border:"1.5px solid #C8E6C9",
     borderRadius:12,outline:"none",boxSizing:"border-box",marginBottom:12,background:"#fff"};
   return(
     <div style={{minHeight:"100vh",background:"linear-gradient(160deg,#0A3D15,#1B5E20 40%,#2E7D32 70%,#1B5E20)",
@@ -685,11 +685,11 @@ function Login({onLogin}){
               border:"2px solid rgba(255,255,255,.3)",fontSize:48}}>🌾</div>
           </div>
           <div style={{fontSize:38,fontWeight:900,color:"#fff",letterSpacing:"-0.03em",lineHeight:1}}>ನಮ್ಮ ತೋಟ</div>
-          <div style={{fontSize:14,color:"rgba(255,255,255,.7)",marginTop:6,letterSpacing:"0.05em",textTransform:"uppercase",fontWeight:600}}>NammaThota</div>
-          <div style={{fontSize:13,color:"rgba(255,255,255,.65)",marginTop:6,fontStyle:"italic"}}>{t("tagline")}</div>
+          <div style={{fontSize:18,color:"rgba(255,255,255,.7)",marginTop:6,letterSpacing:"0.05em",textTransform:"uppercase",fontWeight:600}}>NammaThota</div>
+          <div style={{fontSize:18,color:"rgba(255,255,255,.65)",marginTop:6,fontStyle:"italic"}}>{t("tagline")}</div>
           <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,marginTop:10}}>
             <div style={{height:1,width:40,background:"rgba(255,255,255,.25)"}}/>
-            <div style={{fontSize:11,color:"rgba(255,255,255,.45)",letterSpacing:"0.04em"}}>☁️ CLOUD SYNCED</div>
+            <div style={{fontSize:17,color:"rgba(255,255,255,.45)",letterSpacing:"0.04em"}}>☁️ CLOUD SYNCED</div>
             <div style={{height:1,width:40,background:"rgba(255,255,255,.25)"}}/>
           </div>
         </div>
@@ -702,21 +702,21 @@ function Login({onLogin}){
             <input type="password" value={pass} onChange={e=>setPass(e.target.value)}
               placeholder="••••••••" onKeyDown={e=>e.key==="Enter"&&go()} style={inp}/>
           </Field>
-          {err&&<div style={{color:"#C62828",fontSize:13,textAlign:"center",marginBottom:12,
+          {err&&<div style={{color:"#C62828",fontSize:18,textAlign:"center",marginBottom:12,
             background:"#FFEBEE",padding:"8px 12px",borderRadius:10}}>{err}</div>}
           <button onClick={go} disabled={busy}
             style={{width:"100%",padding:14,background:"#2E7D32",color:"#fff",border:"none",
-              borderRadius:12,fontSize:16,fontWeight:700,cursor:"pointer",
+              borderRadius:12,fontSize:18,fontWeight:700,cursor:"pointer",
               display:"flex",alignItems:"center",justifyContent:"center",gap:10,opacity:busy?.7:1}}>
             {busy?<><Spinner size={18} col="#fff"/><span>{t("loggingIn")}</span></>:`${t("login")} →`}
           </button>
           <div style={{marginTop:16,background:"#F1F8E9",borderRadius:12,padding:"12px 14px",
-            fontSize:13,color:"#555",textAlign:"center",lineHeight:1.8}}>
+            fontSize:18,color:"#555",textAlign:"center",lineHeight:1.8}}>
             {t("loginHint")}<br/>
-            <span style={{fontSize:11,color:"#888"}}>Default: owner / owner123</span>
+            <span style={{fontSize:17,color:"#888"}}>Default: owner / owner123</span>
           </div>
         </div>
-        <div style={{textAlign:"center",marginTop:20,fontSize:11,color:"rgba(255,255,255,.4)"}}>
+        <div style={{textAlign:"center",marginTop:20,fontSize:17,color:"rgba(255,255,255,.4)"}}>
           CodeTrail Technologies Private Limited
         </div>
       </div>
@@ -743,7 +743,7 @@ function ProfilePage({user,onSave,onBack}){
   return(
     <div style={{minHeight:"100vh",background:"#F0F4F0"}}>
       <div style={{background:"#37474F",padding:"14px 16px",display:"flex",alignItems:"center",gap:12,color:"#fff"}}>
-        <button onClick={onBack} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"8px 14px",fontSize:14,cursor:"pointer"}}>‹ {t("back")}</button>
+        <button onClick={onBack} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"8px 14px",fontSize:18,cursor:"pointer"}}>‹ {t("back")}</button>
         <div style={{fontSize:17,fontWeight:700}}>👤 {t("profileTitle")}</div>
       </div>
       <div style={{padding:16}}>
@@ -753,7 +753,7 @@ function ProfilePage({user,onSave,onBack}){
               display:"flex",alignItems:"center",justifyContent:"center",fontSize:38,margin:"0 auto 10px"}}>
               {user.role==="owner"?"👑":"👷"}
             </div>
-            <div style={{fontSize:13,color:"#888"}}>{t(user.role==="owner"?"owner":"supervisor")} · ID: {user.id}</div>
+            <div style={{fontSize:18,color:"#888"}}>{t(user.role==="owner"?"owner":"supervisor")} · ID: {user.id}</div>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
             <Field label={t("firstName")}>
@@ -773,7 +773,7 @@ function ProfilePage({user,onSave,onBack}){
                   style={{flex:1,padding:12,textAlign:"center",borderRadius:12,cursor:"pointer",
                     border:`1.5px solid ${form.lang===l?"#2E7D32":"#ddd"}`,
                     background:form.lang===l?"#E8F5E9":"#fff",
-                    fontWeight:form.lang===l?700:400,fontSize:15,color:form.lang===l?"#2E7D32":"#555"}}>
+                    fontWeight:form.lang===l?700:400,fontSize:17,color:form.lang===l?"#2E7D32":"#555"}}>
                   {lb}
                 </div>
               ))}
@@ -803,14 +803,14 @@ function FarmSelector({user,onSelect,onManage,onProfile,onAddFarm,showToast}){
   },[]);
   if(!farms)return(
     <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:16,background:"#F0F4F0"}}>
-      <Spinner size={40}/><div style={{fontSize:14,color:"#666"}}>{useLang().t("loading")}</div>
+      <Spinner size={40}/><div style={{fontSize:18,color:"#666"}}>{useLang().t("loading")}</div>
     </div>
   );
   if(farms.length===0&&!isOwner)return(
     <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,textAlign:"center",background:"linear-gradient(160deg,#F0F4F0,#E8F5E9)"}}>
       <div style={{fontSize:64,marginBottom:16}}>🚫</div>
       <div style={{fontSize:20,fontWeight:800,marginBottom:8,color:"#1B5E20"}}>{t("noAccess")}</div>
-      <div style={{color:"#666",fontSize:14,lineHeight:1.7}}>{t("noAccessSub")}</div>
+      <div style={{color:"#666",fontSize:18,lineHeight:1.7}}>{t("noAccessSub")}</div>
     </div>
   );
   if(farms.length===0&&isOwner)return(
@@ -818,22 +818,22 @@ function FarmSelector({user,onSelect,onManage,onProfile,onAddFarm,showToast}){
       <div style={{textAlign:"center",marginBottom:32}}>
         <div style={{fontSize:72,marginBottom:12}}>🌾</div>
         <div style={{fontSize:32,fontWeight:900,color:"#fff",letterSpacing:"-0.02em"}}>ನಮ್ಮ ತೋಟ</div>
-        <div style={{fontSize:13,color:"rgba(255,255,255,.7)",marginTop:6,letterSpacing:"0.06em",textTransform:"uppercase"}}>NammaThota</div>
-        <div style={{fontSize:15,color:"rgba(255,255,255,.8)",marginTop:12,fontStyle:"italic"}}>ನಿಮ್ಮ ತೋಟ, ನಿಮ್ಮ ಕೈಯಲ್ಲಿ</div>
+        <div style={{fontSize:18,color:"rgba(255,255,255,.7)",marginTop:6,letterSpacing:"0.06em",textTransform:"uppercase"}}>NammaThota</div>
+        <div style={{fontSize:17,color:"rgba(255,255,255,.8)",marginTop:12,fontStyle:"italic"}}>ನಿಮ್ಮ ತೋಟ, ನಿಮ್ಮ ಕೈಯಲ್ಲಿ</div>
       </div>
       <div style={{background:"#fff",borderRadius:22,padding:24,width:"100%",maxWidth:380,boxShadow:"0 20px 60px rgba(0,0,0,.3)"}}>
         <div style={{textAlign:"center",marginBottom:20}}>
           <div style={{fontSize:18,fontWeight:800,color:"#1B5E20",marginBottom:6}}>ಸ್ವಾಗತ, {dispName(user)||"ಮಾಲೀಕರೇ"}! 👑</div>
-          <div style={{fontSize:13,color:"#666",lineHeight:1.7}}>ನಿಮ್ಮ ಮೊದಲ Farm ಅಥವಾ Project ಸೇರಿಸಿ.<br/>Add your first farm or project to get started.</div>
+          <div style={{fontSize:18,color:"#666",lineHeight:1.7}}>ನಿಮ್ಮ ಮೊದಲ Farm ಅಥವಾ Project ಸೇರಿಸಿ.<br/>Add your first farm or project to get started.</div>
         </div>
-        <button onClick={onAddFarm} style={{width:"100%",background:"#1B5E20",color:"#fff",border:"none",borderRadius:14,padding:16,fontSize:16,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+        <button onClick={onAddFarm} style={{width:"100%",background:"#1B5E20",color:"#fff",border:"none",borderRadius:14,padding:16,fontSize:18,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
           🌾 ಹೊಸ Farm ಸೇರಿಸಿ / Add Farm
         </button>
-        <div style={{marginTop:12,textAlign:"center",fontSize:11,color:"#aaa"}}>
+        <div style={{marginTop:12,textAlign:"center",fontSize:17,color:"#aaa"}}>
           ⚙️ ನಂತರ Manage → Users ನಲ್ಲಿ Supervisors ಸೇರಿಸಿ
         </div>
       </div>
-      <div style={{marginTop:24,fontSize:11,color:"rgba(255,255,255,.4)"}}>CodeTrail Technologies Private Limited</div>
+      <div style={{marginTop:24,fontSize:17,color:"rgba(255,255,255,.4)"}}>CodeTrail Technologies Private Limited</div>
     </div>
   );
   return(
@@ -842,17 +842,17 @@ function FarmSelector({user,onSelect,onManage,onProfile,onAddFarm,showToast}){
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
           <div>
             <div style={{fontSize:24,fontWeight:800,letterSpacing:"-0.01em"}}>🌾 {t("appName")}</div>
-            <div style={{fontSize:12,opacity:.75,marginTop:4}}>{isOwner?"👑 "+t("owner"):"👷 "+t("supervisor")}: {dispName(user)}</div>
+            <div style={{fontSize:17,opacity:.75,marginTop:4}}>{isOwner?"👑 "+t("owner"):"👷 "+t("supervisor")}: {dispName(user)}</div>
           </div>
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
             <LangToggle/>
-            <button onClick={onProfile} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"7px 11px",fontSize:14,cursor:"pointer"}}>👤</button>
-            {isOwner&&<button onClick={onManage} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"7px 11px",fontSize:14,cursor:"pointer"}}>⚙️</button>}
+            <button onClick={onProfile} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"7px 11px",fontSize:18,cursor:"pointer"}}>👤</button>
+            {isOwner&&<button onClick={onManage} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"7px 11px",fontSize:18,cursor:"pointer"}}>⚙️</button>}
           </div>
         </div>
       </div>
       <div style={{padding:16}}>
-        <div style={{fontSize:15,fontWeight:700,marginBottom:14,color:"#111"}}>{t("yourFarms")}</div>
+        <div style={{fontSize:17,fontWeight:700,marginBottom:14,color:"#111"}}>{t("yourFarms")}</div>
         {farms.map(f=>{
           const totalAcres=f.land?.totalAcres||"";const pAcres=f.land?.purchasedAcres||"";
           return(
@@ -869,15 +869,15 @@ function FarmSelector({user,onSelect,onManage,onProfile,onAddFarm,showToast}){
                 </div>
                 <div style={{flex:1}}>
                   <div style={{color:"#fff",fontWeight:800,fontSize:19,letterSpacing:"-0.01em"}}>{f.name}</div>
-                  <div style={{color:"rgba(255,255,255,.8)",fontSize:13,marginTop:3}}>{f.type}</div>
+                  <div style={{color:"rgba(255,255,255,.8)",fontSize:18,marginTop:3}}>{f.type}</div>
                 </div>
                 <div style={{color:"rgba(255,255,255,.7)",fontSize:26}}>›</div>
               </div>
               <div style={{padding:"12px 18px",display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
-                {f.location?.village&&<span style={{fontSize:12,color:"#555"}}>📍 {f.location.village}, {f.location.district}</span>}
-                {totalAcres&&<span style={{fontSize:12,background:f.col+"15",color:f.col,borderRadius:20,padding:"3px 10px",fontWeight:600}}>{totalAcres} {t("totalAcres").replace(" (Acres)","").replace(" (ಎಕರೆ)","")}</span>}
-                {pAcres&&<span style={{fontSize:12,color:"#888"}}>✅ {pAcres} purchased</span>}
-                {f.crop?.primary&&<span style={{fontSize:12,color:"#555"}}>🌱 {f.crop.primary.split(" — ")[0]||f.crop.primary}</span>}
+                {f.location?.village&&<span style={{fontSize:17,color:"#555"}}>📍 {f.location.village}, {f.location.district}</span>}
+                {totalAcres&&<span style={{fontSize:17,background:f.col+"15",color:f.col,borderRadius:20,padding:"3px 10px",fontWeight:600}}>{totalAcres} {t("totalAcres").replace(" (Acres)","").replace(" (ಎಕರೆ)","")}</span>}
+                {pAcres&&<span style={{fontSize:17,color:"#888"}}>✅ {pAcres} purchased</span>}
+                {f.crop?.primary&&<span style={{fontSize:17,color:"#555"}}>🌱 {f.crop.primary.split(" — ")[0]||f.crop.primary}</span>}
               </div>
             </div>
           );
@@ -886,20 +886,20 @@ function FarmSelector({user,onSelect,onManage,onProfile,onAddFarm,showToast}){
           <div style={{marginTop:4}}>
             <button onClick={onAddFarm}
               style={{width:"100%",background:"linear-gradient(135deg,#1B5E20,#2E7D32)",border:"none",borderRadius:18,
-                padding:"18px",fontSize:15,color:"#fff",cursor:"pointer",fontWeight:700,
+                padding:"18px",fontSize:17,color:"#fff",cursor:"pointer",fontWeight:700,
                 display:"flex",alignItems:"center",justifyContent:"center",gap:10,
                 boxShadow:"0 4px 16px rgba(27,94,32,.35)"}}>
               <span style={{fontSize:22}}>🌾</span>
               <span>{t("addFarm")}</span>
             </button>
-            <div style={{textAlign:"center",marginTop:8,fontSize:11,color:"#aaa"}}>ಹೊಸ Farm ಅಥವಾ Project ಸೇರಿಸಿ</div>
+            <div style={{textAlign:"center",marginTop:8,fontSize:17,color:"#aaa"}}>ಹೊಸ Farm ಅಥವಾ Project ಸೇರಿಸಿ</div>
           </div>
         )}
       </div>
       <div style={{textAlign:"center",padding:"20px 16px 30px"}}>
-        <div style={{fontSize:16,marginBottom:4}}>🌾</div>
-        <div style={{fontSize:12,fontWeight:700,color:"#1B5E20",letterSpacing:"0.02em"}}>ನಮ್ಮ ತೋಟ · NammaThota</div>
-        <div style={{fontSize:10,color:"#bbb",marginTop:4,letterSpacing:"0.03em"}}>CodeTrail Technologies Private Limited</div>
+        <div style={{fontSize:18,marginBottom:4}}>🌾</div>
+        <div style={{fontSize:17,fontWeight:700,color:"#1B5E20",letterSpacing:"0.02em"}}>ನಮ್ಮ ತೋಟ · NammaThota</div>
+        <div style={{fontSize:18,color:"#bbb",marginTop:4,letterSpacing:"0.03em"}}>CodeTrail Technologies Private Limited</div>
       </div>
     </div>
   );
@@ -945,7 +945,7 @@ function FarmCreation({editFarm,onDone,onBack,showToast}){
   };
 
   const stepTitles=[t("basicInfo"),t("location"),t("landDetails"),t("cropDetails"),t("infrastructure"),t("budgetInfo"),t("assignSupervisors")];
-  const inp={width:"100%",padding:"13px 14px",borderRadius:12,border:"1.5px solid #D0D8D0",fontSize:14,boxSizing:"border-box",outline:"none",background:"#fff"};
+  const inp={width:"100%",padding:"13px 14px",borderRadius:12,border:"1.5px solid #D0D8D0",fontSize:18,boxSizing:"border-box",outline:"none",background:"#fff"};
 
   const renderStep=()=>{
     switch(step){
@@ -1015,7 +1015,7 @@ function FarmCreation({editFarm,onDone,onBack,showToast}){
                   style={{flex:1,padding:"10px",textAlign:"center",borderRadius:12,cursor:"pointer",
                     border:`1.5px solid ${f.land.landType===v?"#2E7D32":"#ddd"}`,
                     background:f.land.landType===v?"#E8F5E9":"#fff",
-                    fontWeight:f.land.landType===v?700:400,fontSize:13,color:f.land.landType===v?"#2E7D32":"#555"}}>
+                    fontWeight:f.land.landType===v?700:400,fontSize:18,color:f.land.landType===v?"#2E7D32":"#555"}}>
                   {lb}
                 </div>
               ))}
@@ -1035,7 +1035,7 @@ function FarmCreation({editFarm,onDone,onBack,showToast}){
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
             <Field label={t("plantsPerAcre")} mb={14}><input type="number" value={f.crop.plantsPerAcre} onChange={e=>upd("crop.plantsPerAcre",e.target.value)} placeholder="400" style={inp}/></Field>
             <Field label={t("totalPlants")} mb={14}>
-              <div style={{padding:"13px 14px",background:"#E8F5E9",borderRadius:12,fontSize:14,fontWeight:700,color:"#1B5E20"}}>
+              <div style={{padding:"13px 14px",background:"#E8F5E9",borderRadius:12,fontSize:18,fontWeight:700,color:"#1B5E20"}}>
                 {calcTotalPlants(f.land.purchasedAcres,f.crop.plantsPerAcre).toLocaleString("en-IN")||"—"}
               </div>
             </Field>
@@ -1074,7 +1074,7 @@ function FarmCreation({editFarm,onDone,onBack,showToast}){
                   style={{flex:1,padding:"10px",textAlign:"center",borderRadius:12,cursor:"pointer",
                     border:`1.5px solid ${f.infra.fencing===v?"#2E7D32":"#ddd"}`,
                     background:f.infra.fencing===v?"#E8F5E9":"#fff",
-                    fontWeight:f.infra.fencing===v?700:400,fontSize:13,color:f.infra.fencing===v?"#2E7D32":"#555"}}>
+                    fontWeight:f.infra.fencing===v?700:400,fontSize:18,color:f.infra.fencing===v?"#2E7D32":"#555"}}>
                   {lb}
                 </div>
               ))}
@@ -1090,17 +1090,17 @@ function FarmCreation({editFarm,onDone,onBack,showToast}){
       );
       case 6:return(
         <div>
-          <div style={{background:"#FFF9C4",borderRadius:12,padding:"10px 14px",marginBottom:14,fontSize:12,color:"#5D4037",lineHeight:1.7}}>
+          <div style={{background:"#FFF9C4",borderRadius:12,padding:"10px 14px",marginBottom:14,fontSize:17,color:"#5D4037",lineHeight:1.7}}>
             💡 Set your budget here. The app will track planned vs actual spending automatically.
           </div>
           <Field label={t("landCost")} hint={t("optional")} mb={14}><input type="number" value={f.budget.landCost} onChange={e=>upd("budget.landCost",e.target.value)} placeholder="0" style={inp}/></Field>
           <Field label={t("devBudget")} hint={t("optional")} mb={14}><input type="number" value={f.budget.devBudget} onChange={e=>upd("budget.devBudget",e.target.value)} placeholder="0" style={inp}/></Field>
           <Field label={t("monthlyBudget")} hint={t("optional")} mb={14}><input type="number" value={f.budget.monthlyBudget} onChange={e=>upd("budget.monthlyBudget",e.target.value)} placeholder="0" style={inp}/></Field>
-          <div style={{fontSize:13,fontWeight:600,color:"#555",marginBottom:10}}>📋 {t("taskBudget")}</div>
+          <div style={{fontSize:18,fontWeight:600,color:"#555",marginBottom:10}}>📋 {t("taskBudget")}</div>
           {DEFAULT_TASK_GROUPS.map(tg=>(
             <div key={tg.id} style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
-              <div style={{width:40,height:40,background:tg.col,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:"#fff",fontWeight:700,flexShrink:0}}>{tg.id}</div>
-              <div style={{fontSize:13,flex:1,color:"#333"}}>{tg.kn}</div>
+              <div style={{width:40,height:40,background:tg.col,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,color:"#fff",fontWeight:700,flexShrink:0}}>{tg.id}</div>
+              <div style={{fontSize:18,flex:1,color:"#333"}}>{tg.kn}</div>
               <input type="number" value={(f.budget.taskBudgets||{})[tg.id]||""}
                 onChange={e=>upd("budget.taskBudgets",{...(f.budget.taskBudgets||{}),[tg.id]:e.target.value})}
                 placeholder="₹0" style={{...inp,width:100,padding:"8px 10px",fontSize:13}}/>
@@ -1110,7 +1110,7 @@ function FarmCreation({editFarm,onDone,onBack,showToast}){
       );
       case 7:return(
         <div>
-          <div style={{background:"#E3F2FD",borderRadius:12,padding:"10px 14px",marginBottom:14,fontSize:12,color:"#1565C0",lineHeight:1.7}}>
+          <div style={{background:"#E3F2FD",borderRadius:12,padding:"10px 14px",marginBottom:14,fontSize:17,color:"#1565C0",lineHeight:1.7}}>
             👷 {t("assignSupervisors")} — ಒಬ್ಬ ಮೇಲ್ವಿಚಾರಕ ಒಂದಕ್ಕಿಂತ ಹೆಚ್ಚು Farms ಗೆ ನಿಯೋಜಿಸಬಹುದು.
           </div>
           {users.length===0&&<Empty icon="👷" text="No supervisors created yet" sub="Add supervisors in Manage → Users first"/>}
@@ -1121,8 +1121,8 @@ function FarmCreation({editFarm,onDone,onBack,showToast}){
                 style={{display:"flex",alignItems:"center",gap:12,padding:"13px 14px",background:assigned?"#E8F5E9":"#f9f9f9",borderRadius:14,marginBottom:10,cursor:"pointer",border:`1.5px solid ${assigned?"#A5D6A7":"#eee"}`}}>
                 <div style={{width:44,height:44,borderRadius:"50%",background:assigned?"#2E7D32":"#E3F2FD",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{assigned?"✅":"👷"}</div>
                 <div style={{flex:1}}>
-                  <div style={{fontWeight:700,fontSize:14,color:assigned?"#1B5E20":"#333"}}>{dispName(u)||u.id}</div>
-                  <div style={{fontSize:12,color:"#888",marginTop:2}}>ID: {u.id}{u.mobile?" · 📱"+u.mobile:""}</div>
+                  <div style={{fontWeight:700,fontSize:18,color:assigned?"#1B5E20":"#333"}}>{dispName(u)||u.id}</div>
+                  <div style={{fontSize:17,color:"#888",marginTop:2}}>ID: {u.id}{u.mobile?" · 📱"+u.mobile:""}</div>
                 </div>
               </div>
             );
@@ -1135,10 +1135,10 @@ function FarmCreation({editFarm,onDone,onBack,showToast}){
   return(
     <div style={{minHeight:"100vh",background:"#F0F4F0"}}>
       <div style={{background:f.col||"#1B5E20",padding:"14px 16px",color:"#fff",display:"flex",alignItems:"center",gap:12}}>
-        <button onClick={onBack} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"8px 14px",fontSize:14,cursor:"pointer"}}>‹</button>
+        <button onClick={onBack} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"8px 14px",fontSize:18,cursor:"pointer"}}>‹</button>
         <div>
-          <div style={{fontSize:16,fontWeight:700}}>{editFarm?t("editFarm"):t("newFarm")}</div>
-          <div style={{fontSize:12,opacity:.8}}>{t("step")} {step} {t("of")} {STEPS}: {stepTitles[step-1]}</div>
+          <div style={{fontSize:18,fontWeight:700}}>{editFarm?t("editFarm"):t("newFarm")}</div>
+          <div style={{fontSize:17,opacity:.8}}>{t("step")} {step} {t("of")} {STEPS}: {stepTitles[step-1]}</div>
         </div>
       </div>
       {/* Step indicators */}
@@ -1149,7 +1149,7 @@ function FarmCreation({editFarm,onDone,onBack,showToast}){
       </div>
       <div style={{padding:16}}>
         <Card>
-          <div style={{fontSize:15,fontWeight:700,color:"#111",marginBottom:16}}>{stepTitles[step-1]}</div>
+          <div style={{fontSize:17,fontWeight:700,color:"#111",marginBottom:16}}>{stepTitles[step-1]}</div>
           {renderStep()}
         </Card>
         <div style={{display:"flex",gap:10,marginTop:4}}>
@@ -1174,21 +1174,21 @@ function Header({user,farm,onSwitch,onLogout,onProfile,syncing}){
     <div style={{background:farm.col,color:"#fff",position:"sticky",top:0,zIndex:200,boxShadow:"0 2px 10px rgba(0,0,0,.2)"}}>
       <div style={{padding:"12px 16px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontSize:15,fontWeight:800,display:"flex",alignItems:"center",gap:6,overflow:"hidden"}}>
+          <div style={{fontSize:17,fontWeight:800,display:"flex",alignItems:"center",gap:6,overflow:"hidden"}}>
             <span>{farm.icon}</span>
             <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{farm.name||"Farm"}</span>
           </div>
-          <div style={{fontSize:10,opacity:.6,marginTop:1,letterSpacing:"0.04em"}}>ನಮ್ಮ ತೋಟ · NammaThota</div>
-          <div style={{fontSize:11,opacity:.8,marginTop:1,display:"flex",alignItems:"center",gap:5}}>
+          <div style={{fontSize:18,opacity:.6,marginTop:1,letterSpacing:"0.04em"}}>ನಮ್ಮ ತೋಟ · NammaThota</div>
+          <div style={{fontSize:17,opacity:.8,marginTop:1,display:"flex",alignItems:"center",gap:5}}>
             {user.role==="owner"?"👑":"👷"} {dispName(user)||user.id}
             {syncing?<><Spinner size={10} col="rgba(255,255,255,.8)"/><span style={{opacity:.7}}>{t("syncing")}</span></>:<span style={{opacity:.5}}>☁️</span>}
           </div>
         </div>
         <div style={{display:"flex",gap:6,flexShrink:0,alignItems:"center"}}>
           <LangToggle/>
-          <button onClick={onProfile} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"7px 10px",fontSize:14,cursor:"pointer"}}>👤</button>
-          <button onClick={onSwitch} style={{background:"rgba(255,255,255,.25)",border:"1.5px solid rgba(255,255,255,.4)",color:"#fff",borderRadius:10,padding:"7px 12px",fontSize:12,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>⇄ <span style={{fontSize:10,opacity:.85}}>{t("switchFarm")}</span></button>
-          <button onClick={onLogout} style={{background:"rgba(255,255,255,.15)",border:"none",color:"#fff",borderRadius:10,padding:"7px 10px",fontSize:12,cursor:"pointer"}}>{t("logout")}</button>
+          <button onClick={onProfile} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"7px 10px",fontSize:18,cursor:"pointer"}}>👤</button>
+          <button onClick={onSwitch} style={{background:"rgba(255,255,255,.25)",border:"1.5px solid rgba(255,255,255,.4)",color:"#fff",borderRadius:10,padding:"7px 12px",fontSize:17,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>⇄ <span style={{fontSize:18,opacity:.85}}>{t("switchFarm")}</span></button>
+          <button onClick={onLogout} style={{background:"rgba(255,255,255,.15)",border:"none",color:"#fff",borderRadius:10,padding:"7px 10px",fontSize:17,cursor:"pointer"}}>{t("logout")}</button>
         </div>
       </div>
     </div>
@@ -1216,7 +1216,7 @@ function BottomNav({page,setPage,isOwner,onManageClick}){
             alignItems:"center",gap:3,cursor:"pointer",padding:"3px 10px",
             color:page===tb.id?"#1B5E20":"#9E9E9E",position:"relative",minWidth:52}}>
           <span style={{fontSize:22,lineHeight:1}}>{tb.icon}</span>
-          <span style={{fontSize:9,fontWeight:page===tb.id?700:500,whiteSpace:"nowrap"}}>{tb.label}</span>
+          <span style={{fontSize:18,fontWeight:page===tb.id?700:500,whiteSpace:"nowrap"}}>{tb.label}</span>
           {page===tb.id&&<div style={{position:"absolute",bottom:-8,width:22,height:3,background:"#1B5E20",borderRadius:2}}/>}
         </button>
       ))}
@@ -1226,7 +1226,7 @@ function BottomNav({page,setPage,isOwner,onManageClick}){
 
 /* ── Dashboard ───────────────────────────────────── */
 function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,allTasks,onNav}){
-  const{t}=useLang();
+  const{t,lang}=useLang();
   const totalSub=allTasks.reduce((a,tg)=>a+tg.sub.length,0);
   const doneSub=allTasks.reduce((a,tg)=>a+tg.sub.filter((_,i)=>(tasks[tg.id+"-"+i]?.status||"pending")==="taskDone").length,0);
   const pct=totalSub?Math.round(doneSub/totalSub*100):0;
@@ -1256,8 +1256,8 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
       <div style={{background:farm.col||"#1B5E20",borderRadius:20,padding:"18px 16px",color:"#fff",marginBottom:14}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
           <div>
-            <div style={{fontSize:13,opacity:.8}}>{farm.type}{farm.location?.village?" · "+farm.location.village:""}</div>
-            {farm.land?.purchasedAcres&&<div style={{fontSize:12,opacity:.7,marginTop:2}}>✅ {farm.land.purchasedAcres} acres · {farm.land.pendingAcres?" ⏳ "+farm.land.pendingAcres+" pending":""}</div>}
+            <div style={{fontSize:18,opacity:.8}}>{farm.type}{farm.location?.village?" · "+farm.location.village:""}</div>
+            {farm.land?.purchasedAcres&&<div style={{fontSize:17,opacity:.7,marginTop:2}}>✅ {farm.land.purchasedAcres} acres · {farm.land.pendingAcres?" ⏳ "+farm.land.pendingAcres+" pending":""}</div>}
           </div>
           <ProgressRing pct={pct} col="rgba(255,255,255,.9)" size={70}/>
         </div>
@@ -1269,9 +1269,9 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
           ].map(s=>(
             <div key={s.label} onClick={()=>onNav(s.page)}
               style={{background:"rgba(255,255,255,.15)",borderRadius:14,padding:"10px 8px",textAlign:"center",cursor:"pointer"}}>
-              <div style={{fontSize:11,opacity:.8,marginBottom:3}}>{s.icon}</div>
-              <div style={{fontSize:15,fontWeight:800}}>{s.val}</div>
-              <div style={{fontSize:9,opacity:.75,marginTop:2}}>{s.label}</div>
+              <div style={{fontSize:17,opacity:.8,marginBottom:3}}>{s.icon}</div>
+              <div style={{fontSize:17,fontWeight:800}}>{s.val}</div>
+              <div style={{fontSize:18,opacity:.75,marginTop:2}}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -1281,8 +1281,8 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
       {devBudget>0&&(
         <Card>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-            <div style={{fontSize:14,fontWeight:700}}>💰 {t("budget")}</div>
-            <div style={{fontSize:12,color:budgetPct>100?"#C62828":"#2E7D32",fontWeight:600}}>{budgetPct>100?t("overBudget"):t("onTrack")}</div>
+            <div style={{fontSize:18,fontWeight:700}}>💰 {t("budget")}</div>
+            <div style={{fontSize:17,color:budgetPct>100?"#C62828":"#2E7D32",fontWeight:600}}>{budgetPct>100?t("overBudget"):t("onTrack")}</div>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:12}}>
             {[
@@ -1291,15 +1291,15 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
               {label:t("remaining"),val:fmtCur(Math.max(devBudget-totalSpent,0)),col:"#2E7D32"},
             ].map(s=>(
               <div key={s.label} style={{background:"#f8f8f8",borderRadius:12,padding:"10px 10px",textAlign:"center"}}>
-                <div style={{fontSize:12,fontWeight:700,color:s.col}}>{s.val}</div>
-                <div style={{fontSize:10,color:"#888",marginTop:3}}>{s.label}</div>
+                <div style={{fontSize:17,fontWeight:700,color:s.col}}>{s.val}</div>
+                <div style={{fontSize:18,color:"#888",marginTop:3}}>{s.label}</div>
               </div>
             ))}
           </div>
           <div style={{height:10,background:"#f0f0f0",borderRadius:6}}>
             <div style={{height:10,width:Math.min(budgetPct,100)+"%",background:budgetPct>80?"#E65100":"#2E7D32",borderRadius:6,transition:"width .5s"}}/>
           </div>
-          <div style={{fontSize:11,color:"#888",textAlign:"right",marginTop:4}}>{budgetPct}% {t("spent")}</div>
+          <div style={{fontSize:17,color:"#888",textAlign:"right",marginTop:4}}>{budgetPct}% {t("spent")}</div>
         </Card>
       )}
 
@@ -1314,15 +1314,15 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
           <div key={s.label} onClick={()=>onNav(s.page)}
             style={{background:s.bg,borderRadius:16,padding:"13px 14px",cursor:"pointer"}}>
             <div style={{fontSize:22,marginBottom:5}}>{s.icon}</div>
-            <div style={{fontSize:14,fontWeight:700,color:s.col}}>{s.val}</div>
-            <div style={{fontSize:11,color:s.col,opacity:.8,marginTop:2}}>{s.label}</div>
+            <div style={{fontSize:18,fontWeight:700,color:s.col}}>{s.val}</div>
+            <div style={{fontSize:17,color:s.col,opacity:.8,marginTop:2}}>{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Task progress */}
       <Card>
-        <div style={{fontSize:14,fontWeight:700,marginBottom:12}}>📊 {t("progress")}</div>
+        <div style={{fontSize:18,fontWeight:700,marginBottom:12}}>📊 {t("progress")}</div>
         {allTasks.map(tg=>{
           const done=tg.sub.filter((_,i)=>(tasks[tg.id+"-"+i]?.status||"pending")==="taskDone").length;
           const p=tg.sub.length?Math.round(done/tg.sub.length*100):0;
@@ -1332,10 +1332,10 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
                 <div style={{display:"flex",alignItems:"center",gap:7}}>
                   <div style={{width:10,height:10,borderRadius:"50%",background:tg.col}}/>
-                  <span style={{fontSize:12,fontWeight:600,color:tg.col}}>{tg.kn}</span>
-                  {planned>0&&<span style={{fontSize:10,color:"#aaa"}}>{fmtCur(planned)}</span>}
+                  <span style={{fontSize:17,fontWeight:600,color:tg.col}}>{tg.kn}</span>
+                  {planned>0&&<span style={{fontSize:18,color:"#aaa"}}>{fmtCur(planned)}</span>}
                 </div>
-                <span style={{fontSize:11,color:"#888"}}>{done}/{tg.sub.length}</span>
+                <span style={{fontSize:17,color:"#888"}}>{done}/{tg.sub.length}</span>
               </div>
               <div style={{height:6,background:"#f0f0f0",borderRadius:6}}>
                 <div style={{height:6,width:p+"%",background:tg.col,borderRadius:6,transition:"width .4s"}}/>
@@ -1347,20 +1347,20 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
 
       {/* Recent Activity */}
       <Card>
-        <div style={{fontSize:14,fontWeight:700,marginBottom:12}}>🕒 {t("recentActivity")}</div>
-        {recent.length===0?<div style={{fontSize:13,color:"#aaa",textAlign:"center",padding:"10px 0"}}>{t("noActivity")}</div>
+        <div style={{fontSize:18,fontWeight:700,marginBottom:12}}>🕒 {t("recentActivity")}</div>
+        {recent.length===0?<div style={{fontSize:18,color:"#aaa",textAlign:"center",padding:"10px 0"}}>{t("noActivity")}</div>
           :recent.map((r,i)=>(
             <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:i<recent.length-1?"1px solid #f5f5f5":"none"}}>
               <span style={{fontSize:18,width:28,textAlign:"center"}}>{r.icon}</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:13,fontWeight:500,color:"#333",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.text}</div>
+                <div style={{fontSize:18,fontWeight:500,color:"#333",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.text}</div>
               </div>
-              <div style={{fontSize:11,color:"#aaa",flexShrink:0}}>{fmt(r.date)}</div>
+              <div style={{fontSize:17,color:"#aaa",flexShrink:0}}>{fmt(r.date)}</div>
             </div>
           ))}
       </Card>
 
-      <div style={{textAlign:"center",fontSize:10,color:"#ccc",padding:"8px 0"}}>CodeTrail Technologies Private Limited</div>
+      <div style={{textAlign:"center",fontSize:18,color:"#ccc",padding:"8px 0"}}>CodeTrail Technologies Private Limited</div>
     </div>
   );
 }
@@ -1420,16 +1420,16 @@ function TasksPage({farm,tasks,setTasks,customTasks,setCustomTasks,user,showToas
     <div style={{padding:"14px 14px 24px"}}>
       {viewImg&&<div onClick={()=>setViewImg(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.93)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:20}}>
         <img src={viewImg.data} alt="" style={{maxWidth:"100%",maxHeight:"70vh",borderRadius:14,objectFit:"contain"}}/>
-        <button onClick={()=>setViewImg(null)} style={{marginTop:16,background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:20,padding:"10px 28px",fontSize:14,cursor:"pointer"}}>✕ {t("back")}</button>
+        <button onClick={()=>setViewImg(null)} style={{marginTop:16,background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:20,padding:"10px 28px",fontSize:18,cursor:"pointer"}}>✕ {t("back")}</button>
       </div>}
 
       <SHdr title={<span>📋 {t("taskList")}{anyDirty&&<Dot/>}</span>}
         action={isOwner&&<div style={{display:"flex",gap:8}}>
-          <button onClick={()=>{if(window.confirm(lang==="kn"?"Default tasks ಮರಳಿ ತರುವುದೇ?":"Restore all default task groups?"))setCustomTasks(DEFAULT_TASK_GROUPS.map(tg=>({...tg,sub:[...tg.sub]})));}} style={{background:"#F0F4F0",border:"1.5px solid #ccc",borderRadius:12,padding:"8px 12px",fontSize:12,fontWeight:600,cursor:"pointer",color:"#555"}}>↺ {lang==="kn"?"ಮರಳಿ":"Reset"}</button>
+          <button onClick={()=>{if(window.confirm(lang==="kn"?"Default tasks ಮರಳಿ ತರುವುದೇ?":"Restore all default task groups?"))setCustomTasks(DEFAULT_TASK_GROUPS.map(tg=>({...tg,sub:[...tg.sub]})));}} style={{background:"#F0F4F0",border:"1.5px solid #ccc",borderRadius:12,padding:"8px 12px",fontSize:17,fontWeight:600,cursor:"pointer",color:"#555"}}>↺ {lang==="kn"?"ಮರಳಿ":"Reset"}</button>
           <Btn onClick={()=>setShowNG(true)} sm col={farm.col}>{t("addGroup")}</Btn>
         </div>}/>
 
-      {anyDirty&&<div style={{background:"#FFF3E0",border:"1.5px solid #FFB74D",borderRadius:14,padding:"11px 14px",marginBottom:14,fontSize:13,color:"#E65100",fontWeight:600}}>⚠️ {t("unsavedWarn")}</div>}
+      {anyDirty&&<div style={{background:"#FFF3E0",border:"1.5px solid #FFB74D",borderRadius:14,padding:"11px 14px",marginBottom:14,fontSize:18,color:"#E65100",fontWeight:600}}>⚠️ {t("unsavedWarn")}</div>}
 
       {isOwner&&showNG&&(
         <Card style={{border:"2px solid #A5D6A7",marginBottom:14}}>
@@ -1451,13 +1451,13 @@ function TasksPage({farm,tasks,setTasks,customTasks,setCustomTasks,user,showToas
             <div style={{background:tg.col,padding:"13px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setOpen(isOpen?null:tg.id)}>
               <div style={{flex:1}}>
                 <div style={{color:"#fff",fontWeight:800,fontSize:15}}>{tg.id} — {tg.kn}</div>
-                <div style={{color:"rgba(255,255,255,.75)",fontSize:12,marginTop:2}}>
+                <div style={{color:"rgba(255,255,255,.75)",fontSize:17,marginTop:2}}>
                   {tg.en} · {done}/{subs.length} {t("taskDone")}
                   {planned>0&&<span style={{marginLeft:8,opacity:.8}}>· {t("planned")}: {fmtCur(planned)}</span>}
                 </div>
               </div>
               <div style={{display:"flex",alignItems:"center",gap:7}}>
-                {gDirty&&<span style={{background:"#E65100",color:"#fff",borderRadius:8,padding:"2px 8px",fontSize:11,fontWeight:700}}>!</span>}
+                {gDirty&&<span style={{background:"#E65100",color:"#fff",borderRadius:8,padding:"2px 8px",fontSize:17,fontWeight:700}}>!</span>}
                 {/* delete moved to bottom of expanded group */}
                 <div style={{width:30,height:30,borderRadius:"50%",background:"rgba(255,255,255,.25)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:13}}>{isOpen?"▲":"▼"}</div>
               </div>
@@ -1481,30 +1481,30 @@ function TasksPage({farm,tasks,setTasks,customTasks,setCustomTasks,user,showToas
                         <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:10}}>
                           <div onClick={()=>setSt(k,cSt==="taskDone"?"pending":"taskDone")}
                             style={{width:24,height:24,borderRadius:7,background:cSt==="taskDone"?tg.col:"transparent",border:`2px solid ${tg.col}`,flexShrink:0,marginTop:2,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
-                            {cSt==="taskDone"&&<span style={{color:"#fff",fontSize:14,lineHeight:1}}>✓</span>}
+                            {cSt==="taskDone"&&<span style={{color:"#fff",fontSize:18,lineHeight:1}}>✓</span>}
                           </div>
-                          <span style={{fontSize:14,fontWeight:600,flex:1,lineHeight:1.4,textDecoration:cSt==="taskDone"?"line-through":"none",opacity:cSt==="taskDone"?.5:1}}>{sub}</span>
+                          <span style={{fontSize:18,fontWeight:600,flex:1,lineHeight:1.4,textDecoration:cSt==="taskDone"?"line-through":"none",opacity:cSt==="taskDone"?.5:1}}>{sub}</span>
                           {isOwner&&<div style={{display:"flex",gap:4}}>
-                            <button onClick={()=>{setEditSub({tId:tg.id,idx:i});setEditVal(sub);}} style={{background:"none",border:"none",fontSize:14,cursor:"pointer",color:tg.col}}>✏️</button>
-                            {isC&&<button onClick={()=>{if(window.confirm(lang==="kn"?"ಈ sub-task ಅಳಿಸುವುದೇ?":"Delete this sub-task?"))setCustomTasks(p=>p.map(g=>g.id===tg.id?{...g,sub:g.sub.filter((_,j)=>j!==i)}:g));}} style={{background:"#FFEBEE",border:"none",fontSize:13,cursor:"pointer",color:"#C62828",borderRadius:8,padding:"4px 8px",fontWeight:700}}>🗑</button>}
+                            <button onClick={()=>{setEditSub({tId:tg.id,idx:i});setEditVal(sub);}} style={{background:"none",border:"none",fontSize:18,cursor:"pointer",color:tg.col}}>✏️</button>
+                            {isC&&<button onClick={()=>{if(window.confirm(lang==="kn"?"ಈ sub-task ಅಳಿಸುವುದೇ?":"Delete this sub-task?"))setCustomTasks(p=>p.map(g=>g.id===tg.id?{...g,sub:g.sub.filter((_,j)=>j!==i)}:g));}} style={{background:"#FFEBEE",border:"none",fontSize:18,cursor:"pointer",color:"#C62828",borderRadius:8,padding:"4px 8px",fontWeight:700}}>🗑</button>}
                           </div>}
                         </div>
                       )}
-                      <div style={{marginBottom:10}}><StatusPicker value={cSt} onChange={v=>setSt(k,v)} col={tg.col}/>{cSt==="taskDone"&&sv.doneDate&&<span style={{fontSize:11,color:tg.col,fontWeight:600,marginLeft:10}}>✅ {fmt(sv.doneDate)}</span>}</div>
-                      <Field label={<span style={{fontSize:11,color:"#666"}}>{t("startDate")}{dr.startDate!==undefined&&dr.startDate!==sv.startDate&&<Dot/>}</span>} mb={10}>
-                        <input type="date" value={cStart} onChange={e=>mD(k,"startDate",e.target.value)} style={{fontSize:13,padding:"9px 12px",borderColor:tg.col+"60",borderRadius:12,border:`1.5px solid ${tg.col}60`,width:"100%",background:"#fff"}}/>
+                      <div style={{marginBottom:10}}><StatusPicker value={cSt} onChange={v=>setSt(k,v)} col={tg.col}/>{cSt==="taskDone"&&sv.doneDate&&<span style={{fontSize:17,color:tg.col,fontWeight:600,marginLeft:10}}>✅ {fmt(sv.doneDate)}</span>}</div>
+                      <Field label={<span style={{fontSize:17,color:"#666"}}>{t("startDate")}{dr.startDate!==undefined&&dr.startDate!==sv.startDate&&<Dot/>}</span>} mb={10}>
+                        <input type="date" value={cStart} onChange={e=>mD(k,"startDate",e.target.value)} style={{fontSize:18,padding:"9px 12px",borderColor:tg.col+"60",borderRadius:12,border:`1.5px solid ${tg.col}60`,width:"100%",background:"#fff"}}/>
                       </Field>
-                      <Field label={<span style={{fontSize:11,color:"#666"}}>{t("noteSave")}{dr.note!==undefined&&dr.note!==sv.note&&<Dot/>}</span>} mb={10}>
+                      <Field label={<span style={{fontSize:17,color:"#666"}}>{t("noteSave")}{dr.note!==undefined&&dr.note!==sv.note&&<Dot/>}</span>} mb={10}>
                         <textarea value={cNote} onChange={e=>mD(k,"note",e.target.value)} rows={2} placeholder="ಇಲ್ಲಿ ಬರೆಯಿರಿ..." style={{borderColor:dirty?tg.col:tg.col+"40",borderRadius:12,border:`1.5px solid ${dirty?tg.col:tg.col+"40"}`,padding:"10px 12px",width:"100%",background:"#fff",resize:"none",outline:"none",fontSize:14}}/>
                       </Field>
                       <div style={{marginBottom:12}}><SaveBar dirty={dirty} saved={jSaved} onSave={()=>saveT(k)}/></div>
                       <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
-                        <button onClick={()=>fileRefs.current[k]?.click()} style={{background:tg.col+"20",border:`1.5px solid ${tg.col}50`,color:tg.col,borderRadius:12,padding:"8px 14px",fontSize:13,fontWeight:600,cursor:"pointer"}}>📷 {t("photo")}</button>
+                        <button onClick={()=>fileRefs.current[k]?.click()} style={{background:tg.col+"20",border:`1.5px solid ${tg.col}50`,color:tg.col,borderRadius:12,padding:"8px 14px",fontSize:18,fontWeight:600,cursor:"pointer"}}>📷 {t("photo")}</button>
                         <input ref={el=>fileRefs.current[k]=el} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={e=>{const f=e.target.files[0];if(f)addMedia(k,f);e.target.value="";}}/>
                         {(sv.media||[]).map(m=>(
                           <div key={m.id} style={{position:"relative"}}>
                             <img src={m.data} alt="" onClick={()=>setViewImg(m)} style={{width:52,height:52,objectFit:"cover",borderRadius:10,cursor:"pointer",border:`2px solid ${tg.col}60`}}/>
-                            <button onClick={()=>delMedia(k,m.id)} style={{position:"absolute",top:-6,right:-6,background:"#C62828",color:"#fff",border:"none",borderRadius:"50%",width:20,height:20,fontSize:11,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+                            <button onClick={()=>delMedia(k,m.id)} style={{position:"absolute",top:-6,right:-6,background:"#C62828",color:"#fff",border:"none",borderRadius:"50%",width:20,height:20,fontSize:17,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
                           </div>
                         ))}
                       </div>
@@ -1515,18 +1515,18 @@ function TasksPage({farm,tasks,setTasks,customTasks,setCustomTasks,user,showToas
                   {/* DELETE GROUP — bottom of expanded, safe from accidental tap */}
                   <button onClick={()=>{if(window.confirm(lang==="kn"?"ಈ Task Group ಮತ್ತು ಎಲ್ಲಾ sub-tasks ಅಳಿಸುವುದೇ?":"Delete this entire task group and all its sub-tasks?"))setCustomTasks(p=>p.filter(g=>g.id!==tg.id));}}
                     style={{width:"100%",background:"#FFEBEE",border:"1.5px solid #FFCDD2",borderRadius:12,
-                      padding:"10px",marginBottom:10,fontSize:13,fontWeight:600,cursor:"pointer",
+                      padding:"10px",marginBottom:10,fontSize:18,fontWeight:600,cursor:"pointer",
                       color:"#C62828",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
                     🗑 {lang==="kn"?"Task Group ಅಳಿಸಿ":"Delete Task Group"}
                   </button>
                   {addFor===tg.id?(
                     <div style={{display:"flex",gap:8}}>
-                      <input value={newSV} onChange={e=>setNewSV(e.target.value)} placeholder="ಉಪ ಕೆಲಸ ಹೆಸರು..." style={{flex:1,fontSize:13,padding:"10px 12px",borderColor:tg.col,borderRadius:12,border:`1.5px solid ${tg.col}`,background:"#fff",outline:"none"}} onKeyDown={e=>e.key==="Enter"&&addSub(tg.id)}/>
-                      <button onClick={()=>addSub(tg.id)} style={{background:tg.col,color:"#fff",border:"none",borderRadius:12,padding:"10px 16px",fontSize:13,fontWeight:700,cursor:"pointer"}}>{t("add")}</button>
-                      <button onClick={()=>setAddFor(null)} style={{background:"#eee",border:"none",borderRadius:12,padding:"10px 12px",fontSize:14,cursor:"pointer"}}>✕</button>
+                      <input value={newSV} onChange={e=>setNewSV(e.target.value)} placeholder="ಉಪ ಕೆಲಸ ಹೆಸರು..." style={{flex:1,fontSize:18,padding:"10px 12px",borderColor:tg.col,borderRadius:12,border:`1.5px solid ${tg.col}`,background:"#fff",outline:"none"}} onKeyDown={e=>e.key==="Enter"&&addSub(tg.id)}/>
+                      <button onClick={()=>addSub(tg.id)} style={{background:tg.col,color:"#fff",border:"none",borderRadius:12,padding:"10px 16px",fontSize:18,fontWeight:700,cursor:"pointer"}}>{t("add")}</button>
+                      <button onClick={()=>setAddFor(null)} style={{background:"#eee",border:"none",borderRadius:12,padding:"10px 12px",fontSize:18,cursor:"pointer"}}>✕</button>
                     </div>
                   ):(
-                    <button onClick={()=>{setAddFor(tg.id);setNewSV("");}} style={{background:"none",border:`1.5px dashed ${tg.col}60`,color:tg.col,borderRadius:12,padding:"10px 16px",fontSize:13,fontWeight:600,cursor:"pointer",width:"100%"}}>{t("addSubTask")}</button>
+                    <button onClick={()=>{setAddFor(tg.id);setNewSV("");}} style={{background:"none",border:`1.5px dashed ${tg.col}60`,color:tg.col,borderRadius:12,padding:"10px 16px",fontSize:18,fontWeight:600,cursor:"pointer",width:"100%"}}>{t("addSubTask")}</button>
                   )}
                 </div>}
               </div>
@@ -1555,7 +1555,7 @@ function DailyPage({farm,trips,setTrips,labour,setLabour,workers,setWorkers,show
           <button key={id} onClick={()=>setTab(id)}
             style={{flex:1,padding:"11px",borderRadius:14,border:`1.5px solid ${tab===id?farm.col:"#ddd"}`,
               background:tab===id?farm.col:"#fff",color:tab===id?"#fff":"#555",
-              fontSize:14,fontWeight:700,cursor:"pointer"}}>
+              fontSize:18,fontWeight:700,cursor:"pointer"}}>
             {lb}
           </button>
         ))}
@@ -1583,13 +1583,13 @@ function TripsTab({farm,trips,setTrips,showToast}){
     <div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:14}}>
         {[[trips.length,t("totalTrips"),"🚗","#0277BD","#E1F5FE"],[totalKm+"km",t("totalKm"),"📍","#00695C","#E0F2F1"]].map(([v,l,ic,col,bg])=>(
-          <div key={l} style={{background:bg,borderRadius:16,padding:14}}><div style={{fontSize:22,marginBottom:4}}>{ic}</div><div style={{fontSize:20,fontWeight:800,color:col}}>{v}</div><div style={{fontSize:12,color:col,opacity:.8}}>{l}</div></div>
+          <div key={l} style={{background:bg,borderRadius:16,padding:14}}><div style={{fontSize:22,marginBottom:4}}>{ic}</div><div style={{fontSize:20,fontWeight:800,color:col}}>{v}</div><div style={{fontSize:17,color:col,opacity:.8}}>{l}</div></div>
         ))}
       </div>
       <Btn onClick={()=>{setShow(!show);setEditId(null);setForm(E);}} col="#0277BD" full icon="🚗">{t("addTrip")}</Btn>
       {show&&(
         <Card style={{border:"2px solid #90CAF9",marginTop:14}}>
-          <div style={{fontSize:15,fontWeight:700,color:"#0277BD",marginBottom:14}}>{editId?"✏️":""} {t("addTrip")}</div>
+          <div style={{fontSize:17,fontWeight:700,color:"#0277BD",marginBottom:14}}>{editId?"✏️":""} {t("addTrip")}</div>
           <Field label={t("date")||"Date"} required><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></Field>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
             <Field label={t("from")+" *"}><input value={form.from} onChange={e=>setForm({...form,from:e.target.value})} placeholder="e.g. Shiralakoppa"/></Field>
@@ -1611,18 +1611,18 @@ function TripsTab({farm,trips,setTrips,showToast}){
           <Card key={tr.id} style={{border:`1.5px solid ${isSaved?"#90CAF9":"transparent"}`,transition:"border .4s"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <div style={{background:"#E1F5FE",borderRadius:10,padding:"5px 10px",fontSize:13,fontWeight:700,color:"#0277BD"}}>#{trips.length-idx}</div>
-                <span style={{fontSize:13,color:"#888"}}>{fmt(tr.date)}</span>
+                <div style={{background:"#E1F5FE",borderRadius:10,padding:"5px 10px",fontSize:18,fontWeight:700,color:"#0277BD"}}>#{trips.length-idx}</div>
+                <span style={{fontSize:18,color:"#888"}}>{fmt(tr.date)}</span>
               </div>
-              {tr.km&&<span style={{background:"#E0F2F1",color:"#00695C",borderRadius:20,padding:"3px 10px",fontSize:12,fontWeight:600}}>{tr.km}km</span>}
+              {tr.km&&<span style={{background:"#E0F2F1",color:"#00695C",borderRadius:20,padding:"3px 10px",fontSize:17,fontWeight:600}}>{tr.km}km</span>}
             </div>
-            <div style={{fontSize:14,fontWeight:700,marginBottom:4}}>📍 {tr.from} → {tr.to}</div>
-            <div style={{fontSize:13,color:"#555",marginBottom:3}}>🚗 {tr.vehicle}{tr.fuelAmt?" · ₹"+tr.fuelAmt:""}</div>
-            {tr.purpose&&<div style={{fontSize:13,color:"#555"}}>📋 {tr.purpose}</div>}
-            {tr.outcome&&<div style={{fontSize:13,color:"#2E7D32",fontWeight:600,marginTop:4}}>✅ {tr.outcome}</div>}
+            <div style={{fontSize:18,fontWeight:700,marginBottom:4}}>📍 {tr.from} → {tr.to}</div>
+            <div style={{fontSize:18,color:"#555",marginBottom:3}}>🚗 {tr.vehicle}{tr.fuelAmt?" · ₹"+tr.fuelAmt:""}</div>
+            {tr.purpose&&<div style={{fontSize:18,color:"#555"}}>📋 {tr.purpose}</div>}
+            {tr.outcome&&<div style={{fontSize:18,color:"#2E7D32",fontWeight:600,marginTop:4}}>✅ {tr.outcome}</div>}
             <div style={{display:"flex",gap:8,marginTop:10}}>
-              <button onClick={()=>{setForm({...tr});setEditId(tr.id);setShow(true);}} style={{flex:1,background:"#E1F5FE",border:"none",borderRadius:10,padding:9,fontSize:13,fontWeight:600,cursor:"pointer",color:"#0277BD"}}>✏️ {t("edit")}</button>
-              <button onClick={()=>del(tr.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:10,padding:9,fontSize:13,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {t("delete")}</button>
+              <button onClick={()=>{setForm({...tr});setEditId(tr.id);setShow(true);}} style={{flex:1,background:"#E1F5FE",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#0277BD"}}>✏️ {t("edit")}</button>
+              <button onClick={()=>del(tr.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {t("delete")}</button>
             </div>
           </Card>
         );})}
@@ -1658,14 +1658,14 @@ function LabourTab({farm,labour,setLabour,workers,setWorkers,showToast}){
   return(
     <div>
       <Card style={{background:"#E8F5E9",marginBottom:14}}>
-        <div style={{fontSize:12,color:"#2E7D32"}}>{t("totalWages")}</div>
+        <div style={{fontSize:17,color:"#2E7D32"}}>{t("totalWages")}</div>
         <div style={{fontSize:24,fontWeight:800,color:"#1B5E20",marginTop:4}}>{fmtCur(totalWages)}</div>
-        <div style={{fontSize:12,color:"#2E7D32",marginTop:4}}>{labour.length} entries · {workers.length} {t("workerList").toLowerCase()}</div>
+        <div style={{fontSize:17,color:"#2E7D32",marginTop:4}}>{labour.length} entries · {workers.length} {t("workerList").toLowerCase()}</div>
       </Card>
       <Btn onClick={()=>{setShow(!show);setEditId(null);setForm(E);}} col="#2E7D32" full icon="👷">{t("addLabour")}</Btn>
       {show&&(
         <Card style={{border:"2px solid #A5D6A7",marginTop:14}}>
-          <div style={{fontSize:15,fontWeight:700,color:"#1B5E20",marginBottom:14}}>👷 {t("addLabour")}</div>
+          <div style={{fontSize:17,fontWeight:700,color:"#1B5E20",marginBottom:14}}>👷 {t("addLabour")}</div>
           <Field label={t("date")||"Date"} required><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></Field>
           <Field label={t("workerName")+" *"} mb={6}>
             <select value={form.workerId} onChange={e=>{const w=workers.find(x=>x.id===e.target.value);if(w){setForm(p=>({...p,workerName:w.name,workerId:w.id,dailyRate:w.rate||p.dailyRate}));}else{setForm(p=>({...p,workerId:"",workerName:""}));}}}
@@ -1674,7 +1674,7 @@ function LabourTab({farm,labour,setLabour,workers,setWorkers,showToast}){
               {workers.map(w=><option key={w.id} value={w.id}>{w.name}{w.mobile?" ("+w.mobile+")":""}</option>)}
             </select>
           </Field>
-          {!showWF&&<button onClick={()=>setShowWF(true)} style={{background:"none",border:"1.5px dashed #A5D6A7",color:"#2E7D32",borderRadius:10,padding:"7px 14px",fontSize:12,fontWeight:600,cursor:"pointer",marginBottom:10}}>{t("newWorker")}</button>}
+          {!showWF&&<button onClick={()=>setShowWF(true)} style={{background:"none",border:"1.5px dashed #A5D6A7",color:"#2E7D32",borderRadius:10,padding:"7px 14px",fontSize:17,fontWeight:600,cursor:"pointer",marginBottom:10}}>{t("newWorker")}</button>}
           {showWF&&(
             <div style={{background:"#E8F5E9",borderRadius:12,padding:12,marginBottom:10}}>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
@@ -1691,7 +1691,7 @@ function LabourTab({farm,labour,setLabour,workers,setWorkers,showToast}){
             <Field label={t("dailyRate")}><input type="number" value={form.dailyRate} onChange={e=>{setForm(p=>({...p,dailyRate:e.target.value}));}} onBlur={calcWages} placeholder="500"/></Field>
           </div>
           <Field label={t("totalWages")}>
-            <div style={{padding:"12px 14px",background:"#E8F5E9",borderRadius:12,fontSize:16,fontWeight:700,color:"#1B5E20"}}>
+            <div style={{padding:"12px 14px",background:"#E8F5E9",borderRadius:12,fontSize:18,fontWeight:700,color:"#1B5E20"}}>
               {fmtCur((+form.days||0)*(+form.dailyRate||0))||"₹0"}
             </div>
           </Field>
@@ -1706,14 +1706,14 @@ function LabourTab({farm,labour,setLabour,workers,setWorkers,showToast}){
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
               <div>
                 <div style={{fontWeight:700,fontSize:15}}>{l.workerName}</div>
-                <div style={{fontSize:12,color:"#888",marginTop:2}}>{fmt(l.date)} · {l.days} {t("days")} × {fmtCur(l.dailyRate)}</div>
-                {l.taskDone&&<div style={{fontSize:12,color:"#555",marginTop:3}}>📋 {l.taskDone}</div>}
+                <div style={{fontSize:17,color:"#888",marginTop:2}}>{fmt(l.date)} · {l.days} {t("days")} × {fmtCur(l.dailyRate)}</div>
+                {l.taskDone&&<div style={{fontSize:17,color:"#555",marginTop:3}}>📋 {l.taskDone}</div>}
               </div>
               <div style={{fontSize:18,fontWeight:800,color:"#2E7D32"}}>{fmtCur(l.totalWages)}</div>
             </div>
             <div style={{display:"flex",gap:8}}>
-              <button onClick={()=>{setForm({...l});setEditId(l.id);setShow(true);}} style={{flex:1,background:"#E8F5E9",border:"none",borderRadius:10,padding:9,fontSize:13,fontWeight:600,cursor:"pointer",color:"#2E7D32"}}>✏️ {t("edit")}</button>
-              <button onClick={()=>del(l.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:10,padding:9,fontSize:13,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {t("delete")}</button>
+              <button onClick={()=>{setForm({...l});setEditId(l.id);setShow(true);}} style={{flex:1,background:"#E8F5E9",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#2E7D32"}}>✏️ {t("edit")}</button>
+              <button onClick={()=>del(l.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {t("delete")}</button>
             </div>
           </Card>
         );})}
@@ -1733,9 +1733,9 @@ function FinancePage({farm,expenses,setExpenses,purchases,setPurchases,payments,
       <div style={{display:"flex",gap:6,marginBottom:16,overflowX:"auto",paddingBottom:4}}>
         {tabs.map(([id,lb])=>(
           <button key={id} onClick={()=>setTab(id)}
-            style={{padding:"9px 14px",borderRadius:20,border:`1.5px solid ${tab===id?"#E65100":"#ddd"}`,
+            style={{padding:"12px 18px",borderRadius:20,border:`2px solid ${tab===id?"#E65100":"#ddd"}`,
               background:tab===id?"#E65100":"#fff",color:tab===id?"#fff":"#555",
-              fontSize:13,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
+              fontSize:17,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>
             {lb}
           </button>
         ))}
@@ -1768,7 +1768,7 @@ function ExpensesTab({farm,expenses,setExpenses,trips,showToast}){
         <div style={{color:"rgba(255,255,255,.8)",fontSize:12}}>{t("totalExpenses")}</div>
         <div style={{color:"#fff",fontSize:24,fontWeight:800,marginTop:4}}>{fmtCur(total)}</div>
         <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:10}}>
-          {ECAT.map(c=>{const s=expenses.filter(e=>e.cat===c.id).reduce((a,e)=>a+(+e.amount||0),0);return s>0&&<div key={c.id} style={{background:"rgba(255,255,255,.2)",borderRadius:20,padding:"3px 10px",fontSize:11,color:"#fff"}}>{c.icon} {t(c.id)}: {fmtCur(s)}</div>;})}
+          {ECAT.map(c=>{const s=expenses.filter(e=>e.cat===c.id).reduce((a,e)=>a+(+e.amount||0),0);return s>0&&<div key={c.id} style={{background:"rgba(255,255,255,.2)",borderRadius:20,padding:"3px 10px",fontSize:17,color:"#fff"}}>{c.icon} {t(c.id)}: {fmtCur(s)}</div>;})}
         </div>
       </Card>
       <Btn onClick={()=>{setShow(!show);setEditId(null);setForm(E);}} col="#E65100" full>{t("addExpense")}</Btn>
@@ -1790,14 +1790,14 @@ function ExpensesTab({farm,expenses,setExpenses,trips,showToast}){
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
               <div style={{display:"flex",alignItems:"center",gap:10}}>
                 <div style={{width:42,height:42,background:"#FFF3E0",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{ECAT.find(c=>c.id===e.cat)?.icon||"📝"}</div>
-                <div><div style={{fontWeight:700,fontSize:14}}>{t(e.cat)}</div><div style={{fontSize:12,color:"#888"}}>{fmt(e.date)}{e.desc?" · "+e.desc:""}</div></div>
+                <div><div style={{fontWeight:700,fontSize:14}}>{t(e.cat)}</div><div style={{fontSize:17,color:"#888"}}>{fmt(e.date)}{e.desc?" · "+e.desc:""}</div></div>
               </div>
               <div style={{fontSize:18,fontWeight:800,color:"#E65100"}}>{fmtCur(e.amount)}</div>
             </div>
-            {e.note&&<div style={{fontSize:12,color:"#888",fontStyle:"italic",marginBottom:8}}>"{e.note}"</div>}
+            {e.note&&<div style={{fontSize:17,color:"#888",fontStyle:"italic",marginBottom:8}}>"{e.note}"</div>}
             <div style={{display:"flex",gap:8}}>
-              <button onClick={()=>{setForm({...e});setEditId(e.id);setShow(true);}} style={{flex:1,background:"#FFF3E0",border:"none",borderRadius:10,padding:9,fontSize:13,fontWeight:600,cursor:"pointer",color:"#E65100"}}>✏️ {t("edit")}</button>
-              <button onClick={()=>del(e.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:10,padding:9,fontSize:13,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {t("delete")}</button>
+              <button onClick={()=>{setForm({...e});setEditId(e.id);setShow(true);}} style={{flex:1,background:"#FFF3E0",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#E65100"}}>✏️ {t("edit")}</button>
+              <button onClick={()=>del(e.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {t("delete")}</button>
             </div>
           </Card>
         );})}
@@ -1826,12 +1826,12 @@ function PurchasesTab({farm,purchases,setPurchases,showToast}){
     <div>
       {viewR&&<div onClick={()=>setViewR(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.93)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:20}}>
         <img src={viewR} alt="" style={{maxWidth:"100%",maxHeight:"75vh",borderRadius:14,objectFit:"contain"}}/>
-        <button onClick={()=>setViewR(null)} style={{marginTop:16,background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:20,padding:"10px 28px",fontSize:14,cursor:"pointer"}}>✕</button>
+        <button onClick={()=>setViewR(null)} style={{marginTop:16,background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:20,padding:"10px 28px",fontSize:18,cursor:"pointer"}}>✕</button>
       </div>}
       <Card style={{background:"#6A1B9A",marginBottom:14}}>
         <div style={{color:"rgba(255,255,255,.8)",fontSize:12}}>{t("totalPurchases")}</div>
         <div style={{color:"#fff",fontSize:24,fontWeight:800,marginTop:4}}>{fmtCur(total)}</div>
-        <div style={{color:"rgba(255,255,255,.7)",fontSize:12,marginTop:4}}>{purchases.length} items</div>
+        <div style={{color:"rgba(255,255,255,.7)",fontSize:17,marginTop:4}}>{purchases.length} items</div>
       </Card>
       <Btn onClick={()=>{setShow(!show);setEditId(null);setForm(E);}} col="#6A1B9A" full>{t("addPurchase")}</Btn>
       {show&&(
@@ -1846,7 +1846,7 @@ function PurchasesTab({farm,purchases,setPurchases,showToast}){
           <Field label={t("amount")+" *"}><input type="number" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} placeholder="0"/></Field>
           <Field label={t("receipt")} mb={14}>
             <div onClick={()=>fileRef.current.click()} style={{border:"2px dashed #CE93D8",borderRadius:12,padding:14,textAlign:"center",cursor:"pointer",background:"#fafafa"}}>
-              {uploading?"⏳ Processing...":form.receipt?<img src={form.receipt} alt="" style={{maxHeight:100,maxWidth:"100%",borderRadius:8}}/>:<><div style={{fontSize:28,marginBottom:6}}>📷</div><div style={{fontSize:13,color:"#6A1B9A",fontWeight:600}}>{t("receipt")}</div></>}
+              {uploading?"⏳ Processing...":form.receipt?<img src={form.receipt} alt="" style={{maxHeight:100,maxWidth:"100%",borderRadius:8}}/>:<><div style={{fontSize:28,marginBottom:6}}>📷</div><div style={{fontSize:18,color:"#6A1B9A",fontWeight:600}}>{t("receipt")}</div></>}
             </div>
             <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={pickReceipt}/>
           </Field>
@@ -1861,9 +1861,9 @@ function PurchasesTab({farm,purchases,setPurchases,showToast}){
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
               <div style={{flex:1}}>
                 <div style={{fontWeight:700,fontSize:15}}>{p.item}</div>
-                <div style={{fontSize:12,color:"#888",marginTop:2}}>{fmt(p.date)}{p.vendor?" · "+p.vendor:""}</div>
-                {p.qty&&<div style={{fontSize:12,color:"#555",marginTop:2}}>{p.qty} {p.unit}</div>}
-                {p.note&&<div style={{fontSize:12,color:"#888",fontStyle:"italic",marginTop:3}}>"{p.note}"</div>}
+                <div style={{fontSize:17,color:"#888",marginTop:2}}>{fmt(p.date)}{p.vendor?" · "+p.vendor:""}</div>
+                {p.qty&&<div style={{fontSize:17,color:"#555",marginTop:2}}>{p.qty} {p.unit}</div>}
+                {p.note&&<div style={{fontSize:17,color:"#888",fontStyle:"italic",marginTop:3}}>"{p.note}"</div>}
               </div>
               <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6}}>
                 <div style={{fontSize:18,fontWeight:800,color:"#6A1B9A"}}>{fmtCur(p.amount)}</div>
@@ -1871,8 +1871,8 @@ function PurchasesTab({farm,purchases,setPurchases,showToast}){
               </div>
             </div>
             <div style={{display:"flex",gap:8}}>
-              <button onClick={()=>{setForm({...p});setEditId(p.id);setShow(true);}} style={{flex:1,background:"#F3E5F5",border:"none",borderRadius:10,padding:9,fontSize:13,fontWeight:600,cursor:"pointer",color:"#6A1B9A"}}>✏️ {t("edit")}</button>
-              <button onClick={()=>del(p.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:10,padding:9,fontSize:13,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {t("delete")}</button>
+              <button onClick={()=>{setForm({...p});setEditId(p.id);setShow(true);}} style={{flex:1,background:"#F3E5F5",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#6A1B9A"}}>✏️ {t("edit")}</button>
+              <button onClick={()=>del(p.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {t("delete")}</button>
             </div>
           </Card>
         );})}
@@ -1903,30 +1903,30 @@ function PaymentsTab({farm,payments,setPayments,supervisors,user,showToast}){
   return(
     <div>
       <div style={{background:balance>=0?"#1B5E20":"#C62828",borderRadius:16,padding:"14px 16px",color:"#fff",marginBottom:14}}>
-        <div style={{fontSize:12,opacity:.8}}>{t("balance")}</div>
+        <div style={{fontSize:17,opacity:.8}}>{t("balance")}</div>
         <div style={{fontSize:24,fontWeight:800,marginTop:4}}>{balance>=0?"▲ ":"▼ "}{fmtCur(Math.abs(balance))}</div>
-        <div style={{fontSize:12,opacity:.7,marginTop:6}}>{balance>=0?"Supervisor owes this advance":"Owner needs to reimburse"}</div>
+        <div style={{fontSize:17,opacity:.7,marginTop:6}}>{balance>=0?"Supervisor owes this advance":"Owner needs to reimburse"}</div>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:14}}>
         {[["advance","#0277BD","#E3F2FD",totAdv],["claim","#E65100","#FFF3E0",totCl],["salary","#2E7D32","#E8F5E9",totSal]].map(([type,col,bg,val])=>(
           <div key={type} style={{background:bg,borderRadius:14,padding:"11px 10px",textAlign:"center"}}>
             <div style={{fontSize:16}}>{PAY_ICONS[type]}</div>
-            <div style={{fontSize:14,fontWeight:700,color:col,marginTop:4}}>{fmtCur(val)}</div>
-            <div style={{fontSize:10,color:col,opacity:.8,marginTop:2}}>{payLabels[type]}</div>
+            <div style={{fontSize:18,fontWeight:700,color:col,marginTop:4}}>{fmtCur(val)}</div>
+            <div style={{fontSize:18,color:col,opacity:.8,marginTop:2}}>{payLabels[type]}</div>
           </div>
         ))}
       </div>
       {isOwner&&<Btn onClick={()=>setShow(!show)} col="#0277BD" full>{t("addPayment")}</Btn>}
       {!isOwner&&(
         <div style={{background:"#E3F2FD",borderRadius:14,padding:14,marginBottom:14}}>
-          <div style={{fontSize:14,fontWeight:700,color:"#0277BD",marginBottom:6}}>📋 {t("billClaim")}</div>
-          <div style={{fontSize:12,color:"#0277BD",marginBottom:12}}>{t("claimNote")}</div>
+          <div style={{fontSize:18,fontWeight:700,color:"#0277BD",marginBottom:6}}>📋 {t("billClaim")}</div>
+          <div style={{fontSize:17,color:"#0277BD",marginBottom:12}}>{t("claimNote")}</div>
           <Btn onClick={()=>{setPayType("claim");setShow(true);}} col="#E65100" full>{t("addClaim")}</Btn>
         </div>
       )}
       {show&&(
         <Card style={{border:"2px solid #90CAF9",marginTop:14}}>
-          <div style={{fontSize:14,fontWeight:700,color:"#0277BD",marginBottom:12}}>{t("addPayment")}</div>
+          <div style={{fontSize:18,fontWeight:700,color:"#0277BD",marginBottom:12}}>{t("addPayment")}</div>
           {isOwner&&(
             <div style={{display:"flex",gap:8,marginBottom:14}}>
               {PAY_TYPES.map(pt=>(
@@ -1934,14 +1934,14 @@ function PaymentsTab({farm,payments,setPayments,supervisors,user,showToast}){
                   style={{flex:1,padding:"10px 6px",textAlign:"center",borderRadius:12,cursor:"pointer",
                     border:`1.5px solid ${payType===pt?PAY_COLS[pt]:"#ddd"}`,
                     background:payType===pt?PAY_COLS[pt]+"18":"#fff",
-                    fontWeight:payType===pt?700:400,fontSize:12,color:payType===pt?PAY_COLS[pt]:"#555"}}>
+                    fontWeight:payType===pt?700:400,fontSize:17,color:payType===pt?PAY_COLS[pt]:"#555"}}>
                   <div style={{fontSize:18,marginBottom:3}}>{PAY_ICONS[pt]}</div>
                   {payLabels[pt]}
                 </div>
               ))}
             </div>
           )}
-          <div style={{background:"#F0F4F0",borderRadius:10,padding:"8px 12px",marginBottom:12,fontSize:12,color:"#555"}}>{payType==="advance"?t("advanceNote"):payType==="claim"?t("claimNote"):t("salary")}</div>
+          <div style={{background:"#F0F4F0",borderRadius:10,padding:"8px 12px",marginBottom:12,fontSize:17,color:"#555"}}>{payType==="advance"?t("advanceNote"):payType==="claim"?t("claimNote"):t("salary")}</div>
           <Field label={t("date")||"Date"} required><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></Field>
           {isOwner&&supervisors.length>0&&<Field label={t("supervisor")||"Supervisor"}><select value={form.supervisorId} onChange={e=>setForm({...form,supervisorId:e.target.value})}><option value="">— All —</option>{supervisors.map(s=><option key={s.id} value={s.id}>{dispName(s)}</option>)}</select></Field>}
           <Field label={t("description")}><input value={form.desc} onChange={e=>setForm({...form,desc:e.target.value})} placeholder={payType==="claim"?"Bill description":"Purpose"}/></Field>
@@ -1958,16 +1958,16 @@ function PaymentsTab({farm,payments,setPayments,supervisors,user,showToast}){
               <div style={{display:"flex",alignItems:"center",gap:10}}>
                 <div style={{width:42,height:42,background:PAY_COLS[p.type]+"18",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{PAY_ICONS[p.type]}</div>
                 <div>
-                  <div style={{fontWeight:700,fontSize:14,color:PAY_COLS[p.type]}}>{payLabels[p.type]}</div>
-                  <div style={{fontSize:12,color:"#888"}}>{fmt(p.date)}{sup?" · 👷"+dispName(sup):""}</div>
-                  {p.desc&&<div style={{fontSize:12,color:"#555",marginTop:2}}>{p.desc}</div>}
+                  <div style={{fontWeight:700,fontSize:18,color:PAY_COLS[p.type]}}>{payLabels[p.type]}</div>
+                  <div style={{fontSize:17,color:"#888"}}>{fmt(p.date)}{sup?" · 👷"+dispName(sup):""}</div>
+                  {p.desc&&<div style={{fontSize:17,color:"#555",marginTop:2}}>{p.desc}</div>}
                 </div>
               </div>
               <div style={{fontSize:18,fontWeight:800,color:PAY_COLS[p.type]}}>{fmtCur(p.amount)}</div>
             </div>
-            {p.note&&<div style={{fontSize:12,color:"#888",fontStyle:"italic",marginBottom:6}}>"{p.note}"</div>}
-            <div style={{fontSize:11,color:"#aaa",marginBottom:8}}>By: {p.addedByName||p.addedBy}</div>
-            <button onClick={()=>del(p.id)} style={{width:"100%",background:"#FFEBEE",border:"none",borderRadius:10,padding:9,fontSize:13,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {t("delete")}</button>
+            {p.note&&<div style={{fontSize:17,color:"#888",fontStyle:"italic",marginBottom:6}}>"{p.note}"</div>}
+            <div style={{fontSize:17,color:"#aaa",marginBottom:8}}>By: {p.addedByName||p.addedBy}</div>
+            <button onClick={()=>del(p.id)} style={{width:"100%",background:"#FFEBEE",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {t("delete")}</button>
           </Card>
         );})}
       </div>
@@ -2004,7 +2004,7 @@ function MorePage({farm,docs,setDocs,user,onManage,onProfile,onReport,showToast}
         {menuItems.filter(m=>m.action).map(m=>(
           <div key={m.label} onClick={m.action} style={{background:"#fff",borderRadius:16,padding:"16px 14px",cursor:"pointer",boxShadow:"0 2px 8px rgba(0,0,0,.06)",display:"flex",alignItems:"center",gap:10}}>
             <span style={{fontSize:24}}>{m.icon}</span>
-            <span style={{fontSize:13,fontWeight:600,color:"#333"}}>{m.label}</span>
+            <span style={{fontSize:18,fontWeight:600,color:"#333"}}>{m.label}</span>
           </div>
         ))}
       </div>
@@ -2012,8 +2012,8 @@ function MorePage({farm,docs,setDocs,user,onManage,onProfile,onReport,showToast}
       <SHdr title={"📷 "+t("documents")} action={<Btn onClick={()=>setShowForm(!showForm)} sm col="#00695C">{t("addDoc")}</Btn>}/>
       {view&&<div onClick={()=>setView(null)} style={{position:"fixed",inset:0,background:"rgba(0,0,0,.93)",zIndex:500,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:20}}>
         <img src={view.imgData} alt="" style={{maxWidth:"100%",maxHeight:"72vh",borderRadius:14,objectFit:"contain"}}/>
-        <div style={{color:"#fff",marginTop:12,textAlign:"center",fontSize:14}}>{view.title}<br/><span style={{fontSize:12,opacity:.7}}>{view.type} · {fmt(view.date)}</span></div>
-        <button onClick={()=>setView(null)} style={{marginTop:14,background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:20,padding:"10px 28px",fontSize:14,cursor:"pointer"}}>✕</button>
+        <div style={{color:"#fff",marginTop:12,textAlign:"center",fontSize:14}}>{view.title}<br/><span style={{fontSize:17,opacity:.7}}>{view.type} · {fmt(view.date)}</span></div>
+        <button onClick={()=>setView(null)} style={{marginTop:14,background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:20,padding:"10px 28px",fontSize:18,cursor:"pointer"}}>✕</button>
       </div>}
       {showForm&&(
         <Card style={{border:"2px solid #80CBC4",marginBottom:14}}>
@@ -2022,7 +2022,7 @@ function MorePage({farm,docs,setDocs,user,onManage,onProfile,onReport,showToast}
           <Field label={t("docType")}><select value={form.type} onChange={e=>setForm({...form,type:e.target.value})}>{DOC_TYPES.map(dt=><option key={dt}>{dt}</option>)}</select></Field>
           <Field label={t("noteSave")} mb={14}><textarea value={form.note} onChange={e=>setForm({...form,note:e.target.value})} rows={2}/></Field>
           <div onClick={()=>fileRef.current.click()} style={{border:"2px dashed #80CBC4",borderRadius:12,padding:16,textAlign:"center",cursor:"pointer",background:"#f9fffe",marginBottom:14,minHeight:80,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-            {uploading?"⏳":form.imgData?<img src={form.imgData} alt="" style={{maxHeight:120,maxWidth:"100%",borderRadius:8}}/>:<><div style={{fontSize:32,marginBottom:6}}>📷</div><div style={{fontSize:13,color:"#00695C",fontWeight:600}}>{t("docUpload")}</div></>}
+            {uploading?"⏳":form.imgData?<img src={form.imgData} alt="" style={{maxHeight:120,maxWidth:"100%",borderRadius:8}}/>:<><div style={{fontSize:32,marginBottom:6}}>📷</div><div style={{fontSize:18,color:"#00695C",fontWeight:600}}>{t("docUpload")}</div></>}
           </div>
           <input ref={fileRef} type="file" accept="image/*,application/pdf" capture="environment" style={{display:"none"}} onChange={pickFile}/>
           <div style={{display:"flex",gap:10}}><Btn onClick={save} col="#00695C" full>💾 {t("save")}</Btn><Btn onClick={()=>setShowForm(false)} light col="#555" sm>{t("cancel")}</Btn></div>
@@ -2036,14 +2036,14 @@ function MorePage({farm,docs,setDocs,user,onManage,onProfile,onReport,showToast}
               {d.imgData?<img src={d.imgData} alt="" style={{width:"100%",height:90,objectFit:"cover"}}/>:<div style={{height:90,background:"#E0F2F1",display:"flex",alignItems:"center",justifyContent:"center",fontSize:38}}>📄</div>}
             </div>
             <div style={{padding:"9px 10px 8px"}}>
-              <div style={{fontSize:12,fontWeight:700,color:"#00695C",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{d.title}</div>
-              <div style={{fontSize:10,color:"#888",marginTop:2}}>{d.type.split(" — ")[0]} · {fmt(d.date)}</div>
-              <button onClick={()=>del(d.id)} style={{marginTop:7,background:"#FFEBEE",border:"none",borderRadius:8,padding:"5px",fontSize:11,fontWeight:600,cursor:"pointer",color:"#C62828",width:"100%"}}>🗑 {t("delete")}</button>
+              <div style={{fontSize:17,fontWeight:700,color:"#00695C",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{d.title}</div>
+              <div style={{fontSize:18,color:"#888",marginTop:2}}>{d.type.split(" — ")[0]} · {fmt(d.date)}</div>
+              <button onClick={()=>del(d.id)} style={{marginTop:7,background:"#FFEBEE",border:"none",borderRadius:8,padding:"5px",fontSize:17,fontWeight:600,cursor:"pointer",color:"#C62828",width:"100%"}}>🗑 {t("delete")}</button>
             </div>
           </div>
         );})}
       </div>
-      <div style={{textAlign:"center",marginTop:20,fontSize:11,color:"#ccc"}}>CodeTrail Technologies Private Limited</div>
+      <div style={{textAlign:"center",marginTop:20,fontSize:17,color:"#ccc"}}>CodeTrail Technologies Private Limited</div>
     </div>
   );
 }
@@ -2074,7 +2074,7 @@ function IncomeTab({farm,income,setIncome,showToast}){
         <div style={{color:"rgba(255,255,255,.8)",fontSize:12}}>{t("totalIncome")}</div>
         <div style={{color:"#fff",fontSize:26,fontWeight:800,marginTop:4}}>{fmtCur(total)}</div>
         {Object.keys(byMonth).sort().reverse().slice(0,3).map(m=>(
-          <div key={m} style={{color:"rgba(255,255,255,.7)",fontSize:12,marginTop:4}}>
+          <div key={m} style={{color:"rgba(255,255,255,.7)",fontSize:17,marginTop:4}}>
             📅 {m}: {fmtCur(byMonth[m])}
           </div>
         ))}
@@ -2082,14 +2082,14 @@ function IncomeTab({farm,income,setIncome,showToast}){
       <Btn onClick={()=>{setShow(!show);setEditId(null);setForm(E);}} col="#1B5E20" full icon="🌾">{t("addIncome")}</Btn>
       {show&&(
         <Card style={{border:"2px solid #A5D6A7",marginTop:14}}>
-          <div style={{fontSize:15,fontWeight:700,color:"#1B5E20",marginBottom:14}}>🌾 {t("addIncome")}</div>
+          <div style={{fontSize:17,fontWeight:700,color:"#1B5E20",marginBottom:14}}>🌾 {t("addIncome")}</div>
           <div style={{display:"flex",gap:8,marginBottom:14}}>
             {INCOME_TYPES.map(tp=>(
               <div key={tp} onClick={()=>setForm({...form,type:tp})}
                 style={{flex:1,padding:"10px 8px",textAlign:"center",borderRadius:12,cursor:"pointer",
                   border:`1.5px solid ${form.type===tp?"#1B5E20":"#ddd"}`,
                   background:form.type===tp?"#E8F5E9":"#fff",
-                  fontWeight:form.type===tp?700:400,fontSize:13,color:form.type===tp?"#1B5E20":"#555"}}>
+                  fontWeight:form.type===tp?700:400,fontSize:18,color:form.type===tp?"#1B5E20":"#555"}}>
                 {form.type===tp?"✅ ":""}{t(tp)}
               </div>
             ))}
@@ -2109,7 +2109,7 @@ function IncomeTab({farm,income,setIncome,showToast}){
           <Field label={t("totalIncome")+" (₹) *"}>
             <div style={{display:"flex",gap:8,alignItems:"center"}}>
               <input type="number" value={form.totalAmt} onChange={e=>setForm({...form,totalAmt:e.target.value})} placeholder="0" style={{flex:1}}/>
-              {form.qty&&form.ratePerUnit&&<div style={{padding:"10px 12px",background:"#E8F5E9",borderRadius:10,fontSize:13,fontWeight:700,color:"#1B5E20",flexShrink:0}}>{fmtCur((+form.qty)*(+form.ratePerUnit))}</div>}
+              {form.qty&&form.ratePerUnit&&<div style={{padding:"10px 12px",background:"#E8F5E9",borderRadius:10,fontSize:18,fontWeight:700,color:"#1B5E20",flexShrink:0}}>{fmtCur((+form.qty)*(+form.ratePerUnit))}</div>}
             </div>
           </Field>
           <Field label={t("payMode")} mb={14}>
@@ -2119,7 +2119,7 @@ function IncomeTab({farm,income,setIncome,showToast}){
                   style={{flex:1,padding:"9px 6px",textAlign:"center",borderRadius:12,cursor:"pointer",
                     border:`1.5px solid ${form.payMode===pm?"#1B5E20":"#ddd"}`,
                     background:form.payMode===pm?"#E8F5E9":"#fff",
-                    fontSize:12,fontWeight:form.payMode===pm?700:400,color:form.payMode===pm?"#1B5E20":"#555"}}>
+                    fontSize:17,fontWeight:form.payMode===pm?700:400,color:form.payMode===pm?"#1B5E20":"#555"}}>
                   {pm==="cash"?"💵":pm==="cheque"?"📝":"📱"} {t(pm)}
                 </div>
               ))}
@@ -2137,18 +2137,18 @@ function IncomeTab({farm,income,setIncome,showToast}){
               <div style={{display:"flex",alignItems:"center",gap:10}}>
                 <div style={{width:44,height:44,background:"#E8F5E9",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>🌾</div>
                 <div>
-                  <div style={{fontWeight:700,fontSize:15,color:"#1B5E20"}}>{x.crop||t("otherIncome")}</div>
-                  <div style={{fontSize:12,color:"#888"}}>{fmt(x.date)}{x.buyer?" · "+x.buyer:""}{x.market?" · "+x.market:""}</div>
-                  {x.qty&&<div style={{fontSize:12,color:"#555"}}>{x.qty} {x.unit} × {fmtCur(x.ratePerUnit)}</div>}
-                  <div style={{fontSize:11,color:"#555",marginTop:2}}>{x.payMode==="cash"?"💵 Cash":x.payMode==="cheque"?"📝 Cheque":"📱 UPI/Online"}</div>
+                  <div style={{fontWeight:700,fontSize:17,color:"#1B5E20"}}>{x.crop||t("otherIncome")}</div>
+                  <div style={{fontSize:17,color:"#888"}}>{fmt(x.date)}{x.buyer?" · "+x.buyer:""}{x.market?" · "+x.market:""}</div>
+                  {x.qty&&<div style={{fontSize:17,color:"#555"}}>{x.qty} {x.unit} × {fmtCur(x.ratePerUnit)}</div>}
+                  <div style={{fontSize:17,color:"#555",marginTop:2}}>{x.payMode==="cash"?"💵 Cash":x.payMode==="cheque"?"📝 Cheque":"📱 UPI/Online"}</div>
                 </div>
               </div>
               <div style={{fontSize:20,fontWeight:800,color:"#1B5E20"}}>{fmtCur(x.totalAmt)}</div>
             </div>
-            {x.note&&<div style={{fontSize:12,color:"#888",fontStyle:"italic",marginBottom:8}}>"{x.note}"</div>}
+            {x.note&&<div style={{fontSize:17,color:"#888",fontStyle:"italic",marginBottom:8}}>"{x.note}"</div>}
             <div style={{display:"flex",gap:8}}>
-              <button onClick={()=>{setForm({...x});setEditId(x.id);setShow(true);}} style={{flex:1,background:"#E8F5E9",border:"none",borderRadius:10,padding:9,fontSize:13,fontWeight:600,cursor:"pointer",color:"#1B5E20"}}>✏️ {t("edit")}</button>
-              <button onClick={()=>del(x.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:10,padding:9,fontSize:13,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {t("delete")}</button>
+              <button onClick={()=>{setForm({...x});setEditId(x.id);setShow(true);}} style={{flex:1,background:"#E8F5E9",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#1B5E20"}}>✏️ {t("edit")}</button>
+              <button onClick={()=>del(x.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {t("delete")}</button>
             </div>
           </Card>
         );})}
@@ -2222,7 +2222,7 @@ ${farm.budget?.devBudget?`<h2>💰 Budget Overview</h2><div class="summary"><div
   return(
     <div style={{minHeight:"100vh",background:"#F0F4F0"}}>
       <div style={{background:"#37474F",padding:"14px 16px",display:"flex",alignItems:"center",gap:12,color:"#fff"}}>
-        <button onClick={onBack} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"8px 14px",fontSize:14,cursor:"pointer"}}>‹ {t("back")}</button>
+        <button onClick={onBack} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"8px 14px",fontSize:18,cursor:"pointer"}}>‹ {t("back")}</button>
         <div style={{fontSize:17,fontWeight:700}}>📊 {t("reportTitle")}</div>
       </div>
       <div style={{padding:16}}>
@@ -2230,10 +2230,10 @@ ${farm.budget?.devBudget?`<h2>💰 Budget Overview</h2><div class="summary"><div
           <Field label={t("dateFrom")} required><input type="date" value={df} onChange={e=>setDf(e.target.value)}/></Field>
           <Field label={t("dateTo")} required mb={16}><input type="date" value={dt} onChange={e=>setDt(e.target.value)}/></Field>
           <Btn onClick={gen} col={farm.col} full>📄 {t("generateReport")}</Btn>
-          <div style={{fontSize:12,color:"#888",textAlign:"center",marginTop:10}}>Opens in new tab → Print or Save as PDF</div>
+          <div style={{fontSize:17,color:"#888",textAlign:"center",marginTop:10}}>Opens in new tab → Print or Save as PDF</div>
         </Card>
         <Card>
-          <div style={{fontSize:14,fontWeight:700,marginBottom:12}}>{t("preview")}</div>
+          <div style={{fontSize:18,fontWeight:700,marginBottom:12}}>{t("preview")}</div>
           {[
             ["📋",`${allTasks.reduce((a,tg)=>a+tg.sub.filter((_,i)=>(tasks[tg.id+"-"+i]?.status||"pending")==="taskDone").length,0)}/${allTasks.reduce((a,tg)=>a+tg.sub.length,0)}`],
             ["💸",fmtCur(fE.reduce((a,e)=>a+(+e.amount||0),0))+" expenses"],
@@ -2244,7 +2244,7 @@ ${farm.budget?.devBudget?`<h2>💰 Budget Overview</h2><div class="summary"><div
           ].map(([ic,v])=>(
             <div key={ic} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 0",borderBottom:"1px solid #f5f5f5"}}>
               <span style={{fontSize:18,width:26}}>{ic}</span>
-              <span style={{fontSize:13,fontWeight:500,color:"#333"}}>{v}</span>
+              <span style={{fontSize:18,fontWeight:500,color:"#333"}}>{v}</span>
             </div>
           ))}
         </Card>
@@ -2260,7 +2260,7 @@ function ManagePage({user,onBack,showToast}){
   return(
     <div style={{minHeight:"100vh",background:"#F0F4F0"}}>
       <div style={{background:"#37474F",padding:"14px 16px",display:"flex",alignItems:"center",gap:12,color:"#fff"}}>
-        <button onClick={onBack} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"8px 14px",fontSize:14,cursor:"pointer"}}>‹ {t("back")}</button>
+        <button onClick={onBack} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"8px 14px",fontSize:18,cursor:"pointer"}}>‹ {t("back")}</button>
         <div style={{fontSize:17,fontWeight:700}}>{t("manageTitle")}</div>
       </div>
       <div style={{display:"flex",padding:"12px 16px 0",gap:8,overflowX:"auto"}}>
@@ -2268,7 +2268,7 @@ function ManagePage({user,onBack,showToast}){
           <button key={id} onClick={()=>setTab(id)}
             style={{background:tab===id?"#37474F":"#fff",color:tab===id?"#fff":"#555",
               border:`1.5px solid ${tab===id?"#37474F":"#ddd"}`,borderRadius:20,
-              padding:"8px 16px",fontSize:13,fontWeight:600,whiteSpace:"nowrap",flexShrink:0,cursor:"pointer"}}>
+              padding:"8px 16px",fontSize:18,fontWeight:600,whiteSpace:"nowrap",flexShrink:0,cursor:"pointer"}}>
             {lb}
           </button>
         ))}
@@ -2295,19 +2295,19 @@ function ManageFarms({showToast}){
   if(editing)return<FarmCreation editFarm={editing} onDone={async f=>{const cur=await dbGet(gk("farms"))||[];const upd=cur.map(x=>x.id===f.id?f:x);await dbSet(gk("farms"),upd);setEditing(null);showToast("✅ "+t("saved"));}} onBack={()=>setEditing(null)} showToast={showToast}/>;
   return(
     <div>
-      <div style={{fontSize:14,fontWeight:700,marginBottom:14}}>{t("farmsTab")}</div>
+      <div style={{fontSize:18,fontWeight:700,marginBottom:14}}>{t("farmsTab")}</div>
       {farms.map(f=>(
         <Card key={f.id}>
           <div style={{display:"flex",alignItems:"center",gap:12}}>
             <div style={{width:48,height:48,background:f.col,borderRadius:14,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>{f.icon}</div>
             <div style={{flex:1}}>
               <div style={{fontWeight:700,fontSize:15}}>{f.name}</div>
-              <div style={{fontSize:12,color:"#888",marginTop:2}}>{f.type}{f.location?.village?" · "+f.location.village:""}</div>
-              {f.land?.totalAcres&&<div style={{fontSize:11,color:"#555",marginTop:2}}>{f.land.totalAcres} acres · {f.land.purchasedAcres||"?"} purchased</div>}
+              <div style={{fontSize:17,color:"#888",marginTop:2}}>{f.type}{f.location?.village?" · "+f.location.village:""}</div>
+              {f.land?.totalAcres&&<div style={{fontSize:17,color:"#555",marginTop:2}}>{f.land.totalAcres} acres · {f.land.purchasedAcres||"?"} purchased</div>}
             </div>
             <div style={{display:"flex",gap:8}}>
-              <button onClick={()=>setEditing(f)} style={{background:"#E3F2FD",border:"none",borderRadius:10,padding:"8px 12px",fontSize:14,cursor:"pointer",color:"#1565C0"}}>✏️</button>
-              <button onClick={()=>del(f.id)} style={{background:"#FFEBEE",border:"none",borderRadius:10,padding:"8px 12px",fontSize:14,cursor:"pointer",color:"#C62828"}}>🗑</button>
+              <button onClick={()=>setEditing(f)} style={{background:"#E3F2FD",border:"none",borderRadius:10,padding:"8px 12px",fontSize:18,cursor:"pointer",color:"#1565C0"}}>✏️</button>
+              <button onClick={()=>del(f.id)} style={{background:"#FFEBEE",border:"none",borderRadius:10,padding:"8px 12px",fontSize:18,cursor:"pointer",color:"#C62828"}}>🗑</button>
             </div>
           </div>
         </Card>
@@ -2355,7 +2355,7 @@ function ManageUsers({showToast}){
             <Field label={t("assignFarms")} mb={14}>
               {farms.map(f=>(
                 <div key={f.id} onClick={()=>tf(f.id)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:form.farms.includes(f.id)?"#E8F5E9":"#f9f9f9",borderRadius:12,marginBottom:8,cursor:"pointer",border:`1.5px solid ${form.farms.includes(f.id)?"#A5D6A7":"#eee"}`}}>
-                  <span style={{fontSize:20}}>{f.icon}</span><span style={{fontSize:13,fontWeight:600,flex:1}}>{f.name}</span>
+                  <span style={{fontSize:20}}>{f.icon}</span><span style={{fontSize:18,fontWeight:600,flex:1}}>{f.name}</span>
                   <span style={{fontSize:18}}>{form.farms.includes(f.id)?"✅":"☐"}</span>
                 </div>
               ))}
@@ -2369,17 +2369,17 @@ function ManageUsers({showToast}){
           <div style={{display:"flex",alignItems:"center",gap:12}}>
             <div style={{width:46,height:46,borderRadius:"50%",background:u.role==="owner"?"#FFF9C4":"#E3F2FD",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>{u.role==="owner"?"👑":"👷"}</div>
             <div style={{flex:1}}>
-              <div style={{fontWeight:700,fontSize:14,display:"flex",alignItems:"center",gap:6}}>
+              <div style={{fontWeight:700,fontSize:18,display:"flex",alignItems:"center",gap:6}}>
                 {dispName(u)||u.id}
-                <span style={{fontSize:11,background:u.active===false?"#FFEBEE":"#E8F5E9",color:u.active===false?"#C62828":"#2E7D32",borderRadius:8,padding:"2px 7px"}}>{u.active===false?t("revoked"):t("active")}</span>
+                <span style={{fontSize:17,background:u.active===false?"#FFEBEE":"#E8F5E9",color:u.active===false?"#C62828":"#2E7D32",borderRadius:8,padding:"2px 7px"}}>{u.active===false?t("revoked"):t("active")}</span>
               </div>
-              <div style={{fontSize:11,color:"#888",marginTop:2}}>ID: {u.id} · {u.role==="owner"?t("owner"):t("supervisor")}{u.mobile?" · 📱"+u.mobile:""}</div>
-              {u.role==="sup"&&<div style={{fontSize:11,color:"#555",marginTop:2}}>{t("assignFarms")}: {(u.farms||[]).length===0?"None":farms.filter(f=>(u.farms||[]).includes(f.id)).map(f=>f.name).join(", ")||"None"}</div>}
+              <div style={{fontSize:17,color:"#888",marginTop:2}}>ID: {u.id} · {u.role==="owner"?t("owner"):t("supervisor")}{u.mobile?" · 📱"+u.mobile:""}</div>
+              {u.role==="sup"&&<div style={{fontSize:17,color:"#555",marginTop:2}}>{t("assignFarms")}: {(u.farms||[]).length===0?"None":farms.filter(f=>(u.farms||[]).includes(f.id)).map(f=>f.name).join(", ")||"None"}</div>}
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:6}}>
-              <button onClick={()=>{setForm({id:u.id,firstName:u.firstName||"",lastName:u.lastName||"",mobile:u.mobile||"",role:u.role,pass:u.pass,farms:u.farms||[],active:u.active!==false,lang:u.lang||"kn"});setEditId(u.id);setShow(true);}} style={{background:"#E3F2FD",border:"none",borderRadius:10,padding:"7px 11px",fontSize:13,cursor:"pointer",color:"#1565C0"}}>✏️</button>
-              {u.id!=="owner"&&<><button onClick={()=>toggleActive(u.id)} style={{background:u.active===false?"#E8F5E9":"#FFF3E0",border:"none",borderRadius:10,padding:"7px 11px",fontSize:13,cursor:"pointer",color:u.active===false?"#2E7D32":"#E65100"}}>{u.active===false?"✓":"🚫"}</button>
-              <button onClick={()=>del(u.id)} style={{background:"#FFEBEE",border:"none",borderRadius:10,padding:"7px 11px",fontSize:13,cursor:"pointer",color:"#C62828"}}>🗑</button></>}
+              <button onClick={()=>{setForm({id:u.id,firstName:u.firstName||"",lastName:u.lastName||"",mobile:u.mobile||"",role:u.role,pass:u.pass,farms:u.farms||[],active:u.active!==false,lang:u.lang||"kn"});setEditId(u.id);setShow(true);}} style={{background:"#E3F2FD",border:"none",borderRadius:10,padding:"7px 11px",fontSize:18,cursor:"pointer",color:"#1565C0"}}>✏️</button>
+              {u.id!=="owner"&&<><button onClick={()=>toggleActive(u.id)} style={{background:u.active===false?"#E8F5E9":"#FFF3E0",border:"none",borderRadius:10,padding:"7px 11px",fontSize:18,cursor:"pointer",color:u.active===false?"#2E7D32":"#E65100"}}>{u.active===false?"✓":"🚫"}</button>
+              <button onClick={()=>del(u.id)} style={{background:"#FFEBEE",border:"none",borderRadius:10,padding:"7px 11px",fontSize:18,cursor:"pointer",color:"#C62828"}}>🗑</button></>}
             </div>
           </div>
         </Card>
@@ -2395,7 +2395,7 @@ function ManageAccess(){
   if(!users)return<div style={{display:"flex",justifyContent:"center",padding:40}}><Spinner/></div>;
   return(
     <div>
-      <div style={{fontSize:14,fontWeight:700,marginBottom:14}}>🔐 {t("accessTab")}</div>
+      <div style={{fontSize:18,fontWeight:700,marginBottom:14}}>🔐 {t("accessTab")}</div>
       {users.length===0&&<Empty icon="👥" text={t("noActivity")}/>}
       {users.map(u=>(
         <Card key={u.id}>
@@ -2403,13 +2403,13 @@ function ManageAccess(){
             <span style={{fontSize:20}}>👷</span>
             <div>
               <div style={{fontWeight:700,fontSize:14}}>{dispName(u)||u.id}</div>
-              <div style={{fontSize:12,color:"#888"}}>ID: {u.id}{u.mobile?" · 📱"+u.mobile:""} · {u.active===false?"🔴 "+t("revoked"):"🟢 "+t("active")}</div>
+              <div style={{fontSize:17,color:"#888"}}>ID: {u.id}{u.mobile?" · 📱"+u.mobile:""} · {u.active===false?"🔴 "+t("revoked"):"🟢 "+t("active")}</div>
             </div>
           </div>
           {farms.map(f=>{const has=(u.farms||[]).includes(f.id);return(
             <div key={f.id} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",background:has?"#E8F5E9":"#F5F5F5",borderRadius:10,marginBottom:6}}>
               <span style={{fontSize:18}}>{f.icon}</span>
-              <span style={{fontSize:13,fontWeight:600,flex:1,color:has?"#2E7D32":"#aaa"}}>{f.name}</span>
+              <span style={{fontSize:18,fontWeight:600,flex:1,color:has?"#2E7D32":"#aaa"}}>{f.name}</span>
               <span>{has?"✅":"—"}</span>
             </div>
           );})}
@@ -2435,11 +2435,11 @@ class AppErrorBoundary extends React.Component{
         alignItems:"center",justifyContent:"center",padding:24,background:"#F0F4F0",textAlign:"center"}}>
         <div style={{fontSize:52,marginBottom:16}}>⚠️</div>
         <div style={{fontSize:18,fontWeight:700,color:"#C62828",marginBottom:8}}>ದೋಷ ಸಂಭವಿಸಿದೆ</div>
-        <div style={{fontSize:13,color:"#666",marginBottom:20}}>Something went wrong. Please go back and try again.</div>
-        <div style={{background:"#FFEBEE",borderRadius:12,padding:"12px 16px",fontSize:11,color:"#C62828",marginBottom:20,maxWidth:340,wordBreak:"break-all",textAlign:"left"}}>
+        <div style={{fontSize:18,color:"#666",marginBottom:20}}>Something went wrong. Please go back and try again.</div>
+        <div style={{background:"#FFEBEE",borderRadius:12,padding:"12px 16px",fontSize:17,color:"#C62828",marginBottom:20,maxWidth:340,wordBreak:"break-all",textAlign:"left"}}>
           {this.state.err?.message||"Unknown error"}
         </div>
-        <button onClick={()=>window.location.reload()} style={{background:"#1B5E20",color:"#fff",border:"none",borderRadius:12,padding:"12px 24px",fontSize:14,fontWeight:700,cursor:"pointer"}}>
+        <button onClick={()=>window.location.reload()} style={{background:"#1B5E20",color:"#fff",border:"none",borderRadius:12,padding:"12px 24px",fontSize:18,fontWeight:700,cursor:"pointer"}}>
           🔄 Reload App
         </button>
       </div>
@@ -2551,13 +2551,13 @@ function FarmApp({user,setUser,farm,onSwitch,onLogout,showToast}){
     <div style={{maxWidth:520,margin:"0 auto"}}>
       <Header user={user} farm={farm} onSwitch={onSwitch} onLogout={onLogout} onProfile={()=>setOverlay("profile")} syncing={true}/>
       <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"60px 20px",gap:16}}>
-        <Spinner size={42}/><div style={{fontSize:14,color:"#666"}}>{t("loading")}</div>
+        <Spinner size={42}/><div style={{fontSize:18,color:"#666"}}>{t("loading")}</div>
       </div>
     </div>
   );
 
   return(
-    <div style={{maxWidth:520,margin:"0 auto",background:"#F0F4F0",minHeight:"100vh",paddingBottom:76}}>
+    <div style={{maxWidth:520,margin:"0 auto",background:"#F0F4F0",minHeight:"100vh",paddingBottom:100}}>
       <Header user={user} farm={farm} onSwitch={onSwitch} onLogout={onLogout} onProfile={()=>setOverlay("profile")} syncing={syncing}/>
 
       {page==="home"&&(
@@ -2615,9 +2615,9 @@ function App(){
           width:96,height:96,background:"rgba(255,255,255,.15)",
           borderRadius:30,border:"2px solid rgba(255,255,255,.3)",fontSize:52}}>🌾</div>
         <div style={{fontSize:40,fontWeight:900,color:"#fff",letterSpacing:"-0.03em",marginTop:4}}>ನಮ್ಮ ತೋಟ</div>
-        <div style={{fontSize:13,color:"rgba(255,255,255,.6)",letterSpacing:"0.08em",textTransform:"uppercase"}}>NammaThota</div>
+        <div style={{fontSize:18,color:"rgba(255,255,255,.6)",letterSpacing:"0.08em",textTransform:"uppercase"}}>NammaThota</div>
         <Spinner size={32} col="rgba(255,255,255,.7)"/>
-        <div style={{position:"absolute",bottom:30,fontSize:11,color:"rgba(255,255,255,.35)",letterSpacing:"0.04em",textAlign:"center"}}>
+        <div style={{position:"absolute",bottom:30,fontSize:17,color:"rgba(255,255,255,.35)",letterSpacing:"0.04em",textAlign:"center"}}>
           CodeTrail Technologies Private Limited
         </div>
       </div>
