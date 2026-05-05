@@ -1953,39 +1953,45 @@ function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,showToast}){
   const[editId,setEditId]=useState(null);
   const[savedId,setSavedId]=useState(null);
 
-  const label=c=>c?(c.icon+" "+(lang==="kn"?c.kn:c.en)):"";
-  const catObj=id=>ECAT.find(c=>c.id===id)||ECAT[ECAT.length-1];
+  const getLabel=c=>c?(c.icon+" "+(lang==="kn"?c.kn:c.en)):"";
 
-  const save=()=>{
-    if(!form.amount){showToast((lang==="kn"?"ಮೊತ್ತ ನಮೂದಿಸಿ":"Amount required"),"warn");return;}
-    if(!form.date){showToast((lang==="kn"?"ದಿನಾಂಕ ನಮೂದಿಸಿ":"Date required"),"warn");return;}
+  const handleSave=()=>{
+    if(!form.amount){showToast(lang==="kn"?"ಮೊತ್ತ ನಮೂದಿಸಿ":"Enter amount","warn");return;}
     const nid=editId||uid();
-    if(editId)setExpenses(p=>p.map(x=>x.id===editId?{...x,...form}:x));
-    else setExpenses(p=>[{id:nid,...form},...p]);
-    setSavedId(nid);showToast("✅ "+(lang==="kn"?"ಉಳಿಸಲಾಗಿದೆ":"Saved"));
+    if(editId){setExpenses(p=>p.map(x=>x.id===editId?{...x,...form}:x));}
+    else{setExpenses(p=>[{id:nid,...form},...p]);}
+    setSavedId(nid);
+    showToast("✅ "+(lang==="kn"?"ಉಳಿಸಲಾಗಿದೆ":"Saved"));
     setTimeout(()=>{setSavedId(null);setForm(E);setShow(false);setEditId(null);},1600);
   };
-  const del=id=>{
+
+  const handleDelete=id=>{
     if(window.confirm(lang==="kn"?"ಈ ಖರ್ಚು ಅಳಿಸುವುದೇ?":"Delete this expense?"))
       setExpenses(p=>p.filter(x=>x.id!==id));
   };
 
   const total=expenses.reduce((a,e)=>a+(+e.amount||0),0);
 
+  const activeBorder="2px solid #E65100";
+  const inactiveBorder="2px solid #eee";
+  const activeBg="#FFF3E0";
+  const inactiveBg="#fafafa";
+
   return(
     <div>
-      {/* Summary card */}
-      <div style={{background:"#E65100",borderRadius:18,padding:"16px",marginBottom:14,color:"#fff"}}>
+      {/* Total card */}
+      <div style={{background:"#E65100",borderRadius:18,padding:16,marginBottom:14,color:"#fff"}}>
         <div style={{fontSize:14,opacity:.8}}>{lang==="kn"?"ಒಟ್ಟು ಖರ್ಚು":"Total Expenses"}</div>
         <div style={{fontSize:28,fontWeight:800,marginTop:4}}>{fmtCur(total)}</div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:10}}>
           {ECAT.map(c=>{
             const s=expenses.filter(e=>e.cat===c.id).reduce((a,e)=>a+(+e.amount||0),0);
-            return s>0?(
+            if(!s)return null;
+            return(
               <div key={c.id} style={{background:"rgba(255,255,255,.2)",borderRadius:20,padding:"4px 12px",fontSize:13,color:"#fff"}}>
                 {c.icon} {lang==="kn"?c.kn:c.en}: {fmtCur(s)}
               </div>
-            ):null;
+            );
           })}
         </div>
       </div>
@@ -1993,55 +1999,58 @@ function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,showToast}){
       {/* Add button */}
       <button onClick={()=>{setShow(!show);setEditId(null);setForm(E);}}
         style={{width:"100%",background:"#E65100",color:"#fff",border:"none",
-          borderRadius:16,padding:"15px",fontSize:17,fontWeight:700,
-          cursor:"pointer",marginBottom:14,display:"flex",
-          alignItems:"center",justifyContent:"center",gap:10}}>
-        ➕ {lang==="kn"?"ಖರ್ಚು ಸೇರಿಸಿ":"Add Expense"}
+          borderRadius:16,padding:15,fontSize:17,fontWeight:700,cursor:"pointer",
+          marginBottom:14,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+        {show?"✕ "+(lang==="kn"?"ರದ್ದು":"Cancel"):"➕ "+(lang==="kn"?"ಖರ್ಚು ಸೇರಿಸಿ":"Add Expense")}
       </button>
 
       {/* Form */}
       {show&&(
-        <div style={{background:"#fff",borderRadius:18,padding:"18px",
+        <div style={{background:"#fff",borderRadius:18,padding:18,
           border:"2px solid #FFCC80",marginBottom:14,
           boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+
           <div style={{fontSize:17,fontWeight:700,color:"#E65100",marginBottom:16}}>
             {editId?(lang==="kn"?"ಸಂಪಾದಿಸಿ":"Edit"):(lang==="kn"?"ಹೊಸ":"New")} {lang==="kn"?"ಖರ್ಚು":"Expense"}
           </div>
 
           {/* Date */}
-          <div style={{marginBottom:12}}>
+          <div style={{marginBottom:14}}>
             <div style={{fontSize:14,fontWeight:600,color:"#333",marginBottom:6}}>
-              📅 {lang==="kn"?"ದಿನಾಂಕ":"Date"} *
+              📅 {lang==="kn"?"ದಿನಾಂಕ *":"Date *"}
             </div>
             <input type="date" value={form.date}
               onChange={e=>setForm({...form,date:e.target.value})}/>
           </div>
 
-          {/* Category — BIG visual picker */}
+          {/* Category grid */}
           <div style={{marginBottom:14}}>
             <div style={{fontSize:14,fontWeight:600,color:"#333",marginBottom:8}}>
-              🏷️ {lang==="kn"?"ವರ್ಗ":"Category"} *
+              🏷️ {lang==="kn"?"ವರ್ಗ ಆಯ್ಕೆ ಮಾಡಿ *":"Select Category *"}
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-              {ECAT.map(c=>(
-                <div key={c.id} onClick={()=>setForm({...form,cat:c.id})}
-                  style={{
-                    padding:"12px 10px",borderRadius:14,cursor:"pointer",
-                    border:`2px solid ${form.cat===c.id?"#E65100":"#eee"}`,
-                    background:form.cat===c.id?"#FFF3E0":"#fafafa",
-                    display:"flex",alignItems:"center",gap:8,
-                    transition:"all .15s",
-                  }}>
-                  <span style={{fontSize:22}}>{c.icon}</span>
-                  <div>
-                    <div style={{fontSize:14,fontWeight:form.cat===c.id?700:500,
-                      color:form.cat===c.id?"#E65100":"#333"}}>
-                      {lang==="kn"?c.kn:c.en}
+              {ECAT.map(c=>{
+                const active=form.cat===c.id;
+                return(
+                  <div key={c.id}
+                    onClick={()=>setForm({...form,cat:c.id})}
+                    style={{
+                      padding:"12px 10px",borderRadius:14,cursor:"pointer",
+                      border:active?activeBorder:inactiveBorder,
+                      background:active?activeBg:inactiveBg,
+                      display:"flex",alignItems:"center",gap:8,
+                    }}>
+                    <span style={{fontSize:22}}>{c.icon}</span>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:14,fontWeight:active?700:500,
+                        color:active?"#E65100":"#333",lineHeight:1.3}}>
+                        {lang==="kn"?c.kn:c.en}
+                      </div>
                     </div>
+                    {active&&<span style={{fontSize:16,flexShrink:0}}>✅</span>}
                   </div>
-                  {form.cat===c.id&&<span style={{marginLeft:"auto",fontSize:16}}>✅</span>}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -2050,18 +2059,20 @@ function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,showToast}){
             <div style={{fontSize:14,fontWeight:600,color:"#333",marginBottom:6}}>
               📝 {lang==="kn"?"ವಿವರ":"Description"}
             </div>
-            <input value={form.desc} onChange={e=>setForm({...form,desc:e.target.value})}
+            <input value={form.desc}
+              onChange={e=>setForm({...form,desc:e.target.value})}
               placeholder={lang==="kn"?"ಖರ್ಚಿನ ವಿವರ...":"Description..."}/>
           </div>
 
           {/* Amount */}
           <div style={{marginBottom:12}}>
             <div style={{fontSize:14,fontWeight:600,color:"#333",marginBottom:6}}>
-              💰 {lang==="kn"?"ಮೊತ್ತ (₹)":"Amount (₹)"} *
+              💰 {lang==="kn"?"ಮೊತ್ತ (₹) *":"Amount (₹) *"}
             </div>
-            <input type="number" value={form.amount}
+            <input type="number" inputMode="numeric"
+              value={form.amount}
               onChange={e=>setForm({...form,amount:e.target.value})}
-              placeholder="0" inputMode="numeric"/>
+              placeholder="0"/>
           </div>
 
           {/* Link to Task */}
@@ -2069,8 +2080,9 @@ function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,showToast}){
             <div style={{fontSize:14,fontWeight:600,color:"#333",marginBottom:6}}>
               📋 {lang==="kn"?"ಕೆಲಸಕ್ಕೆ ಲಿಂಕ್ (ಐಚ್ಛಿಕ)":"Link to Task (Optional)"}
             </div>
-            <select value={form.taskId} onChange={e=>setForm({...form,taskId:e.target.value})}>
-              <option value="">— {lang==="kn"?"ಆಯ್ಕೆ ಮಾಡಿ":"Select Task"} —</option>
+            <select value={form.taskId}
+              onChange={e=>setForm({...form,taskId:e.target.value})}>
+              <option value="">— {lang==="kn"?"ಆಯ್ಕೆ":"Select"} —</option>
               {(allTasks||[]).map(tg=>(
                 <option key={tg.id} value={tg.id}>
                   {tg.id}: {lang==="kn"?tg.kn:tg.en}
@@ -2084,8 +2096,9 @@ function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,showToast}){
             <div style={{fontSize:14,fontWeight:600,color:"#333",marginBottom:6}}>
               🚗 {lang==="kn"?"ಪ್ರಯಾಣಕ್ಕೆ ಲಿಂಕ್ (ಐಚ್ಛಿಕ)":"Link to Trip (Optional)"}
             </div>
-            <select value={form.tripId} onChange={e=>setForm({...form,tripId:e.target.value})}>
-              <option value="">— {lang==="kn"?"ಆಯ್ಕೆ ಮಾಡಿ":"Select"} —</option>
+            <select value={form.tripId}
+              onChange={e=>setForm({...form,tripId:e.target.value})}>
+              <option value="">— {lang==="kn"?"ಆಯ್ಕೆ":"Select"} —</option>
               {trips.map(tr=>(
                 <option key={tr.id} value={tr.id}>
                   {fmt(tr.date)}: {tr.from}→{tr.to}
@@ -2099,17 +2112,19 @@ function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,showToast}){
             <div style={{fontSize:14,fontWeight:600,color:"#333",marginBottom:6}}>
               🗒️ {lang==="kn"?"ಟಿಪ್ಪಣಿ (ಐಚ್ಛಿಕ)":"Note (Optional)"}
             </div>
-            <textarea value={form.note} onChange={e=>setForm({...form,note:e.target.value})}
-              rows={2} placeholder={lang==="kn"?"ಟಿಪ್ಪಣಿ...":"Note..."}/>
+            <textarea value={form.note}
+              onChange={e=>setForm({...form,note:e.target.value})}
+              rows={2}
+              placeholder={lang==="kn"?"ಟಿಪ್ಪಣಿ...":"Note..."}/>
           </div>
 
           <div style={{display:"flex",gap:10}}>
-            <button onClick={save}
+            <button onClick={handleSave}
               style={{flex:1,background:"#E65100",color:"#fff",border:"none",
-                borderRadius:14,padding:"14px",fontSize:17,fontWeight:700,cursor:"pointer"}}>
+                borderRadius:14,padding:14,fontSize:17,fontWeight:700,cursor:"pointer"}}>
               💾 {lang==="kn"?"ಉಳಿಸಿ":"Save"}
             </button>
-            <button onClick={()=>{setShow(false);setEditId(null);}}
+            <button onClick={()=>{setShow(false);setEditId(null);setForm(E);}}
               style={{background:"#f0f0f0",border:"none",color:"#555",
                 borderRadius:14,padding:"14px 18px",fontSize:17,fontWeight:600,cursor:"pointer"}}>
               {lang==="kn"?"ರದ್ದು":"Cancel"}
@@ -2118,25 +2133,25 @@ function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,showToast}){
         </div>
       )}
 
-      {/* Expense list */}
+      {/* List */}
       {expenses.length===0&&(
-        <div style={{textAlign:"center",padding:"48px 20px",color:"#aaa"}}>
-          <div style={{fontSize:52,marginBottom:12}}>💸</div>
+        <div style={{textAlign:"center",padding:"40px 20px",color:"#aaa"}}>
+          <div style={{fontSize:48,marginBottom:12}}>💸</div>
           <div style={{fontSize:16}}>{lang==="kn"?"ಯಾವುದೇ ಖರ್ಚು ಇಲ್ಲ":"No expenses yet"}</div>
         </div>
       )}
+
       {expenses.map(e=>{
-        const c=catObj(e.cat);
-        const isSaved=savedId===e.id;
-        const linkedTask=(allTasks||[]).find(tg=>tg.id===e.taskId);
+        const c=ECAT.find(x=>x.id===e.cat)||ECAT[ECAT.length-1];
+        const linked=(allTasks||[]).find(tg=>tg.id===e.taskId);
+        const saved=savedId===e.id;
         return(
-          <div key={e.id} style={{background:"#fff",borderRadius:18,
-            padding:"16px",marginBottom:12,
-            boxShadow:"0 2px 10px rgba(0,0,0,.07)",
-            border:`2px solid ${isSaved?"#FFCC80":"transparent"}`,
+          <div key={e.id} style={{background:"#fff",borderRadius:18,padding:16,
+            marginBottom:12,boxShadow:"0 2px 10px rgba(0,0,0,.07)",
+            border:saved?"2px solid #FFCC80":"2px solid transparent",
             transition:"border .4s"}}>
             <div style={{display:"flex",justifyContent:"space-between",
-              alignItems:"flex-start",marginBottom:8}}>
+              alignItems:"flex-start",marginBottom:10}}>
               <div style={{display:"flex",alignItems:"center",gap:12}}>
                 <div style={{width:46,height:46,background:"#FFF3E0",borderRadius:14,
                   display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>
@@ -2149,14 +2164,18 @@ function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,showToast}){
                   <div style={{fontSize:14,color:"#888",marginTop:2}}>
                     📅 {fmt(e.date)}{e.desc?" · "+e.desc:""}
                   </div>
-                  {linkedTask&&(
-                    <div style={{fontSize:13,color:"#1B5E20",marginTop:3,
+                  {linked&&(
+                    <div style={{fontSize:13,color:"#1B5E20",marginTop:4,
                       background:"#E8F5E9",borderRadius:8,padding:"2px 8px",
                       display:"inline-block"}}>
-                      📋 {lang==="kn"?linkedTask.kn:linkedTask.en}
+                      📋 {lang==="kn"?linked.kn:linked.en}
                     </div>
                   )}
-                  {e.note&&<div style={{fontSize:13,color:"#aaa",marginTop:3,fontStyle:"italic"}}>"{e.note}"</div>}
+                  {e.note&&(
+                    <div style={{fontSize:13,color:"#aaa",marginTop:3,fontStyle:"italic"}}>
+                      {'"'}{e.note}{'"'}
+                    </div>
+                  )}
                 </div>
               </div>
               <div style={{fontSize:20,fontWeight:800,color:"#E65100",flexShrink:0,marginLeft:8}}>
@@ -2166,12 +2185,12 @@ function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,showToast}){
             <div style={{display:"flex",gap:8}}>
               <button onClick={()=>{setForm({...e});setEditId(e.id);setShow(true);}}
                 style={{flex:1,background:"#FFF3E0",border:"none",borderRadius:12,
-                  padding:"10px",fontSize:15,fontWeight:600,cursor:"pointer",color:"#E65100"}}>
+                  padding:10,fontSize:15,fontWeight:600,cursor:"pointer",color:"#E65100"}}>
                 ✏️ {lang==="kn"?"ಸಂಪಾದಿಸಿ":"Edit"}
               </button>
-              <button onClick={()=>del(e.id)}
+              <button onClick={()=>handleDelete(e.id)}
                 style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:12,
-                  padding:"10px",fontSize:15,fontWeight:600,cursor:"pointer",color:"#C62828"}}>
+                  padding:10,fontSize:15,fontWeight:600,cursor:"pointer",color:"#C62828"}}>
                 🗑 {lang==="kn"?"ಅಳಿಸಿ":"Delete"}
               </button>
             </div>
