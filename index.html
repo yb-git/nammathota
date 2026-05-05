@@ -742,7 +742,7 @@ function Login({onLogin}){
 }
 
 /* ── Profile Page ─────────────────────────────── */
-function ProfilePage({user,onSave,onBack}){
+function ProfilePage({user,onSave,onBack,onLogout}){
   const{t,lang,setLang}=useLang();
   const[form,setForm]=useState({
     firstName:user.firstName||"",lastName:user.lastName||"",
@@ -797,6 +797,15 @@ function ProfilePage({user,onSave,onBack}){
             </div>
           </Field>
           <SaveBar dirty saved={saved} onSave={save}/>
+          <div style={{marginTop:16,borderTop:"1.5px solid #f0f0f0",paddingTop:16}}>
+            <button onClick={()=>{if(window.confirm(lang==="kn"?"ನಿಜವಾಗಿಯೂ Sign Out ಮಾಡುವುದೇ?":"Sign out?"))onLogout&&onLogout();}}
+              style={{width:"100%",background:"#FFEBEE",border:"1.5px solid #FFCDD2",
+                color:"#C62828",borderRadius:14,padding:14,fontSize:17,
+                fontWeight:700,cursor:"pointer",display:"flex",
+                alignItems:"center",justifyContent:"center",gap:8}}>
+              🚪 {lang==="kn"?"ಸೈನ್ ಔಟ್":"Sign Out"}
+            </button>
+          </div>
         </Card>
       </div>
     </div>
@@ -1222,10 +1231,10 @@ function Header({user,farm,onSwitch,onLogout,onProfile,syncing}){
       {/* Right buttons */}
       <div style={{display:"flex",gap:6,flexShrink:0}}>
         <LangToggle/>
-        <button onClick={onProfile} style={{background:"rgba(255,255,255,.2)",
-          border:"none",color:"#fff",borderRadius:10,
-          width:34,height:34,fontSize:16,cursor:"pointer",
-          display:"flex",alignItems:"center",justifyContent:"center"}}>
+        <button onClick={onProfile} title={t("profileTitle")}
+          style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",
+            borderRadius:10,width:34,height:34,fontSize:16,cursor:"pointer",
+            display:"flex",alignItems:"center",justifyContent:"center"}}>
           👤
         </button>
         <button onClick={onSwitch} title={t("switchFarm")}
@@ -1233,6 +1242,12 @@ function Header({user,farm,onSwitch,onLogout,onProfile,syncing}){
             borderRadius:10,width:34,height:34,fontSize:16,cursor:"pointer",
             display:"flex",alignItems:"center",justifyContent:"center"}}>
           ⇄
+        </button>
+        <button onClick={onLogout} title={t("logout")}
+          style={{background:"rgba(255,255,255,.15)",border:"1.5px solid rgba(255,255,255,.3)",
+            color:"#fff",borderRadius:10,width:34,height:34,fontSize:16,cursor:"pointer",
+            display:"flex",alignItems:"center",justifyContent:"center"}}>
+          🚪
         </button>
       </div>
     </div>
@@ -2606,7 +2621,7 @@ function FarmApp({user,setUser,farm,onSwitch,onLogout,showToast}){
 
   // Overlays
   if(overlay==="profile")return(
-    <ProfilePage user={user} onSave={u=>{setUser(u);setOverlay(null);}} onBack={()=>setOverlay(null)}/>
+    <ProfilePage user={user} onSave={u=>{setUser(u);setOverlay(null);}} onBack={()=>setOverlay(null)} onLogout={onLogout}/>
   );
   if(showPin)return(<><PinGate onVerified={onPinOk} onCancel={()=>{setShowPin(false);setPinTarget(null);}}/></>);
   if(overlay==="report")return(
@@ -2643,7 +2658,7 @@ function FarmApp({user,setUser,farm,onSwitch,onLogout,showToast}){
         <FinancePage farm={farm} expenses={expenses} setExpenses={setExpenses} purchases={purchases} setPurchases={setPurchases} payments={payments} setPayments={setPayments} income={income} setIncome={setIncome} trips={trips} supervisors={supervisors} user={user} showToast={showToast}/>
       )}
       {page==="more"&&(
-        <MorePage farm={farm} docs={docs} setDocs={setDocs} user={user} onManage={isOwner?()=>requirePin("manage"):null} onProfile={()=>setOverlay("profile")} onReport={()=>requirePin("report")} showToast={showToast}/>
+        <MorePage farm={farm} docs={docs} setDocs={setDocs} user={user} onManage={isOwner?()=>requirePin("manage"):null} onProfile={()=>setOverlay("profile")} onReport={()=>requirePin("report")} onLogout={onLogout} showToast={showToast}/>
       )}
 
       <BottomNav page={page} setPage={setPage} isOwner={isOwner} onManageClick={()=>requirePin("manage")}/>
