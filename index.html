@@ -15,6 +15,11 @@ input,select,textarea,button{font-family:inherit;font-size:15px;-webkit-appearan
 input,select,textarea{background:#fff;border:1.5px solid #D0D8D0;border-radius:12px;padding:12px 14px;width:100%;color:#1a1a1a;display:block}
 input[type=number]{-moz-appearance:textfield}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}} @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+        *{box-sizing:border-box;-webkit-tap-highlight-color:rgba(0,0,0,0)}
+        input,select,textarea{outline:none}
+        textarea{resize:none;line-height:1.5}
 input:focus,select:focus,textarea:focus{border-color:#2E7D32;box-shadow:0 0 0 3px rgba(46,125,50,.1)}
 button{cursor:pointer;border:none;border-radius:12px;font-weight:600;transition:transform .1s,opacity .1s;-webkit-user-select:none;user-select:none}
 button:active{transform:scale(0.96)}
@@ -47,8 +52,8 @@ function ls_get(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):nu
 function ls_set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
 function dbSet(k,v){ls_set(k,v);sbSet(k,v);}
 async function dbGet(k){const r=await sbGet(k);if(r!==null){ls_set(k,r);return r;}return ls_get(k);}
-const gk=k=>`nt:global:${k}`;
-const fk=(id,k)=>`nt:farm:${id}:${k}`;
+const gk=k=>"nt:global:"+k;
+const fk=(id,k)=>"nt:farm:"+id+":"+k;
 
 /* ── Language Context ─────────────────────────── */
 const LX=createContext({lang:"kn",setLang:()=>{},t:k=>k});
@@ -370,7 +375,7 @@ async function initApp(){
 
 /* ── Spinner ──────────────────────────────────── */
 function Spinner({size=22,col="#2E7D32"}){
-  return <div style={{width:size,height:size,border:`2.5px solid ${col}25`,borderTopColor:col,borderRadius:"50%",animation:"spin .7s linear infinite",flexShrink:0}}/>;
+  return <div style={{width:size,height:size,border:"2.5px solid "+col+"25",borderTopColor:col,borderRadius:"50%",animation:"spin .7s linear infinite",flexShrink:0}}/>;
 }
 
 /* ── Toast ────────────────────────────────────── */
@@ -401,7 +406,7 @@ function Btn({children,onClick,col="#2E7D32",light,full,sm,disabled,icon}){
   const bg=light?col+"15":col;const tc=light?col:"#fff";
   return(
     <button onClick={onClick} disabled={disabled}
-      style={{background:bg,color:tc,border:light?`1.5px solid ${col}40`:"none",
+      style={{background:bg,color:tc,border:light?"1.5px solid "+col+"40":"none",
         borderRadius:14,padding:sm?"9px 16px":"13px 20px",fontSize:sm?13:15,
         fontWeight:700,width:full?"100%":"auto",opacity:disabled?.45:1,
         cursor:disabled?"not-allowed":"pointer",display:"flex",alignItems:"center",
@@ -495,7 +500,7 @@ function StatusPicker({value,onChange,col}){
   return(
     <div style={{position:"relative"}}>
       <button onClick={()=>setOpen(o=>!o)}
-        style={{background:cfg.bg,border:`1.5px solid ${col}40`,borderRadius:20,
+        style={{background:cfg.bg,border:"1.5px solid "+col+"40",borderRadius:20,
           padding:"7px 14px",fontSize:18,color:cfg.col,fontWeight:700,
           display:"flex",alignItems:"center",gap:6}}>
         {cfg.icon} {t(v)} ▾
@@ -526,7 +531,7 @@ function ProgressRing({pct,size=72,col="#1B5E20",label,sub}){
       <svg width={size} height={size} viewBox="0 0 72 72">
         <circle cx="36" cy="36" r={r} fill="none" stroke="#E8F5E9" strokeWidth="6"/>
         <circle cx="36" cy="36" r={r} fill="none" stroke={col} strokeWidth="6"
-          strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
+          strokeDasharray={dash+" "+circ} strokeLinecap="round"
           transform="rotate(-90 36 36)" style={{transition:"stroke-dasharray .5s"}}/>
         <text x="36" y="36" textAnchor="middle" dominantBaseline="central" fill={col} fontSize="14" fontWeight="700">{pct}%</text>
       </svg>
@@ -639,7 +644,7 @@ function PinGate({onVerified,onCancel}){
               animation:shake?"shake .4s ease":"none"}}>
               {Array.from({length:6},(_,i)=>(
                 <div key={i} style={{width:38,height:46,borderRadius:12,
-                  border:`2px solid ${err?"#C62828":i<pin.length?"#1B5E20":"#D0D8D0"}`,
+                  border:"2px solid "+(err?"#C62828":i<pin.length?"#1B5E20":"#D0D8D0"),
                   background:i<pin.length?(err?"#FFEBEE":"#E8F5E9"):"#F8F8F8",
                   display:"flex",alignItems:"center",justifyContent:"center",
                   transition:"all .15s"}}>
@@ -665,7 +670,7 @@ function PinGate({onVerified,onCancel}){
                   }
                 }} style={{padding:"14px 0",fontSize:k==="⌫"?18:20,fontWeight:k==="⌫"?500:700,
                   background:k===""?"transparent":k==="⌫"?"#F5F5F5":"#F8F8F8",
-                  border:`1.5px solid ${k===""?"transparent":"#E8E8E8"}`,
+                  border:"1.5px solid "+(k===""?"transparent":"#E8E8E8"),
                   borderRadius:14,cursor:k===""?"default":"pointer",
                   color:"#1a1a1a",visibility:k===""?"hidden":"visible"}}>
                   {k}
@@ -674,7 +679,7 @@ function PinGate({onVerified,onCancel}){
             </div>
 
             {err&&<div style={{textAlign:"center",fontSize:18,color:"#C62828",fontWeight:600,marginBottom:12}}>
-              {lang==="kn"?"❌ ತಪ್ಪಾದ PIN":"❌ Incorrect PIN"}{attempts>1?` (${attempts}/3)`:""}
+              {lang==="kn"?"❌ ತಪ್ಪಾದ PIN":"❌ Incorrect PIN"}{attempts>1?" ("+attempts+"/3)":""}
             </div>}
 
             <button onClick={onCancel}
@@ -811,7 +816,7 @@ function ProfilePage({user,onSave,onBack,onLogout}){
               {[["kn","ಕನ್ನಡ"],["en","English"]].map(([l,lb])=>(
                 <div key={l} onClick={()=>setForm({...form,lang:l})}
                   style={{flex:1,padding:12,textAlign:"center",borderRadius:12,cursor:"pointer",
-                    border:`1.5px solid ${form.lang===l?"#2E7D32":"#ddd"}`,
+                    border:"1.5px solid "+(form.lang===l?"#2E7D32":"#ddd"),
                     background:form.lang===l?"#E8F5E9":"#fff",
                     fontWeight:form.lang===l?700:400,fontSize:17,color:form.lang===l?"#2E7D32":"#555"}}>
                   {lb}
@@ -908,7 +913,7 @@ function FarmSelector({user,onSelect,onManage,onProfile,onAddFarm,showToast}){
             <div key={f.id} onClick={()=>onSelect(f)}
               style={{background:"#fff",borderRadius:20,marginBottom:14,overflow:"hidden",
                 boxShadow:"0 3px 14px rgba(0,0,0,.1)",cursor:"pointer",
-                border:`2px solid ${f.col}40`,
+                border:"2px solid "+f.col+"40",
                 WebkitTapHighlightColor:"rgba(0,0,0,0)",
                 userSelect:"none",WebkitUserSelect:"none"}}>
               <div style={{background:f.col||"#1B5E20",padding:"18px",display:"flex",alignItems:"center",gap:14}}>
@@ -1062,7 +1067,7 @@ function FarmCreation({editFarm,onDone,onBack,showToast}){
               {[["dry",t("dry")],["wet",t("wet")],["converted",t("converted")]].map(([v,lb])=>(
                 <div key={v} onClick={()=>upd("land.landType",v)}
                   style={{flex:1,padding:"10px",textAlign:"center",borderRadius:12,cursor:"pointer",
-                    border:`1.5px solid ${f.land.landType===v?"#2E7D32":"#ddd"}`,
+                    border:"1.5px solid "+(f.land.landType===v?"#2E7D32":"#ddd"),
                     background:f.land.landType===v?"#E8F5E9":"#fff",
                     fontWeight:f.land.landType===v?700:400,fontSize:18,color:f.land.landType===v?"#2E7D32":"#555"}}>
                   {lb}
@@ -1093,7 +1098,7 @@ function FarmCreation({editFarm,onDone,onBack,showToast}){
       );
       case 5:return(
         <div>
-          <div style={{background:f.infra.borewell?"#E8F5E9":"#F5F5F5",borderRadius:14,padding:14,marginBottom:12,border:`1.5px solid ${f.infra.borewell?"#A5D6A7":"#ddd"}`}}>
+          <div style={{background:f.infra.borewell?"#E8F5E9":"#F5F5F5",borderRadius:14,padding:14,marginBottom:12,border:"1.5px solid "+(f.infra.borewell?"#A5D6A7":"#ddd")}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:f.infra.borewell?12:0}}>
               <div style={{fontWeight:700,fontSize:14}}>🔩 {t("borewell")}</div>
               <div onClick={()=>upd("infra.borewell",!f.infra.borewell)} style={{width:48,height:26,borderRadius:13,background:f.infra.borewell?"#2E7D32":"#ccc",cursor:"pointer",position:"relative",transition:"background .2s"}}>
@@ -1107,7 +1112,7 @@ function FarmCreation({editFarm,onDone,onBack,showToast}){
               </div>
             )}
           </div>
-          <div style={{background:f.infra.electricity?"#E3F2FD":"#F5F5F5",borderRadius:14,padding:14,marginBottom:12,border:`1.5px solid ${f.infra.electricity?"#90CAF9":"#ddd"}`}}>
+          <div style={{background:f.infra.electricity?"#E3F2FD":"#F5F5F5",borderRadius:14,padding:14,marginBottom:12,border:"1.5px solid "+(f.infra.electricity?"#90CAF9":"#ddd")}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:f.infra.electricity?12:0}}>
               <div style={{fontWeight:700,fontSize:14}}>⚡ {t("electricity")}</div>
               <div onClick={()=>upd("infra.electricity",!f.infra.electricity)} style={{width:48,height:26,borderRadius:13,background:f.infra.electricity?"#0277BD":"#ccc",cursor:"pointer",position:"relative",transition:"background .2s"}}>
@@ -1121,7 +1126,7 @@ function FarmCreation({editFarm,onDone,onBack,showToast}){
               {[["complete",t("complete")],["partial",t("partial")],["none",t("none")]].map(([v,lb])=>(
                 <div key={v} onClick={()=>upd("infra.fencing",v)}
                   style={{flex:1,padding:"10px",textAlign:"center",borderRadius:12,cursor:"pointer",
-                    border:`1.5px solid ${f.infra.fencing===v?"#2E7D32":"#ddd"}`,
+                    border:"1.5px solid "+(f.infra.fencing===v?"#2E7D32":"#ddd"),
                     background:f.infra.fencing===v?"#E8F5E9":"#fff",
                     fontWeight:f.infra.fencing===v?700:400,fontSize:18,color:f.infra.fencing===v?"#2E7D32":"#555"}}>
                   {lb}
@@ -1129,7 +1134,7 @@ function FarmCreation({editFarm,onDone,onBack,showToast}){
               ))}
             </div>
           </Field>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",background:f.infra.roadAccess?"#E8F5E9":"#F5F5F5",borderRadius:12,border:`1.5px solid ${f.infra.roadAccess?"#A5D6A7":"#ddd"}`}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",background:f.infra.roadAccess?"#E8F5E9":"#F5F5F5",borderRadius:12,border:"1.5px solid "+(f.infra.roadAccess?"#A5D6A7":"#ddd")}}>
             <div style={{fontWeight:700,fontSize:14}}>🛣️ {t("roadAccess")}</div>
             <div onClick={()=>upd("infra.roadAccess",!f.infra.roadAccess)} style={{width:48,height:26,borderRadius:13,background:f.infra.roadAccess?"#2E7D32":"#ccc",cursor:"pointer",position:"relative",transition:"background .2s"}}>
               <div style={{position:"absolute",top:3,left:f.infra.roadAccess?24:3,width:20,height:20,borderRadius:"50%",background:"#fff",transition:"left .2s"}}/>
@@ -1167,7 +1172,7 @@ function FarmCreation({editFarm,onDone,onBack,showToast}){
             const assigned=(f.supervisorIds||[]).includes(u.id);
             return(
               <div key={u.id} onClick={()=>{const cur=f.supervisorIds||[];upd("supervisorIds",assigned?cur.filter(x=>x!==u.id):[...cur,u.id]);}}
-                style={{display:"flex",alignItems:"center",gap:12,padding:"13px 14px",background:assigned?"#E8F5E9":"#f9f9f9",borderRadius:14,marginBottom:10,cursor:"pointer",border:`1.5px solid ${assigned?"#A5D6A7":"#eee"}`}}>
+                style={{display:"flex",alignItems:"center",gap:12,padding:"13px 14px",background:assigned?"#E8F5E9":"#f9f9f9",borderRadius:14,marginBottom:10,cursor:"pointer",border:"1.5px solid "+(assigned?"#A5D6A7":"#eee")}}>
                 <div style={{width:44,height:44,borderRadius:"50%",background:assigned?"#2E7D32":"#E3F2FD",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>{assigned?"✅":"👷"}</div>
                 <div style={{flex:1}}>
                   <div style={{fontWeight:700,fontSize:18,color:assigned?"#1B5E20":"#333"}}>{dispName(u)||u.id}</div>
@@ -1371,7 +1376,7 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
           {[
-            {label:t("tasks"),val:`${doneSub}/${totalSub}`,icon:"📋",page:"tasks"},
+            {label:t("tasks"),val:doneSub+"/"+totalSub,icon:"📋",page:"tasks"},
             {label:t("expenses"),val:fmtCur(mthExp),icon:"💸",page:"finance"},
             {label:t("labour"),val:fmtCur(mthWage),icon:"👷",page:"daily"},
           ].map(s=>(
@@ -1561,8 +1566,8 @@ function TasksPage({farm,tasks,setTasks,customTasks,setCustomTasks,user,showToas
         // Show toast with auto-complete message
         if(allDone){
           showToast(lang==="kn"
-            ?`✅ ${tg.kn} — ಎಲ್ಲಾ ಕೆಲಸ ಮುಗಿದಿದೆ!`
-            :`✅ ${tg.en} — All sub-tasks complete!`);
+            ?"✅ "+tg.kn+" — ಎಲ್ಲಾ ಕೆಲಸ ಮುಗಿದಿದೆ!"
+            :"✅ "+tg.en+" — All sub-tasks complete!");
         } else {
           showToast("✅ "+t("status")+" "+t("saved"));
         }
@@ -1633,7 +1638,7 @@ function TasksPage({farm,tasks,setTasks,customTasks,setCustomTasks,user,showToas
         const isOpen=open===tg.id;const isC=tg.id.startsWith("C");const gDirty=subs.some((_,i)=>isDirty(tg.id+"-"+i));
         const planned=+(farm.budget?.taskBudgets||{})[tg.id]||0;
         return(
-          <div key={tg.id} style={{marginBottom:12,borderRadius:18,overflow:"hidden",boxShadow:"0 2px 10px rgba(0,0,0,.08)",border:`1.5px solid ${gDirty?tg.col+"80":"transparent"}`}}>
+          <div key={tg.id} style={{marginBottom:12,borderRadius:18,overflow:"hidden",boxShadow:"0 2px 10px rgba(0,0,0,.08)",border:"1.5px solid "+(gDirty?tg.col+"80":"transparent")}}>
             <div style={{background:tg.col,padding:"13px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setOpen(isOpen?null:tg.id)}>
               <div style={{flex:1}}>
                 <div style={{color:"#fff",fontWeight:800,fontSize:15}}>{tg.id} — {tg.kn}</div>
@@ -1669,17 +1674,17 @@ function TasksPage({farm,tasks,setTasks,customTasks,setCustomTasks,user,showToas
                   const cNote=dr.note!==undefined?dr.note:(sv.note||"");const cStart=dr.startDate!==undefined?dr.startDate:(sv.startDate||"");
                   const cSt=sv.status||"pending";const isEd=editSub&&editSub.tId===tg.id&&editSub.idx===i;
                   return(
-                    <div key={i} style={{padding:"13px 14px",borderTop:`1px solid ${tg.col}20`,background:dirty?"rgba(230,81,0,0.04)":"transparent"}}>
+                    <div key={i} style={{padding:"13px 14px",borderTop:"1px solid "+tg.col+"20",background:dirty?"rgba(230,81,0,0.04)":"transparent"}}>
                       {isEd?(
                         <div style={{display:"flex",gap:8,marginBottom:12}}>
-                          <input value={editVal} onChange={e=>setEditVal(e.target.value)} style={{flex:1,borderColor:tg.col,borderRadius:12,padding:"10px 12px",border:`1.5px solid ${tg.col}`}}/>
+                          <input value={editVal} onChange={e=>setEditVal(e.target.value)} style={{flex:1,borderColor:tg.col,borderRadius:12,padding:"10px 12px",border:"1.5px solid "+tg.col}}/>
                           <button onClick={()=>saveES(tg)} style={{background:tg.col,color:"#fff",border:"none",borderRadius:12,padding:"10px 14px",cursor:"pointer"}}>✓</button>
                           <button onClick={()=>setEditSub(null)} style={{background:"#eee",border:"none",borderRadius:12,padding:"10px 14px",cursor:"pointer"}}>✕</button>
                         </div>
                       ):(
                         <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:10}}>
                           <div onClick={()=>setSt(k,cSt==="taskDone"?"pending":"taskDone")}
-                            style={{width:24,height:24,borderRadius:7,background:cSt==="taskDone"?tg.col:"transparent",border:`2px solid ${tg.col}`,flexShrink:0,marginTop:2,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
+                            style={{width:24,height:24,borderRadius:7,background:cSt==="taskDone"?tg.col:"transparent",border:"2px solid "+tg.col,flexShrink:0,marginTop:2,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
                             {cSt==="taskDone"&&<span style={{color:"#fff",fontSize:18,lineHeight:1}}>✓</span>}
                           </div>
                           <span style={{fontSize:18,fontWeight:600,flex:1,lineHeight:1.4,textDecoration:cSt==="taskDone"?"line-through":"none",opacity:cSt==="taskDone"?.5:1}}>{sub}</span>
@@ -1691,18 +1696,18 @@ function TasksPage({farm,tasks,setTasks,customTasks,setCustomTasks,user,showToas
                       )}
                       <div style={{marginBottom:10}}><StatusPicker value={cSt} onChange={v=>setSt(k,v)} col={tg.col}/>{cSt==="taskDone"&&sv.doneDate&&<span style={{fontSize:17,color:tg.col,fontWeight:600,marginLeft:10}}>✅ {fmt(sv.doneDate)}</span>}</div>
                       <Field label={<span style={{fontSize:17,color:"#666"}}>{t("startDate")}{dr.startDate!==undefined&&dr.startDate!==sv.startDate&&<Dot/>}</span>} mb={10}>
-                        <input type="date" value={cStart} onChange={e=>mD(k,"startDate",e.target.value)} style={{fontSize:18,padding:"9px 12px",borderColor:tg.col+"60",borderRadius:12,border:`1.5px solid ${tg.col}60`,width:"100%",background:"#fff"}}/>
+                        <input type="date" value={cStart} onChange={e=>mD(k,"startDate",e.target.value)} style={{fontSize:18,padding:"9px 12px",borderColor:tg.col+"60",borderRadius:12,border:"1.5px solid "+tg.col+"60",width:"100%",background:"#fff"}}/>
                       </Field>
                       <Field label={<span style={{fontSize:17,color:"#666"}}>{t("noteSave")}{dr.note!==undefined&&dr.note!==sv.note&&<Dot/>}</span>} mb={10}>
-                        <textarea value={cNote} onChange={e=>mD(k,"note",e.target.value)} rows={2} placeholder="ಇಲ್ಲಿ ಬರೆಯಿರಿ..." style={{borderColor:dirty?tg.col:tg.col+"40",borderRadius:12,border:`1.5px solid ${dirty?tg.col:tg.col+"40"}`,padding:"10px 12px",width:"100%",background:"#fff",resize:"none",outline:"none",fontSize:14}}/>
+                        <textarea value={cNote} onChange={e=>mD(k,"note",e.target.value)} rows={2} placeholder="ಇಲ್ಲಿ ಬರೆಯಿರಿ..." style={{borderColor:dirty?tg.col:tg.col+"40",borderRadius:12,border:"1.5px solid "+(dirty?tg.col:tg.col+"40"),padding:"10px 12px",width:"100%",background:"#fff",resize:"none",outline:"none",fontSize:14}}/>
                       </Field>
                       <div style={{marginBottom:12}}><SaveBar dirty={dirty} saved={jSaved} onSave={()=>saveT(k)}/></div>
                       <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
-                        <button onClick={()=>fileRefs.current[k]?.click()} style={{background:tg.col+"20",border:`1.5px solid ${tg.col}50`,color:tg.col,borderRadius:12,padding:"8px 14px",fontSize:18,fontWeight:600,cursor:"pointer"}}>📷 {t("photo")}</button>
+                        <button onClick={()=>fileRefs.current[k]?.click()} style={{background:tg.col+"20",border:"1.5px solid "+tg.col+"50",color:tg.col,borderRadius:12,padding:"8px 14px",fontSize:18,fontWeight:600,cursor:"pointer"}}>📷 {t("photo")}</button>
                         <input ref={el=>fileRefs.current[k]=el} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={e=>{const f=e.target.files[0];if(f)addMedia(k,f);e.target.value="";}}/>
                         {(sv.media||[]).map(m=>(
                           <div key={m.id} style={{position:"relative"}}>
-                            <img src={m.data} alt="" onClick={()=>setViewImg(m)} style={{width:52,height:52,objectFit:"cover",borderRadius:10,cursor:"pointer",border:`2px solid ${tg.col}60`}}/>
+                            <img src={m.data} alt="" onClick={()=>setViewImg(m)} style={{width:52,height:52,objectFit:"cover",borderRadius:10,cursor:"pointer",border:"2px solid "+tg.col+"60"}}/>
                             <button onClick={()=>delMedia(k,m.id)} style={{position:"absolute",top:-6,right:-6,background:"#C62828",color:"#fff",border:"none",borderRadius:"50%",width:20,height:20,fontSize:17,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
                           </div>
                         ))}
@@ -1710,7 +1715,7 @@ function TasksPage({farm,tasks,setTasks,customTasks,setCustomTasks,user,showToas
                     </div>
                   );
                 })}
-                {isOwner&&<div style={{padding:"11px 14px",borderTop:`1px dashed ${tg.col}40`}}>
+                {isOwner&&<div style={{padding:"11px 14px",borderTop:"1px dashed "+tg.col+"40"}}>
                   {/* DELETE GROUP — bottom of expanded, safe from accidental tap */}
                   <button onClick={()=>{if(window.confirm(lang==="kn"?"ಈ Task Group ಮತ್ತು ಎಲ್ಲಾ sub-tasks ಅಳಿಸುವುದೇ?":"Delete this entire task group and all its sub-tasks?"))setCustomTasks(p=>p.filter(g=>g.id!==tg.id));}}
                     style={{width:"100%",background:"#FFEBEE",border:"1.5px solid #FFCDD2",borderRadius:12,
@@ -1720,12 +1725,12 @@ function TasksPage({farm,tasks,setTasks,customTasks,setCustomTasks,user,showToas
                   </button>
                   {addFor===tg.id?(
                     <div style={{display:"flex",gap:8}}>
-                      <input value={newSV} onChange={e=>setNewSV(e.target.value)} placeholder="ಉಪ ಕೆಲಸ ಹೆಸರು..." style={{flex:1,fontSize:18,padding:"10px 12px",borderColor:tg.col,borderRadius:12,border:`1.5px solid ${tg.col}`,background:"#fff",outline:"none"}} onKeyDown={e=>e.key==="Enter"&&addSub(tg.id)}/>
+                      <input value={newSV} onChange={e=>setNewSV(e.target.value)} placeholder="ಉಪ ಕೆಲಸ ಹೆಸರು..." style={{flex:1,fontSize:18,padding:"10px 12px",borderColor:tg.col,borderRadius:12,border:"1.5px solid "+tg.col,background:"#fff",outline:"none"}} onKeyDown={e=>e.key==="Enter"&&addSub(tg.id)}/>
                       <button onClick={()=>addSub(tg.id)} style={{background:tg.col,color:"#fff",border:"none",borderRadius:12,padding:"10px 16px",fontSize:18,fontWeight:700,cursor:"pointer"}}>{t("add")}</button>
                       <button onClick={()=>setAddFor(null)} style={{background:"#eee",border:"none",borderRadius:12,padding:"10px 12px",fontSize:18,cursor:"pointer"}}>✕</button>
                     </div>
                   ):(
-                    <button onClick={()=>{setAddFor(tg.id);setNewSV("");}} style={{background:"none",border:`1.5px dashed ${tg.col}60`,color:tg.col,borderRadius:12,padding:"10px 16px",fontSize:18,fontWeight:600,cursor:"pointer",width:"100%"}}>{t("addSubTask")}</button>
+                    <button onClick={()=>{setAddFor(tg.id);setNewSV("");}} style={{background:"none",border:"1.5px dashed "+tg.col+"60",color:tg.col,borderRadius:12,padding:"10px 16px",fontSize:18,fontWeight:600,cursor:"pointer",width:"100%"}}>{t("addSubTask")}</button>
                   )}
                 </div>}
               </div>
@@ -1752,7 +1757,7 @@ function DailyPage({farm,trips,setTrips,labour,setLabour,workers,setWorkers,show
       <div style={{display:"flex",gap:8,marginBottom:16}}>
         {[["trips","🚗 "+t("trips")],["labour","👷 "+t("labour")]].map(([id,lb])=>(
           <button key={id} onClick={()=>setTab(id)}
-            style={{flex:1,padding:"11px",borderRadius:14,border:`1.5px solid ${tab===id?farm.col:"#ddd"}`,
+            style={{flex:1,padding:"11px",borderRadius:14,border:"1.5px solid "+(tab===id?farm.col:"#ddd"),
               background:tab===id?farm.col:"#fff",color:tab===id?"#fff":"#555",
               fontSize:18,fontWeight:700,cursor:"pointer"}}>
             {lb}
@@ -1807,7 +1812,7 @@ function TripsTab({farm,trips,setTrips,showToast}){
       <div style={{marginTop:14}}>
         {trips.length===0&&<Empty icon="🚗" text={t("noActivity")}/>}
         {trips.map((tr,idx)=>{const isSaved=savedId===tr.id;return(
-          <Card key={tr.id} style={{border:`1.5px solid ${isSaved?"#90CAF9":"transparent"}`,transition:"border .4s"}}>
+          <Card key={tr.id} style={{border:"1.5px solid "+(isSaved?"#90CAF9":"transparent"),transition:"border .4s"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
                 <div style={{background:"#E1F5FE",borderRadius:10,padding:"5px 10px",fontSize:18,fontWeight:700,color:"#0277BD"}}>#{trips.length-idx}</div>
@@ -1901,6 +1906,16 @@ function MorePage({farm,docs,setDocs,user,onManage,onProfile,onReport,onLogout,s
   const[showDocs,setShowDocs]=useState(false);
   const menuItems=[
     {icon:"📊",label:lang==="kn"?"ವರದಿ":"Reports",action:onReport},
+    {icon:"📥",label:lang==="kn"?"ಬ್ಯಾಕಪ್":"Backup",action:()=>{
+      const allData={};
+      Object.keys(localStorage).filter(k=>k.startsWith("nt:")).forEach(k=>{try{allData[k]=JSON.parse(localStorage.getItem(k));}catch{}});
+      allData["_exportedAt"]=new Date().toISOString();
+      const blob=new Blob([JSON.stringify(allData,null,2)],{type:"application/json"});
+      const url=URL.createObjectURL(blob);const a=document.createElement("a");
+      a.href=url;a.download="NammaThota-backup-"+new Date().toISOString().slice(0,10)+".json";
+      a.click();URL.revokeObjectURL(url);
+      showToast(lang==="kn"?"✅ ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್":"✅ Backup downloaded");
+    }},
     ...(user.role==="owner"&&onManage?[{icon:"⚙️",label:lang==="kn"?"ನಿರ್ವಹಣೆ":"Manage",action:onManage}]:[]),
     {icon:"👤",label:lang==="kn"?"ಪ್ರೊಫೈಲ್":"Profile",action:onProfile},
   ];
@@ -2430,7 +2445,7 @@ function IncomeTab({farm,income,setIncome,showToast}){
             {INCOME_TYPES.map(tp=>(
               <div key={tp} onClick={()=>setForm({...form,type:tp})}
                 style={{flex:1,padding:"10px 8px",textAlign:"center",borderRadius:12,cursor:"pointer",
-                  border:`1.5px solid ${form.type===tp?"#1B5E20":"#ddd"}`,
+                  border:"1.5px solid "+(form.type===tp?"#1B5E20":"#ddd"),
                   background:form.type===tp?"#E8F5E9":"#fff",
                   fontWeight:form.type===tp?700:400,fontSize:18,color:form.type===tp?"#1B5E20":"#555"}}>
                 {form.type===tp?"✅ ":""}{t(tp)}
@@ -2460,7 +2475,7 @@ function IncomeTab({farm,income,setIncome,showToast}){
               {PAY_MODES.map(pm=>(
                 <div key={pm} onClick={()=>setForm({...form,payMode:pm})}
                   style={{flex:1,padding:"9px 6px",textAlign:"center",borderRadius:12,cursor:"pointer",
-                    border:`1.5px solid ${form.payMode===pm?"#1B5E20":"#ddd"}`,
+                    border:"1.5px solid "+(form.payMode===pm?"#1B5E20":"#ddd"),
                     background:form.payMode===pm?"#E8F5E9":"#fff",
                     fontSize:17,fontWeight:form.payMode===pm?700:400,color:form.payMode===pm?"#1B5E20":"#555"}}>
                   {pm==="cash"?"💵":pm==="cheque"?"📝":"📱"} {t(pm)}
@@ -2475,7 +2490,7 @@ function IncomeTab({farm,income,setIncome,showToast}){
       <div style={{marginTop:14}}>
         {(income||[]).length===0&&<Empty icon="🌾" text={t("noActivity")}/>}
         {(income||[]).map(x=>{const isSaved=savedId===x.id;return(
-          <Card key={x.id} style={{border:`1.5px solid ${isSaved?"#A5D6A7":"transparent"}`,transition:"border .4s"}}>
+          <Card key={x.id} style={{border:"1.5px solid "+(isSaved?"#A5D6A7":"transparent"),transition:"border .4s"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
               <div style={{display:"flex",alignItems:"center",gap:10}}>
                 <div style={{width:44,height:44,background:"#E8F5E9",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>🌾</div>
@@ -2695,9 +2710,8 @@ function ReportPage({farm,tasks,expenses,purchases,payments,income,labour,trips,
 
     const csv=rows.map(r=>r.map(c=>{
       const s=String(c);
-      return s.includes(",")?"""+s+""":s;
-    }).join(",")).join("
-");
+      return s.includes(",")?'"'+s+'"':s;
+    }).join(",")).join("\n");
 
     const bom="﻿"; // BOM for Excel UTF-8
     const blob=new Blob([bom+csv],{type:"text/csv;charset=utf-8;"});
@@ -2911,7 +2925,7 @@ function ManageUsers({showToast}){
           {form.role==="sup"&&(
             <Field label={t("assignFarms")} mb={14}>
               {farms.map(f=>(
-                <div key={f.id} onClick={()=>tf(f.id)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:form.farms.includes(f.id)?"#E8F5E9":"#f9f9f9",borderRadius:12,marginBottom:8,cursor:"pointer",border:`1.5px solid ${form.farms.includes(f.id)?"#A5D6A7":"#eee"}`}}>
+                <div key={f.id} onClick={()=>tf(f.id)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:form.farms.includes(f.id)?"#E8F5E9":"#f9f9f9",borderRadius:12,marginBottom:8,cursor:"pointer",border:"1.5px solid "+(form.farms.includes(f.id)?"#A5D6A7":"#eee")}}>
                   <span style={{fontSize:20}}>{f.icon}</span><span style={{fontSize:18,fontWeight:600,flex:1}}>{f.name}</span>
                   <span style={{fontSize:18}}>{form.farms.includes(f.id)?"✅":"☐"}</span>
                 </div>
@@ -3185,13 +3199,7 @@ function App(){
 
   return(
     <LX.Provider value={langCtx}>
-      <style>{`
-        @keyframes spin{to{transform:rotate(360deg)}}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}} @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
-        *{box-sizing:border-box;-webkit-tap-highlight-color:rgba(0,0,0,0)}
-        input,select,textarea{outline:none}
-        textarea{resize:none;line-height:1.5}
-      `}</style>
+      
 
       {view==="login"&&<Login onLogin={handleLogin}/>}
 
