@@ -1368,7 +1368,6 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
   const totalIncome=(income||[]).reduce((a,x)=>a+(+x.totalAmt||0),0);
   const profit=totalIncome-totalSpent;
   const devBudget=+(farm.budget?.devBudget||0);
-  const budgetPct=devBudget?Math.min(Math.round(totalSpent/devBudget*100),150):0;
   // Period filter
   const now=new Date();
   const periodStart=periodFilter==="month"?now.toISOString().slice(0,7)+"-01":
@@ -1425,47 +1424,7 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
       </div>
 
       {/* Budget Overview */}
-      {devBudget>0&&(
-        <Card>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-            <div style={{fontSize:18,fontWeight:700}}>💰 {t("budget")}</div>
-            <div style={{fontSize:17,color:budgetPct>100?"#C62828":"#2E7D32",fontWeight:600}}>{budgetPct>100?t("overBudget"):t("onTrack")}</div>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:12}}>
-            {[
-              {label:t("totalBudget"),val:fmtCur(devBudget),col:"#555"},
-              {label:t("spent"),val:fmtCur(totalSpent),col:"#E65100"},
-              {label:t("remaining"),val:fmtCur(Math.max(devBudget-totalSpent,0)),col:"#2E7D32"},
-            ].map(s=>(
-              <div key={s.label} style={{background:"#f8f8f8",borderRadius:12,padding:"10px 10px",textAlign:"center"}}>
-                <div style={{fontSize:17,fontWeight:700,color:s.col}}>{s.val}</div>
-                <div style={{fontSize:18,color:"#888",marginTop:3}}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-          <div style={{height:10,background:"#f0f0f0",borderRadius:6}}>
-            <div style={{height:10,width:Math.min(budgetPct,100)+"%",background:budgetPct>80?"#E65100":"#2E7D32",borderRadius:6,transition:"width .5s"}}/>
-          </div>
-          <div style={{fontSize:17,color:"#888",textAlign:"right",marginTop:4}}>{budgetPct}% {t("spent")}</div>
-        </Card>
-      )}
-
-      {/* Quick stats grid */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:14}}>
-        {[
-          {label:t("purchases"),val:purchases.length+" items",icon:"🛒",col:"#6A1B9A",bg:"#F3E5F5",page:"finance"},
-          {label:t("payments"),val:(payBalance>=0?"↑ ":"↓ ")+fmtCur(Math.abs(payBalance)),icon:"💳",col:"#0277BD",bg:"#E3F2FD",page:"finance"},
-          {label:t("income"),val:fmtCur(totalIncome),icon:"🌾",col:"#2E7D32",bg:"#E8F5E9",page:"finance"},
-          {label:t("profit"),val:(profit>=0?"▲ ":"▼ ")+fmtCur(Math.abs(profit)),icon:profit>=0?"📈":"📉",col:profit>=0?"#1B5E20":"#C62828",bg:profit>=0?"#E8F5E9":"#FFEBEE",page:"finance"},
-        ].map(s=>(
-          <div key={s.label} onClick={()=>onNav(s.page)}
-            style={{background:s.bg,borderRadius:16,padding:"13px 14px",cursor:"pointer"}}>
-            <div style={{fontSize:22,marginBottom:5}}>{s.icon}</div>
-            <div style={{fontSize:18,fontWeight:700,color:s.col}}>{s.val}</div>
-            <div style={{fontSize:17,color:s.col,opacity:.8,marginTop:2}}>{s.label}</div>
-          </div>
-        ))}
-      </div>
+      
 
       {/* Task progress */}
       <Card>
