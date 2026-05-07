@@ -1452,8 +1452,8 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
           {[
-            {label:lang==="kn"?"ಖರ್ಚು":"Expenses",val:fmtCur(pExp),icon:"💸",page:"finance"},
-            {label:lang==="kn"?"ಕೂಲಿ":"Wages",val:fmtCur(pWage),icon:"👷",page:"daily"},
+            {label:lang==="kn"?"ಒಟ್ಟು ಖರ್ಚು":"Total Spent",val:fmtCur(pExp+pWage+pPur),icon:"💸",page:"finance"},
+            {label:lang==="kn"?"ಆದಾಯ":"Income",val:fmtCur(pInc),icon:"🌾",page:"finance"},
           ].map(s=>(
             <div key={s.label} onClick={()=>onNav(s.page)}
               style={{background:"rgba(255,255,255,.15)",borderRadius:14,padding:12,cursor:"pointer"}}>
@@ -1465,37 +1465,91 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
         </div>
       </div>
 
-      {/* P&L */}
-      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
-        <div style={{fontSize:16,fontWeight:800,marginBottom:12}}>
-          📊 {lang==="kn"?"ಆದಾಯ & ಖರ್ಚು":"Income & Expense"}
-          <span style={{fontSize:12,color:"#888",fontWeight:400,marginLeft:8}}>
-            {period==="month"?mth:period==="year"?yr:(lang==="kn"?"ಒಟ್ಟಾರೆ":"All")}
-          </span>
-        </div>
-        {[
-          {icon:"🌾",label:lang==="kn"?"ಆದಾಯ":"Income",val:pInc,col:"#1B5E20"},
-          {icon:"💸",label:lang==="kn"?"ಖರ್ಚು":"Expenses",val:pExp,col:"#E65100"},
-          {icon:"👷",label:lang==="kn"?"ಕೂಲಿ":"Wages",val:pWage,col:"#E65100"},
-          {icon:"🛒",label:lang==="kn"?"ಖರೀದಿ":"Purchases",val:pPur,col:"#6A1B9A"},
-        ].map(r=>(
-          <div key={r.label} style={{display:"flex",justifyContent:"space-between",
-            alignItems:"center",padding:"9px 0",borderBottom:"1px solid #f5f5f5"}}>
-            <span style={{fontSize:15,color:"#555"}}>{r.icon} {r.label}</span>
-            <span style={{fontSize:16,fontWeight:700,color:r.col}}>{fmtCur(r.val)}</span>
+      {/* P&L — collapsible category breakdown */}
+      {(()=>{
+        const [showDetails, setShowDetails]=React.useState(false);
+        const catAmts=ECAT.map(c=>({
+          ...c,
+          amt:expenses.filter(e=>inP(e.date)&&e.cat===c.id).reduce((a,e)=>a+(+e.amount||0),0)
+        }));
+        const totalOut=pExp+pPur;
+        const pnl=pInc-totalOut;
+        return(
+          <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+            {/* Header */}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+              <div style={{fontSize:16,fontWeight:800}}>
+                📊 {lang==="kn"?"ಹಣಕಾಸು ಸಾರಾಂಶ":"Financial Summary"}
+              </div>
+              <span style={{fontSize:12,color:"#888",background:"#f5f5f5",borderRadius:20,padding:"3px 10px"}}>
+                {period==="month"?mth:period==="year"?yr:(lang==="kn"?"ಎಲ್ಲಾ":"All")}
+              </span>
+            </div>
+
+            {/* Summary rows — always visible */}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
+              padding:"10px 12px",marginBottom:6,borderRadius:12,background:"#E8F5E9"}}>
+              <span style={{fontSize:15,fontWeight:700,color:"#1B5E20"}}>🌾 {lang==="kn"?"ಆದಾಯ":"Income"}</span>
+              <span style={{fontSize:18,fontWeight:800,color:"#1B5E20"}}>{fmtCur(pInc)}</span>
+            </div>
+
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
+              padding:"10px 12px",marginBottom:6,borderRadius:12,background:"#FFF3E0"}}>
+              <span style={{fontSize:15,fontWeight:700,color:"#E65100"}}>💸 {lang==="kn"?"ಒಟ್ಟು ಖರ್ಚು":"Total Expenses"}</span>
+              <span style={{fontSize:18,fontWeight:800,color:"#E65100"}}>{fmtCur(totalOut)}</span>
+            </div>
+
+            {/* Expand/collapse details */}
+            <button onClick={()=>setShowDetails(d=>!d)}
+              style={{width:"100%",background:"#f9f9f9",border:"1.5px solid #eee",
+                borderRadius:12,padding:"9px 14px",fontSize:14,fontWeight:600,
+                color:"#555",cursor:"pointer",display:"flex",
+                alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
+              <span>🔍 {lang==="kn"?"ವಿವರ ನೋಡಿ":"View Breakdown"} ({catAmts.length+1} {lang==="kn"?"ವರ್ಗ":"categories"})</span>
+              <span>{showDetails?"▲":"▼"}</span>
+            </button>
+
+            {/* Detailed breakdown — expandable */}
+            {showDetails&&(
+              <div style={{background:"#fafafa",borderRadius:12,padding:"10px 8px",marginBottom:6}}>
+                {catAmts.map(c=>(
+                  <div key={c.id} style={{display:"flex",justifyContent:"space-between",
+                    alignItems:"center",padding:"8px 10px",marginBottom:4,
+                    borderRadius:10,background:"#fff",boxShadow:"0 1px 4px rgba(0,0,0,.05)"}}>
+                    <span style={{fontSize:14,color:"#444"}}>{c.icon} {lang==="kn"?c.kn:c.en}</span>
+                    <span style={{fontSize:15,fontWeight:700,color:"#E65100"}}>{fmtCur(c.amt)}</span>
+                  </div>
+                ))}
+                {pPur>0&&(
+                  <div style={{display:"flex",justifyContent:"space-between",
+                    alignItems:"center",padding:"8px 10px",marginBottom:4,
+                    borderRadius:10,background:"#fff",boxShadow:"0 1px 4px rgba(0,0,0,.05)"}}>
+                    <span style={{fontSize:14,color:"#444"}}>🛒 {lang==="kn"?"ಖರೀದಿ":"Purchases"}</span>
+                    <span style={{fontSize:15,fontWeight:700,color:"#6A1B9A"}}>{fmtCur(pPur)}</span>
+                  </div>
+                )}
+                {catAmts.length===0&&pPur===0&&(
+                  <div style={{fontSize:13,color:"#aaa",textAlign:"center",padding:"8px"}}>
+                    {lang==="kn"?"ಈ ಅವಧಿಯಲ್ಲಿ ಖರ್ಚಿಲ್ಲ":"No expenses this period"}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Profit/Loss */}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
+              padding:"12px 14px",borderRadius:14,marginTop:4,
+              background:pnl>=0?"#E8F5E9":"#FFEBEE"}}>
+              <span style={{fontSize:16,fontWeight:700,color:pnl>=0?"#1B5E20":"#C62828"}}>
+                {pnl>=0?"📈":"📉"} {lang==="kn"?"ಲಾಭ / ನಷ್ಟ":"Profit / Loss"}
+              </span>
+              <span style={{fontSize:20,fontWeight:800,color:pnl>=0?"#1B5E20":"#C62828"}}>
+                {pnl>=0?"▲ ":"▼ "}{fmtCur(Math.abs(pnl))}
+              </span>
+            </div>
           </div>
-        ))}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
-          padding:"12px 14px",marginTop:10,borderRadius:14,
-          background:pPnL>=0?"#E8F5E9":"#FFEBEE"}}>
-          <span style={{fontSize:16,fontWeight:700,color:pPnL>=0?"#1B5E20":"#C62828"}}>
-            {pPnL>=0?"📈":"📉"} {lang==="kn"?"ಲಾಭ / ನಷ್ಟ":"Profit / Loss"}
-          </span>
-          <span style={{fontSize:20,fontWeight:800,color:pPnL>=0?"#1B5E20":"#C62828"}}>
-            {pPnL>=0?"▲ ":"▼ "}{fmtCur(Math.abs(pPnL))}
-          </span>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Supervisor Balance */}
       <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
