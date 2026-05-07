@@ -2261,18 +2261,49 @@ function PurchasesTab({farm,purchases,setPurchases,showToast}){
             <div><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಪ್ರಮಾಣ":"Qty"}</div><input type="number" value={form.qty} onChange={e=>setForm({...form,qty:e.target.value})} placeholder="0"/></div>
             <div><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಘಟಕ":"Unit"}</div><select value={form.unit} onChange={e=>setForm({...form,unit:e.target.value})}>{"ಕೆ.ಜಿ,ಗ್ರಾಂ,ಲೀ,Bags,Nos,ಟ್ರಕ್,ಲೋಡ್,Acres,Meters,Feet,Tons".split(",").map(u=><option key={u}>{u}</option>)}</select></div>
           </div>
-          <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಮೊತ್ತ (₹) *":"Amount (₹) *"}</div><input type="number" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} placeholder="0"/></div>
-          <div style={{background:"#E3F2FD",borderRadius:14,padding:"12px 14px",marginBottom:12}}>
+          <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಮೊತ್ತ (₹) *":"Amount (₹) *"}</div><input type="number" value={form.amount}
+              onChange={e=>{
+                const amt=e.target.value;
+                const gstAmt=form.gst?String(Math.round((+amt||0)*+form.gst/100)):"";
+                setForm({...form,amount:amt,gstAmt:gstAmt});
+              }} placeholder="0"/></div>
+          <div style={{background:"#E3F2FD",borderRadius:14,padding:"14px",marginBottom:12}}>
             <div style={{fontSize:14,fontWeight:700,color:"#1565C0",marginBottom:10}}>🏛️ {lang==="kn"?"GST ವಿವರ (ಐಚ್ಛಿಕ)":"GST Details (Optional)"}</div>
-            <div style={{display:"flex",gap:10}}>
-              <div style={{flex:1}}><div style={{fontSize:13,color:"#555",marginBottom:5}}>GST %</div>
-                <select value={form.gst} onChange={e=>{const pct=e.target.value;const gstAmt=pct?Math.round((+form.amount||0)*+pct/100):"";setForm({...form,gst:pct,gstAmt:gstAmt});}}>
-                  <option value="">—</option>{"0,5,12,18,28".split(",").map(r=><option key={r} value={r}>{r}%</option>)}
-                </select>
-              </div>
-              <div style={{flex:1}}><div style={{fontSize:13,color:"#555",marginBottom:5}}>{lang==="kn"?"GST ಮೊತ್ತ (₹)":"GST Amount (₹)"}</div><input type="number" value={form.gstAmt} onChange={e=>setForm({...form,gstAmt:e.target.value})} placeholder="0"/></div>
+            {/* GST % picker */}
+            <div style={{display:"flex",gap:8,marginBottom:12,flexWrap:"wrap"}}>
+              {["","0","5","12","18","28"].map(r=>(
+                <div key={r} onClick={()=>{
+                  const gstAmt=r?String(Math.round((+form.amount||0)*+r/100)):"";
+                  setForm({...form,gst:r,gstAmt:gstAmt});
+                }} style={{padding:"8px 14px",borderRadius:20,cursor:"pointer",
+                  border:"2px solid "+(form.gst===r?"#1565C0":"#ddd"),
+                  background:form.gst===r?"#1565C0":"#fff",
+                  color:form.gst===r?"#fff":"#555",fontSize:14,fontWeight:700}}>
+                  {r?r+"%":"No GST"}
+                </div>
+              ))}
             </div>
-            {form.gst&&form.amount&&<div style={{marginTop:8,fontSize:13,color:"#1565C0",fontWeight:600}}>{lang==="kn"?"ಒಟ್ಟು:":"Total:"} {fmtCur((+form.amount||0)+(+form.gstAmt||0))}</div>}
+            {/* Auto-calculated breakdown */}
+            {form.gst&&form.amount?(
+              <div style={{background:"#fff",borderRadius:12,padding:"12px 14px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:6,fontSize:14}}>
+                  <span style={{color:"#555"}}>{lang==="kn"?"ಮೂಲ ಬೆಲೆ (Excl. GST)":"Base Amount (Excl. GST)"}</span>
+                  <span style={{fontWeight:700}}>{fmtCur(form.amount)}</span>
+                </div>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:8,fontSize:14}}>
+                  <span style={{color:"#1565C0"}}>GST {form.gst}%</span>
+                  <span style={{fontWeight:700,color:"#1565C0"}}>{fmtCur(form.gstAmt||0)}</span>
+                </div>
+                <div style={{display:"flex",justifyContent:"space-between",borderTop:"1.5px solid #E3F2FD",paddingTop:8,fontSize:16}}>
+                  <span style={{fontWeight:700,color:"#1B5E20"}}>{lang==="kn"?"ಒಟ್ಟು (GST ಸಹಿತ)":"Grand Total (Incl. GST)"}</span>
+                  <span style={{fontWeight:800,color:"#1B5E20"}}>{fmtCur((+form.amount||0)+(+form.gstAmt||0))}</span>
+                </div>
+              </div>
+            ):(
+              <div style={{fontSize:13,color:"#888",textAlign:"center"}}>
+                {lang==="kn"?"GST % ಆಯ್ಕೆ ಮಾಡಿದ ನಂತರ ಲೆಕ್ಕ ಸ್ವಯಂ ಆಗುತ್ತದೆ":"Select GST % to auto-calculate"}
+              </div>
+            )}
           </div>
           <div style={{marginBottom:14}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ರಸೀದಿ ಫೋಟೋ":"Receipt Photo"}</div>
             <div onClick={()=>fileRef.current.click()} style={{border:"2px dashed #CE93D8",borderRadius:12,padding:14,textAlign:"center",cursor:"pointer",background:"#fafafa",minHeight:70,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
@@ -2409,177 +2440,253 @@ function PaymentsTab({farm,payments,setPayments,supervisors,user,showToast}){
 
 /* ── Income / Earnings Tab ──────────────────────── */
 function IncomeTab({farm,income,setIncome,showToast}){
-  const{t}=useLang();
-  const INCOME_TYPES=["cropSale","otherIncome"];
-  const PAY_MODES=["cash","cheque","upi"];
+  const{t,lang}=useLang();
   const E={date:today(),type:"cropSale",crop:"",buyer:"",market:"",qty:"",unit:"ಕೆ.ಜಿ",ratePerUnit:"",totalAmt:"",payMode:"cash",note:""};
-  const[form,setForm]=useState(E);const[show,setShow]=useState(false);const[editId,setEditId]=useState(null);const[savedId,setSavedId]=useState(null);
-  const calcTotal=()=>{const tot=(+form.qty||0)*(+form.ratePerUnit||0);if(tot>0)setForm(p=>({...p,totalAmt:tot}));};
+  const[form,setForm]=useState(E);
+  const[show,setShow]=useState(false);
+  const[editId,setEditId]=useState(null);
+  const[savedId,setSavedId]=useState(null);
+
+  const calcTotal=()=>{
+    const tot=(+form.qty||0)*(+form.ratePerUnit||0);
+    if(tot>0)setForm(p=>({...p,totalAmt:String(tot)}));
+  };
+
   const save=()=>{
-    if(!form.totalAmt){showToast(t("amount")+" "+t("required"),"warn");return;}
+    if(!form.totalAmt){showToast(lang==="kn"?"ಮೊತ್ತ ನಮೂದಿಸಿ":"Amount required","warn");return;}
     const nid=editId||uid();
     if(editId)setIncome(p=>p.map(x=>x.id===editId?{...x,...form}:x));
     else setIncome(p=>[{id:nid,...form},...p]);
-    setSavedId(nid);showToast("✅ "+t("saved"));
+    setSavedId(nid);
+    showToast("✅ "+(lang==="kn"?"ಉಳಿಸಲಾಗಿದೆ":"Saved"));
     setTimeout(()=>{setSavedId(null);setForm(E);setShow(false);setEditId(null);},1600);
   };
-  const del=id=>{setIncome(p=>p.filter(x=>x.id!==id));showToast("🗑 "+t("delete"));};
+
+  const del=id=>{
+    if(window.confirm(lang==="kn"?"ಈ ಆದಾಯ ಅಳಿಸುವುದೇ?":"Delete this income entry?"))
+      setIncome(p=>p.filter(x=>x.id!==id));
+  };
+
   const total=(income||[]).reduce((a,x)=>a+(+x.totalAmt||0),0);
-  const byMonth={};(income||[]).forEach(x=>{const m=x.date?.slice(0,7)||"";byMonth[m]=(byMonth[m]||0)+(+x.totalAmt||0);});
+  const byMonth={};
+  (income||[]).forEach(x=>{const m=(x.date||"").slice(0,7);byMonth[m]=(byMonth[m]||0)+(+x.totalAmt||0);});
+
   return(
     <div>
-      <Card style={{background:"#1B5E20",marginBottom:14}}>
-        <div style={{color:"rgba(255,255,255,.8)",fontSize:12}}>{t("totalIncome")}</div>
-        <div style={{color:"#fff",fontSize:26,fontWeight:800,marginTop:4}}>{fmtCur(total)}</div>
-        {Object.keys(byMonth).sort().reverse().slice(0,3).map(m=>(
-          <div key={m} style={{color:"rgba(255,255,255,.7)",fontSize:17,marginTop:4}}>
-            📅 {m}: {fmtCur(byMonth[m])}
-          </div>
-        ))}
-      </Card>
-      <Btn onClick={()=>{setShow(!show);setEditId(null);setForm(E);}} col="#1B5E20" full icon="🌾">{t("addIncome")}</Btn>
+      {/* Summary */}
+      <div style={{background:"#1B5E20",borderRadius:18,padding:16,marginBottom:14,color:"#fff"}}>
+        <div style={{fontSize:14,opacity:.8}}>{lang==="kn"?"ಒಟ್ಟು ಆದಾಯ":"Total Income"}</div>
+        <div style={{fontSize:28,fontWeight:800,marginTop:4}}>{fmtCur(total)}</div>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:10}}>
+          {Object.keys(byMonth).sort().reverse().slice(0,3).map(m=>(
+            <div key={m} style={{background:"rgba(255,255,255,.2)",borderRadius:20,padding:"3px 12px",fontSize:13}}>
+              {m}: {fmtCur(byMonth[m])}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Add button */}
+      <button onClick={()=>{setShow(!show);setEditId(null);setForm(E);}}
+        style={{width:"100%",background:"#1B5E20",color:"#fff",border:"none",borderRadius:16,
+          padding:15,fontSize:17,fontWeight:700,cursor:"pointer",marginBottom:14,
+          display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+        {show?"✕ "+(lang==="kn"?"ರದ್ದು":"Cancel"):"🌾 "+(lang==="kn"?"ಆದಾಯ ಸೇರಿಸಿ":"Add Income")}
+      </button>
+
+      {/* Form */}
       {show&&(
-        <Card style={{border:"2px solid #A5D6A7",marginTop:14}}>
-          <div style={{fontSize:17,fontWeight:700,color:"#1B5E20",marginBottom:14}}>🌾 {t("addIncome")}</div>
-          <div style={{display:"flex",gap:8,marginBottom:14}}>
-            {INCOME_TYPES.map(tp=>(
+        <div style={{background:"#fff",borderRadius:18,padding:18,border:"2px solid #A5D6A7",marginBottom:14}}>
+          <div style={{fontSize:17,fontWeight:700,color:"#1B5E20",marginBottom:16}}>
+            {editId?(lang==="kn"?"ಸಂಪಾದಿಸಿ":"Edit"):(lang==="kn"?"ಹೊಸ":"New")} {lang==="kn"?"ಆದಾಯ":"Income"}
+          </div>
+
+          {/* Type selector */}
+          <div style={{display:"flex",gap:10,marginBottom:14}}>
+            {[["cropSale",lang==="kn"?"ಬೆಳೆ ಮಾರಾಟ":"Crop Sale","🌾"],
+              ["otherIncome",lang==="kn"?"ಇತರ ಆದಾಯ":"Other Income","💵"]].map(([tp,lb,ic])=>(
               <div key={tp} onClick={()=>setForm({...form,type:tp})}
-                style={{flex:1,padding:"10px 8px",textAlign:"center",borderRadius:12,cursor:"pointer",
-                  border:"1.5px solid "+(form.type===tp?"#1B5E20":"#ddd"),
-                  background:form.type===tp?"#E8F5E9":"#fff",
-                  fontWeight:form.type===tp?700:400,fontSize:18,color:form.type===tp?"#1B5E20":"#555"}}>
-                {form.type===tp?"✅ ":""}{t(tp)}
+                style={{flex:1,padding:"12px 8px",textAlign:"center",borderRadius:14,cursor:"pointer",
+                  border:"2px solid "+(form.type===tp?"#1B5E20":"#eee"),
+                  background:form.type===tp?"#E8F5E9":"#fafafa"}}>
+                <div style={{fontSize:24,marginBottom:4}}>{ic}</div>
+                <div style={{fontSize:14,fontWeight:form.type===tp?700:500,
+                  color:form.type===tp?"#1B5E20":"#555"}}>{lb}</div>
               </div>
             ))}
           </div>
-          <Field label="Date" required><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></Field>
-          {form.type==="cropSale"&&<>
-            <Field label={t("crop")+" *"}><input value={form.crop} onChange={e=>setForm({...form,crop:e.target.value})} placeholder="Areca Nut / ಅಡಿಕೆ"/></Field>
-            <Field label={t("buyer")}><input value={form.buyer} onChange={e=>setForm({...form,buyer:e.target.value})} placeholder="ಖರೀದಿದಾರ ಹೆಸರು"/></Field>
-            <Field label={t("market")}><input value={form.market} onChange={e=>setForm({...form,market:e.target.value})} placeholder="APMC / ಮಾರುಕಟ್ಟೆ"/></Field>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-              <Field label={t("totalQty")}><input type="number" value={form.qty} onChange={e=>setForm({...form,qty:e.target.value})} onBlur={calcTotal} placeholder="0"/></Field>
-              <Field label={t("unit")}><select value={form.unit} onChange={e=>setForm({...form,unit:e.target.value})}>{UNITS.map(u=><option key={u}>{u}</option>)}</select></Field>
+
+          {/* Date */}
+          <div style={{marginBottom:12}}>
+            <div style={{fontSize:14,fontWeight:600,marginBottom:6}}>📅 {lang==="kn"?"ದಿನಾಂಕ *":"Date *"}</div>
+            <input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/>
+          </div>
+
+          {/* Crop sale fields */}
+          {form.type==="cropSale"&&(
+            <>
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:14,fontWeight:600,marginBottom:6}}>🌱 {lang==="kn"?"ಬೆಳೆ / ಉತ್ಪನ್ನ *":"Crop / Product *"}</div>
+                <input value={form.crop} onChange={e=>setForm({...form,crop:e.target.value})}
+                  placeholder={lang==="kn"?"ಅಡಿಕೆ, ತೆಂಗಿನಕಾಯಿ, ಭತ್ತ...":"Areca nut, coconut, paddy..."}/>
+              </div>
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:14,fontWeight:600,marginBottom:6}}>👤 {lang==="kn"?"ಖರೀದಿದಾರ":"Buyer Name"}</div>
+                <input value={form.buyer} onChange={e=>setForm({...form,buyer:e.target.value})}
+                  placeholder={lang==="kn"?"ಖರೀದಿದಾರ ಹೆಸರು":"Buyer name"}/>
+              </div>
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:14,fontWeight:600,marginBottom:6}}>🏪 {lang==="kn"?"ಮಾರುಕಟ್ಟೆ / APMC":"Market / APMC"}</div>
+                <input value={form.market} onChange={e=>setForm({...form,market:e.target.value})}
+                  placeholder="APMC, Shimoga Market..."/>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
+                <div>
+                  <div style={{fontSize:14,fontWeight:600,marginBottom:6}}>⚖️ {lang==="kn"?"ಪ್ರಮಾಣ":"Qty"}</div>
+                  <input type="number" value={form.qty} inputMode="numeric"
+                    onChange={e=>setForm({...form,qty:e.target.value})} onBlur={calcTotal} placeholder="0"/>
+                </div>
+                <div>
+                  <div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಘಟಕ":"Unit"}</div>
+                  <select value={form.unit} onChange={e=>setForm({...form,unit:e.target.value})}>
+                    {"ಕೆ.ಜಿ,Quintal,Ton,Bags,Nos,ಲೋಡ್".split(",").map(u=><option key={u}>{u}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div style={{marginBottom:12}}>
+                <div style={{fontSize:14,fontWeight:600,marginBottom:6}}>💰 {lang==="kn"?"ಒಂದು ಘಟಕಕ್ಕೆ ದರ (₹)":"Rate per Unit (₹)"}</div>
+                <input type="number" value={form.ratePerUnit} inputMode="numeric"
+                  onChange={e=>setForm({...form,ratePerUnit:e.target.value})} onBlur={calcTotal} placeholder="0"/>
+              </div>
+              {form.qty&&form.ratePerUnit&&(
+                <div style={{background:"#E8F5E9",borderRadius:12,padding:"10px 14px",
+                  marginBottom:12,fontSize:15,fontWeight:700,color:"#1B5E20"}}>
+                  {lang==="kn"?"ಲೆಕ್ಕ: ":"Calc: "}{form.qty} × {fmtCur(form.ratePerUnit)} = {fmtCur((+form.qty)*(+form.ratePerUnit))}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Other income description */}
+          {form.type!=="cropSale"&&(
+            <div style={{marginBottom:12}}>
+              <div style={{fontSize:14,fontWeight:600,marginBottom:6}}>📝 {lang==="kn"?"ವಿವರ *":"Description *"}</div>
+              <input value={form.crop} onChange={e=>setForm({...form,crop:e.target.value})}
+                placeholder={lang==="kn"?"ಆದಾಯದ ವಿವರ":"Income description"}/>
             </div>
-            <Field label={t("ratePerUnit")}><input type="number" value={form.ratePerUnit} onChange={e=>setForm({...form,ratePerUnit:e.target.value})} onBlur={calcTotal} placeholder="0"/></Field>
-          </>}
-          {form.type!=="cropSale"&&<Field label="Description *"><input value={form.crop} onChange={e=>setForm({...form,crop:e.target.value})} placeholder="ಆದಾಯದ ವಿವರ"/></Field>}
-          <Field label={t("totalIncome")+" (₹) *"}>
-            <div style={{display:"flex",gap:8,alignItems:"center"}}>
-              <input type="number" value={form.totalAmt} onChange={e=>setForm({...form,totalAmt:e.target.value})} placeholder="0" style={{flex:1}}/>
-              {form.qty&&form.ratePerUnit&&<div style={{padding:"10px 12px",background:"#E8F5E9",borderRadius:10,fontSize:18,fontWeight:700,color:"#1B5E20",flexShrink:0}}>{fmtCur((+form.qty)*(+form.ratePerUnit))}</div>}
-            </div>
-          </Field>
-          <Field label={t("payMode")} mb={14}>
+          )}
+
+          {/* Total amount */}
+          <div style={{marginBottom:12}}>
+            <div style={{fontSize:14,fontWeight:600,marginBottom:6}}>💰 {lang==="kn"?"ಒಟ್ಟು ಮೊತ್ತ (₹) *":"Total Amount (₹) *"}</div>
+            <input type="number" value={form.totalAmt} inputMode="numeric"
+              onChange={e=>setForm({...form,totalAmt:e.target.value})} placeholder="0"/>
+          </div>
+
+          {/* Payment mode */}
+          <div style={{marginBottom:16}}>
+            <div style={{fontSize:14,fontWeight:600,marginBottom:8}}>{lang==="kn"?"ಪಾವತಿ ವಿಧ":"Payment Mode"}</div>
             <div style={{display:"flex",gap:8}}>
-              {PAY_MODES.map(pm=>(
+              {[["cash","💵",lang==="kn"?"ನಗದು":"Cash"],
+                ["cheque","📝",lang==="kn"?"ಚೆಕ್":"Cheque"],
+                ["upi","📱","UPI/Online"]].map(([pm,ic,lb])=>(
                 <div key={pm} onClick={()=>setForm({...form,payMode:pm})}
-                  style={{flex:1,padding:"9px 6px",textAlign:"center",borderRadius:12,cursor:"pointer",
-                    border:"1.5px solid "+(form.payMode===pm?"#1B5E20":"#ddd"),
-                    background:form.payMode===pm?"#E8F5E9":"#fff",
-                    fontSize:17,fontWeight:form.payMode===pm?700:400,color:form.payMode===pm?"#1B5E20":"#555"}}>
-                  {pm==="cash"?"💵":pm==="cheque"?"📝":"📱"} {t(pm)}
+                  style={{flex:1,padding:"10px 6px",textAlign:"center",borderRadius:12,cursor:"pointer",
+                    border:"2px solid "+(form.payMode===pm?"#1B5E20":"#ddd"),
+                    background:form.payMode===pm?"#E8F5E9":"#fafafa"}}>
+                  <div style={{fontSize:20,marginBottom:3}}>{ic}</div>
+                  <div style={{fontSize:13,fontWeight:form.payMode===pm?700:500,
+                    color:form.payMode===pm?"#1B5E20":"#555"}}>{lb}</div>
                 </div>
               ))}
             </div>
-          </Field>
-          <Field label={t("noteSave")} mb={14}><textarea value={form.note} onChange={e=>setForm({...form,note:e.target.value})} rows={2} placeholder="ಟಿಪ್ಪಣಿ..."/></Field>
-          <div style={{display:"flex",gap:10}}><Btn onClick={save} col="#1B5E20" full>💾 {t("save")}</Btn><Btn onClick={()=>{setShow(false);setEditId(null);}} light col="#555" sm>{t("cancel")}</Btn></div>
-        </Card>
+          </div>
+
+          {/* Note */}
+          <div style={{marginBottom:16}}>
+            <div style={{fontSize:14,fontWeight:600,marginBottom:6}}>🗒️ {lang==="kn"?"ಟಿಪ್ಪಣಿ (ಐಚ್ಛಿಕ)":"Note (Optional)"}</div>
+            <textarea value={form.note} onChange={e=>setForm({...form,note:e.target.value})}
+              rows={2} placeholder={lang==="kn"?"ಟಿಪ್ಪಣಿ...":"Note..."}/>
+          </div>
+
+          <div style={{display:"flex",gap:10}}>
+            <button onClick={save}
+              style={{flex:1,background:"#1B5E20",color:"#fff",border:"none",
+                borderRadius:14,padding:14,fontSize:17,fontWeight:700,cursor:"pointer"}}>
+              💾 {lang==="kn"?"ಉಳಿಸಿ":"Save"}
+            </button>
+            <button onClick={()=>{setShow(false);setEditId(null);setForm(E);}}
+              style={{background:"#f0f0f0",border:"none",color:"#555",
+                borderRadius:14,padding:"14px 18px",fontSize:17,fontWeight:600,cursor:"pointer"}}>
+              {lang==="kn"?"ರದ್ದು":"Cancel"}
+            </button>
+          </div>
+        </div>
       )}
-      <div style={{marginTop:14}}>
-        {(income||[]).length===0&&<Empty icon="🌾" text={t("noActivity")}/>}
-        {(income||[]).map(x=>{const isSaved=savedId===x.id;return(
-          <Card key={x.id} style={{border:"1.5px solid "+(isSaved?"#A5D6A7":"transparent"),transition:"border .4s"}}>
+
+      {/* List */}
+      {(!income||income.length===0)&&(
+        <div style={{textAlign:"center",padding:"40px 20px",color:"#aaa"}}>
+          <div style={{fontSize:48,marginBottom:12}}>🌾</div>
+          <div style={{fontSize:16}}>{lang==="kn"?"ಯಾವುದೇ ಆದಾಯ ಇಲ್ಲ":"No income entries yet"}</div>
+        </div>
+      )}
+      {(income||[]).map(x=>{
+        const saved=savedId===x.id;
+        const pmIcon=x.payMode==="cash"?"💵":x.payMode==="cheque"?"📝":"📱";
+        return(
+          <div key={x.id} style={{background:"#fff",borderRadius:18,padding:16,marginBottom:12,
+            boxShadow:"0 2px 10px rgba(0,0,0,.07)",
+            border:saved?"2px solid #A5D6A7":"2px solid transparent",transition:"border .4s"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
-              <div style={{display:"flex",alignItems:"center",gap:10}}>
-                <div style={{width:44,height:44,background:"#E8F5E9",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>🌾</div>
+              <div style={{display:"flex",alignItems:"center",gap:12}}>
+                <div style={{width:46,height:46,background:"#E8F5E9",borderRadius:14,
+                  display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>
+                  {x.type==="cropSale"?"🌾":"💵"}
+                </div>
                 <div>
-                  <div style={{fontWeight:700,fontSize:17,color:"#1B5E20"}}>{x.crop||t("otherIncome")}</div>
-                  <div style={{fontSize:17,color:"#888"}}>{fmt(x.date)}{x.buyer?" · "+x.buyer:""}{x.market?" · "+x.market:""}</div>
-                  {x.qty&&<div style={{fontSize:17,color:"#555"}}>{x.qty} {x.unit} × {fmtCur(x.ratePerUnit)}</div>}
-                  <div style={{fontSize:17,color:"#555",marginTop:2}}>{x.payMode==="cash"?"💵 Cash":x.payMode==="cheque"?"📝 Cheque":"📱 UPI/Online"}</div>
+                  <div style={{fontWeight:700,fontSize:16,color:"#1B5E20"}}>
+                    {x.crop||lang==="kn"?"ಇತರ ಆದಾಯ":"Other Income"}
+                  </div>
+                  <div style={{fontSize:13,color:"#888",marginTop:2}}>
+                    📅 {fmt(x.date)}
+                    {x.buyer?" · "+x.buyer:""}
+                    {x.market?" · "+x.market:""}
+                  </div>
+                  {x.qty&&x.ratePerUnit&&(
+                    <div style={{fontSize:13,color:"#555",marginTop:2}}>
+                      {x.qty} {x.unit} × {fmtCur(x.ratePerUnit)}
+                    </div>
+                  )}
+                  <div style={{fontSize:13,color:"#555",marginTop:2}}>
+                    {pmIcon} {x.payMode==="cash"?(lang==="kn"?"ನಗದು":"Cash"):x.payMode==="cheque"?(lang==="kn"?"ಚೆಕ್":"Cheque"):"UPI/Online"}
+                  </div>
+                  {x.note&&<div style={{fontSize:13,color:"#aaa",fontStyle:"italic",marginTop:2}}>"{x.note}"</div>}
                 </div>
               </div>
-              <div style={{fontSize:20,fontWeight:800,color:"#1B5E20"}}>{fmtCur(x.totalAmt)}</div>
+              <div style={{fontSize:20,fontWeight:800,color:"#1B5E20",flexShrink:0,marginLeft:8}}>
+                {fmtCur(x.totalAmt)}
+              </div>
             </div>
-            {x.note&&<div style={{fontSize:17,color:"#888",fontStyle:"italic",marginBottom:8}}>"{x.note}"</div>}
             <div style={{display:"flex",gap:8}}>
-              <button onClick={()=>{setForm({...x});setEditId(x.id);setShow(true);}} style={{flex:1,background:"#E8F5E9",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#1B5E20"}}>✏️ {t("edit")}</button>
-              <button onClick={()=>del(x.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:10,padding:9,fontSize:18,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {t("delete")}</button>
+              <button onClick={()=>{setForm({...x});setEditId(x.id);setShow(true);}}
+                style={{flex:1,background:"#E8F5E9",border:"none",borderRadius:12,padding:10,
+                  fontSize:15,fontWeight:600,cursor:"pointer",color:"#1B5E20"}}>
+                ✏️ {lang==="kn"?"ಸಂಪಾದಿಸಿ":"Edit"}
+              </button>
+              <button onClick={()=>del(x.id)}
+                style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:12,padding:10,
+                  fontSize:15,fontWeight:600,cursor:"pointer",color:"#C62828"}}>
+                🗑 {lang==="kn"?"ಅಳಿಸಿ":"Delete"}
+              </button>
             </div>
-          </Card>
-        );})}
-      </div>
-
-      {/* ═══ BACKUP & RESTORE ═══ */}
-      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
-        <div style={{fontSize:17,fontWeight:700,marginBottom:12,color:"#333"}}>
-          ☁️ {lang==="kn"?"ಡೇಟಾ ಬ್ಯಾಕಪ್ & ಮರುಸ್ಥಾಪನೆ":"Data Backup & Restore"}
-        </div>
-        <button onClick={()=>{
-          const allData={};
-          Object.keys(localStorage).filter(k=>k.startsWith("nt:")).forEach(k=>{
-            try{allData[k]=JSON.parse(localStorage.getItem(k));}catch{}
-          });
-          allData["_exportedAt"]=new Date().toISOString();
-          const blob=new Blob([JSON.stringify(allData,null,2)],{type:"application/json"});
-          const url=URL.createObjectURL(blob);
-          const a=document.createElement("a");
-          a.href=url;
-          a.download="NammaThota-backup-"+new Date().toISOString().slice(0,10)+".json";
-          a.click();
-          URL.revokeObjectURL(url);
-          showToast(lang==="kn"?"✅ ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಆಗಿದೆ":"✅ Backup downloaded");
-        }} style={{width:"100%",background:"#E8F5E9",border:"2px solid #A5D6A7",color:"#1B5E20",
-          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
-          marginBottom:10,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-          📥 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ":"Download Backup (.json)"}
-        </button>
-        <label style={{width:"100%",background:"#E3F2FD",border:"2px solid #90CAF9",color:"#1565C0",
-          borderRadius:14,padding:14,fontSize:16,fontWeight:700,cursor:"pointer",
-          display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:8}}>
-          📤 {lang==="kn"?"ಬ್ಯಾಕಪ್ ಮರುಸ್ಥಾಪಿಸಿ":"Restore from Backup"}
-          <input type="file" accept=".json" style={{display:"none"}}
-            onChange={e=>{
-              const file=e.target.files[0];if(!file)return;
-              const reader=new FileReader();
-              reader.onload=ev=>{
-                try{
-                  const data=JSON.parse(ev.target.result);
-                  if(!data["nt:global:users"]){showToast(lang==="kn"?"ತಪ್ಪಾದ ಫೈಲ್":"Invalid backup file","warn");return;}
-                  if(!window.confirm(lang==="kn"?"ಎಲ್ಲಾ ಡೇಟಾ ಮರುಸ್ಥಾಪಿಸುವುದೇ?":"Restore all data? Current data will be overwritten."))return;
-                  Object.keys(data).filter(k=>k.startsWith("nt:")).forEach(k=>{
-                    localStorage.setItem(k,JSON.stringify(data[k]));
-                    sbSet(k,data[k]);
-                  });
-                  showToast(lang==="kn"?"✅ ಮರುಸ್ಥಾಪಿಸಲಾಗಿದೆ — ಮರುಲೋಡ್...":"✅ Restored — Reloading...");
-                  setTimeout(()=>window.location.reload(),1500);
-                }catch(ex){showToast(lang==="kn"?"ಫೈಲ್ ಓದಲಾಗಲಿಲ್ಲ":"Could not read file","error");}
-              };
-              reader.readAsText(file);
-              e.target.value="";
-            }}/>
-        </label>
-        <div style={{fontSize:13,color:"#888",textAlign:"center",lineHeight:1.6}}>
-          {lang==="kn"?"ಬ್ಯಾಕಪ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ → Google Drive ಗೆ ಹಾಕಿ ಸುರಕ್ಷಿತವಾಗಿ ಇರಿಸಿ":"Download backup → Upload to Google Drive to keep it safe"}
-        </div>
-      </div>
-
-      {/* ═══ SIGN OUT ═══ */}
-      <button onClick={()=>{if(window.confirm(lang==="kn"?"ನಿಜವಾಗಿಯೂ Sign Out ಮಾಡುವುದೇ?":"Sign out of NammaThota?"))onLogout&&onLogout();}}
-        style={{width:"100%",background:"#FFEBEE",border:"2px solid #FFCDD2",
-          color:"#C62828",borderRadius:18,padding:18,fontSize:18,
-          fontWeight:700,cursor:"pointer",display:"flex",
-          alignItems:"center",justifyContent:"center",gap:10,marginBottom:16}}>
-        🚪 {lang==="kn"?"ಸೈನ್ ಔಟ್":"Sign Out"}
-      </button>
-      <div style={{textAlign:"center",fontSize:13,color:"#ccc",marginBottom:8}}>
-        ನಮ್ಮ ತೋಟ · CodeTrail Technologies
-      </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
+
 
 /* ── Report Page ────────────────────────────────── */
 function ReportPage({farm,tasks,expenses,purchases,payments,income,labour,trips,docs,allTasks,user,onBack}){
