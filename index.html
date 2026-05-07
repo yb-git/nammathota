@@ -1360,121 +1360,269 @@ function BottomNav({page,setPage,isOwner,onManageClick}){
 /* ── Dashboard ───────────────────────────────────── */
 function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,allTasks,onNav}){
   const{t,lang}=useLang();
-  const[periodFilter,setPeriodFilter]=useState("month");
+  const[period,setPeriod]=useState("month");
+
+  // ── Task progress ──────────────────────────────
   const totalSub=allTasks.reduce((a,tg)=>a+tg.sub.length,0);
   const doneSub=allTasks.reduce((a,tg)=>a+tg.sub.filter((_,i)=>(tasks[tg.id+"-"+i]?.status||"pending")==="taskDone").length,0);
   const pct=totalSub?Math.round(doneSub/totalSub*100):0;
-  const mth=new Date().toISOString().slice(0,7);
-  const mthExp=expenses.filter(e=>e.date?.startsWith(mth)).reduce((a,e)=>a+(+e.amount||0),0);
-  const mthWage=labour.filter(l=>l.date?.startsWith(mth)).reduce((a,l)=>a+(+l.totalWages||0),0);
-  const totalSpent=expenses.reduce((a,e)=>a+(+e.amount||0),0)+purchases.reduce((a,p)=>a+(+p.amount||0),0)+labour.reduce((a,l)=>a+(+l.totalWages||0),0);
-  const totalIncome=(income||[]).reduce((a,x)=>a+(+x.totalAmt||0),0);
-  const profit=totalIncome-totalSpent;
-  const devBudget=+(farm.budget?.devBudget||0);
-  // Period filter
+
+  // ── Period filter ──────────────────────────────
   const now=new Date();
-  const periodStart=periodFilter==="month"?now.toISOString().slice(0,7)+"-01":
-    periodFilter==="year"?now.getFullYear()+"-01-01":"2000-01-01";
-  const inPeriod=d=>(d||"")>=periodStart;
+  const mth=now.toISOString().slice(0,7);
+  const yr=now.getFullYear().toString();
+  const inP=d=>{
+    if(!d)return false;
+    if(period==="month")return d.startsWith(mth);
+    if(period==="year")return d.startsWith(yr);
+    return true;
+  };
 
-  // Advance balance using hook
-  const{advanceBalance,usedFromAdv,pendingClaims,settledClaims,ownerDirect}=useAdvanceBalance(payments,expenses,purchases);
-  const totalAdv=payments.filter(p=>p.type==="advance").reduce((a,p)=>a+(+p.amount||0),0);
-  const totalSalary=payments.filter(p=>p.type==="salary").reduce((a,p)=>a+(+p.amount||0),0);
-
-  // Period filtered
-  const pExp=expenses.filter(e=>inPeriod(e.date)).reduce((a,e)=>a+(+e.amount||0),0);
-  const pWage=labour.filter(l=>inPeriod(l.date)).reduce((a,l)=>a+(+l.totalWages||0),0);
-  const pPur=purchases.filter(p=>inPeriod(p.date)).reduce((a,p)=>a+(+p.amount||0),0);
-  const pInc=(income||[]).filter(x=>inPeriod(x.date)).reduce((a,x)=>a+(+x.totalAmt||0),0);
+  // ── Period totals ──────────────────────────────
+  const pExp=expenses.filter(e=>inP(e.date)).reduce((a,e)=>a+(+e.amount||0),0);
+  const pWage=labour.filter(l=>inP(l.date)).reduce((a,l)=>a+(+l.totalWages||0),0);
+  const pPur=purchases.filter(p=>inP(p.date)).reduce((a,p)=>a+(+p.amount||0),0);
+  const pInc=(income||[]).filter(x=>inP(x.date)).reduce((a,x)=>a+(+x.totalAmt||0),0);
   const pPnL=pInc-pExp-pWage-pPur;
 
-  const totalInvested=(+(farm.budget?.landCost||0))+(+(farm.budget?.devBudget||0));
+  // ── All-time totals ────────────────────────────
+  const totalExp=expenses.reduce((a,e)=>a+(+e.amount||0),0);
+  const totalWage=labour.reduce((a,l)=>a+(+l.totalWages||0),0);
+  const totalPur=purchases.reduce((a,p)=>a+(+p.amount||0),0);
+  const totalInc=(income||[]).reduce((a,x)=>a+(+x.totalAmt||0),0);
+  const totalSpent=totalExp+totalWage+totalPur;
 
-  // Recent activity — last 5 entries across all modules
+  // ── Supervisor balance ─────────────────────────
+  const advGiven=payments.filter(p=>p.type==="advance").reduce((a,p)=>a+(+p.amount||0),0);
+  const advUsedExp=expenses.filter(e=>e.pstatus==="advance").reduce((a,e)=>a+(+e.amount||0),0);
+  const advUsedPur=purchases.filter(p=>p.pstatus==="advance").reduce((a,p)=>a+(+p.amount||0),0);
+  const advBalance=advGiven-advUsedExp-advUsedPur;
+  const pendingClaims=expenses.filter(e=>e.pstatus==="pending").reduce((a,e)=>a+(+e.amount||0),0)
+    +purchases.filter(p=>p.pstatus==="pending").reduce((a,p)=>a+(+p.amount||0),0);
+  const salaryPaid=payments.filter(p=>p.type==="salary").reduce((a,p)=>a+(+p.amount||0),0);
+
+  // ── Budget ─────────────────────────────────────
+  const landCost=+(farm.budget?.landCost||0);
+  const devBudget=+(farm.budget?.devBudget||0);
+
+  // ── Recent activity ────────────────────────────
   const recent=[
-    ...expenses.map(e=>({date:e.date,text:e.desc||e.cat,icon:"💸",type:"expense"})),
-    ...purchases.map(p=>({date:p.date,text:p.item,icon:"🛒",type:"purchase"})),
-    ...trips.map(tr=>({date:tr.date,text:tr.from+"→"+tr.to,icon:"🚗",type:"trip"})),
-    ...labour.map(l=>({date:l.date,text:l.workerName,icon:"👷",type:"labour"})),
+    ...expenses.map(e=>({date:e.date,text:e.desc||(ECAT.find(c=>c.id===e.cat)||{}).kn||e.cat,icon:"💸"})),
+    ...purchases.map(p=>({date:p.date,text:p.item,icon:"🛒"})),
+    ...trips.map(tr=>({date:tr.date,text:tr.from+"→"+tr.to,icon:"🚗"})),
+    ...labour.map(l=>({date:l.date,text:l.workerName,icon:"👷"})),
   ].sort((a,b)=>(b.date||"").localeCompare(a.date||"")).slice(0,5);
 
   return(
     <div style={{padding:"14px 14px 24px"}}>
-      {/* Farm Banner */}
-      <div style={{background:farm.col||"#1B5E20",borderRadius:20,padding:"18px 16px",color:"#fff",marginBottom:14}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
-          <div>
-            <div style={{fontSize:18,opacity:.8}}>{farm.type}{farm.location?.village?" · "+farm.location.village:""}</div>
-            {farm.land?.purchasedAcres&&<div style={{fontSize:17,opacity:.7,marginTop:2}}>✅ {farm.land.purchasedAcres} acres · {farm.land.pendingAcres?" ⏳ "+farm.land.pendingAcres+" pending":""}</div>}
-          </div>
-          <ProgressRing pct={pct} col="rgba(255,255,255,.9)" size={70}/>
+
+      {/* Period selector */}
+      <div style={{display:"flex",gap:8,marginBottom:14}}>
+        {[["month",lang==="kn"?"ಈ ತಿಂಗಳು":"This Month"],
+          ["year",lang==="kn"?"ಈ ವರ್ಷ":"This Year"],
+          ["all",lang==="kn"?"ಒಟ್ಟಾರೆ":"All Time"]].map(([p,lb])=>(
+          <button key={p} onClick={()=>setPeriod(p)}
+            style={{flex:1,padding:"10px 6px",borderRadius:20,fontSize:14,fontWeight:700,
+              border:"2px solid "+(period===p?(farm.col||"#1B5E20"):"#ddd"),
+              background:period===p?(farm.col||"#1B5E20"):"#fff",
+              color:period===p?"#fff":"#555",cursor:"pointer"}}>
+            {lb}
+          </button>
+        ))}
+      </div>
+
+      {/* Farm banner */}
+      <div style={{background:farm.col||"#1B5E20",borderRadius:20,padding:18,color:"#fff",marginBottom:14,boxShadow:"0 4px 20px rgba(0,0,0,.2)"}}>
+        <div style={{fontSize:14,opacity:.8,marginBottom:8}}>
+          {farm.location?.village||farm.type}
+          {farm.land?.totalAcres?" · "+farm.land.totalAcres+" ಎಕರೆ":""}
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10}}>
+        <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:14}}>
+          <div style={{flex:1}}>
+            <div style={{fontSize:30,fontWeight:900}}>{pct}%</div>
+            <div style={{fontSize:14,opacity:.8}}>{lang==="kn"?"ಒಟ್ಟು ಪ್ರಗತಿ":"Overall Progress"}</div>
+            <div style={{height:8,background:"rgba(255,255,255,.25)",borderRadius:6,marginTop:8}}>
+              <div style={{height:8,width:pct+"%",background:"#fff",borderRadius:6,transition:"width .5s"}}/>
+            </div>
+          </div>
+          <div style={{background:"rgba(255,255,255,.15)",borderRadius:16,padding:"12px 16px",textAlign:"center"}}>
+            <div style={{fontSize:24,fontWeight:900}}>{doneSub}/{totalSub}</div>
+            <div style={{fontSize:13,opacity:.8}}>📋 {lang==="kn"?"ಕೆಲಸ":"Tasks"}</div>
+          </div>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
           {[
-            {label:t("tasks"),val:doneSub+"/"+totalSub,icon:"📋",page:"tasks"},
-            {label:t("expenses"),val:fmtCur(mthExp),icon:"💸",page:"finance"},
-            {label:t("labour"),val:fmtCur(mthWage),icon:"👷",page:"daily"},
+            {label:lang==="kn"?"ಖರ್ಚು":"Expenses",val:fmtCur(pExp),icon:"💸",page:"finance"},
+            {label:lang==="kn"?"ಕೂಲಿ":"Wages",val:fmtCur(pWage),icon:"👷",page:"daily"},
           ].map(s=>(
             <div key={s.label} onClick={()=>onNav(s.page)}
-              style={{background:"rgba(255,255,255,.15)",borderRadius:14,padding:"10px 8px",textAlign:"center",cursor:"pointer"}}>
-              <div style={{fontSize:17,opacity:.8,marginBottom:3}}>{s.icon}</div>
-              <div style={{fontSize:17,fontWeight:800}}>{s.val}</div>
-              <div style={{fontSize:18,opacity:.75,marginTop:2}}>{s.label}</div>
+              style={{background:"rgba(255,255,255,.15)",borderRadius:14,padding:12,cursor:"pointer"}}>
+              <div style={{fontSize:18,marginBottom:4}}>{s.icon}</div>
+              <div style={{fontSize:18,fontWeight:800}}>{s.val}</div>
+              <div style={{fontSize:12,opacity:.8,marginTop:2}}>{s.label}</div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Budget Overview */}
-      
+      {/* P&L */}
+      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+        <div style={{fontSize:16,fontWeight:800,marginBottom:12}}>
+          📊 {lang==="kn"?"ಆದಾಯ & ಖರ್ಚು":"Income & Expense"}
+          <span style={{fontSize:12,color:"#888",fontWeight:400,marginLeft:8}}>
+            {period==="month"?mth:period==="year"?yr:(lang==="kn"?"ಒಟ್ಟಾರೆ":"All")}
+          </span>
+        </div>
+        {[
+          {icon:"🌾",label:lang==="kn"?"ಆದಾಯ":"Income",val:pInc,col:"#1B5E20"},
+          {icon:"💸",label:lang==="kn"?"ಖರ್ಚು":"Expenses",val:pExp,col:"#E65100"},
+          {icon:"👷",label:lang==="kn"?"ಕೂಲಿ":"Wages",val:pWage,col:"#E65100"},
+          {icon:"🛒",label:lang==="kn"?"ಖರೀದಿ":"Purchases",val:pPur,col:"#6A1B9A"},
+        ].map(r=>(
+          <div key={r.label} style={{display:"flex",justifyContent:"space-between",
+            alignItems:"center",padding:"9px 0",borderBottom:"1px solid #f5f5f5"}}>
+            <span style={{fontSize:15,color:"#555"}}>{r.icon} {r.label}</span>
+            <span style={{fontSize:16,fontWeight:700,color:r.col}}>{fmtCur(r.val)}</span>
+          </div>
+        ))}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
+          padding:"12px 14px",marginTop:10,borderRadius:14,
+          background:pPnL>=0?"#E8F5E9":"#FFEBEE"}}>
+          <span style={{fontSize:16,fontWeight:700,color:pPnL>=0?"#1B5E20":"#C62828"}}>
+            {pPnL>=0?"📈":"📉"} {lang==="kn"?"ಲಾಭ / ನಷ್ಟ":"Profit / Loss"}
+          </span>
+          <span style={{fontSize:20,fontWeight:800,color:pPnL>=0?"#1B5E20":"#C62828"}}>
+            {pPnL>=0?"▲ ":"▼ "}{fmtCur(Math.abs(pPnL))}
+          </span>
+        </div>
+      </div>
+
+      {/* Supervisor Balance */}
+      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+        <div style={{fontSize:16,fontWeight:800,marginBottom:12}}>👷 {lang==="kn"?"ಮೇಲ್ವಿಚಾರಕ ಲೆಕ್ಕ":"Supervisor Account"}</div>
+        {[
+          {icon:"💵",label:lang==="kn"?"ಮುಂಗಡ ನೀಡಿದ್ದು":"Advance Given",val:advGiven,col:"#0277BD"},
+          {icon:"💸",label:lang==="kn"?"ಮುಂಗಡದಿಂದ ಬಳಸಿದ್ದು":"Used from Advance",val:advUsedExp+advUsedPur,col:"#E65100"},
+          {icon:"💰",label:lang==="kn"?"ಸಂಬಳ":"Salary",val:salaryPaid,col:"#555"},
+        ].map(r=>(
+          <div key={r.label} style={{display:"flex",justifyContent:"space-between",
+            alignItems:"center",padding:"8px 0",borderBottom:"1px solid #f5f5f5"}}>
+            <span style={{fontSize:15,color:"#555"}}>{r.icon} {r.label}</span>
+            <span style={{fontSize:15,fontWeight:700,color:r.col}}>{fmtCur(r.val)}</span>
+          </div>
+        ))}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
+          padding:"10px 14px",marginTop:8,borderRadius:14,
+          background:advBalance>=0?"#E8F5E9":"#FFEBEE"}}>
+          <span style={{fontSize:15,fontWeight:700,color:advBalance>=0?"#1B5E20":"#C62828"}}>
+            🏦 {lang==="kn"?"ಮುಂಗಡ ಬಾಕಿ":"Advance Balance"}
+          </span>
+          <span style={{fontSize:18,fontWeight:800,color:advBalance>=0?"#1B5E20":"#C62828"}}>
+            {fmtCur(advBalance)}
+          </span>
+        </div>
+        {pendingClaims>0&&(
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
+            padding:"10px 14px",marginTop:8,borderRadius:14,background:"#FFEBEE",
+            border:"2px solid #FFCDD2"}}>
+            <span style={{fontSize:15,fontWeight:700,color:"#C62828"}}>
+              🔴 {lang==="kn"?"ಕ್ಲೇಮ್ ಬಾಕಿ":"Pending Claims"}
+            </span>
+            <span style={{fontSize:18,fontWeight:800,color:"#C62828"}}>{fmtCur(pendingClaims)}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Investment */}
+      {(landCost>0||devBudget>0||totalSpent>0)&&(
+        <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+          <div style={{fontSize:16,fontWeight:800,marginBottom:12}}>💰 {lang==="kn"?"ಹೂಡಿಕೆ ಸಾರಾಂಶ":"Investment"}</div>
+          {landCost>0&&<div style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #f5f5f5"}}>
+            <span style={{fontSize:15,color:"#555"}}>🏡 {lang==="kn"?"ಜಮೀನು":"Land Cost"}</span>
+            <span style={{fontSize:15,fontWeight:700}}>{fmtCur(landCost)}</span>
+          </div>}
+          <div style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #f5f5f5"}}>
+            <span style={{fontSize:15,color:"#555"}}>🔨 {lang==="kn"?"ಅಭಿವೃದ್ಧಿ ಖರ್ಚು":"Dev Spent"}</span>
+            <span style={{fontSize:15,fontWeight:700,color:"#E65100"}}>{fmtCur(totalSpent)}</span>
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",padding:"12px 14px",marginTop:8,borderRadius:14,background:"#E3F2FD"}}>
+            <span style={{fontSize:16,fontWeight:700,color:"#0277BD"}}>📊 {lang==="kn"?"ಒಟ್ಟು ಹೂಡಿಕೆ":"Total Invested"}</span>
+            <span style={{fontSize:18,fontWeight:800,color:"#0277BD"}}>{fmtCur(landCost+totalSpent)}</span>
+          </div>
+          {devBudget>0&&(
+            <div style={{marginTop:10}}>
+              <div style={{display:"flex",justifyContent:"space-between",fontSize:13,marginBottom:5}}>
+                <span style={{color:"#555"}}>{lang==="kn"?"ಬಜೆಟ್:":"Budget:"} {fmtCur(devBudget)}</span>
+                <span style={{color:totalSpent>devBudget?"#C62828":"#2E7D32",fontWeight:600}}>
+                  {Math.min(Math.round(totalSpent/devBudget*100),100)}% {lang==="kn"?"ಬಳಸಿದ್ದು":"used"}
+                </span>
+              </div>
+              <div style={{height:8,background:"#f0f0f0",borderRadius:6}}>
+                <div style={{height:8,width:Math.min(Math.round(totalSpent/devBudget*100),100)+"%",
+                  background:totalSpent>devBudget?"#C62828":"#1B5E20",borderRadius:6,transition:"width .5s"}}/>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Task progress */}
-      <Card>
-        <div style={{fontSize:18,fontWeight:700,marginBottom:12}}>📊 {t("progress")}</div>
-        {allTasks.map(tg=>{
-          const done=tg.sub.filter((_,i)=>(tasks[tg.id+"-"+i]?.status||"pending")==="taskDone").length;
-          const p=tg.sub.length?Math.round(done/tg.sub.length*100):0;
-          const planned=+(farm.budget?.taskBudgets||{})[tg.id]||0;
-          return(
-            <div key={tg.id} style={{marginBottom:10}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-                <div style={{display:"flex",alignItems:"center",gap:7}}>
-                  <div style={{width:10,height:10,borderRadius:"50%",background:tg.col}}/>
-                  <span style={{fontSize:17,fontWeight:600,color:tg.col}}>{tg.kn}</span>
-                  {planned>0&&<span style={{fontSize:18,color:"#aaa"}}>{fmtCur(planned)}</span>}
+      {allTasks.length>0&&(
+        <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+          <div style={{fontSize:16,fontWeight:800,marginBottom:12}}>📋 {lang==="kn"?"ಕೆಲಸ ಪ್ರಗತಿ":"Task Progress"}</div>
+          {allTasks.slice(0,8).map(tg=>{
+            const done=tg.sub.filter((_,i)=>(tasks[tg.id+"-"+i]?.status||"pending")==="taskDone").length;
+            const p=tg.sub.length?Math.round(done/tg.sub.length*100):0;
+            const tSpent=expenses.filter(e=>e.taskId===tg.id).reduce((a,e)=>a+(+e.amount||0),0);
+            const planned=+(farm.budget?.taskBudgets||{})[tg.id]||0;
+            return(
+              <div key={tg.id} style={{marginBottom:10,background:"#f9f9f9",borderRadius:12,padding:"10px 12px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+                  <span style={{fontSize:14,fontWeight:700,color:tg.col}}>{lang==="kn"?tg.kn:tg.en}</span>
+                  <span style={{fontSize:13,color:"#888"}}>{done}/{tg.sub.length}</span>
                 </div>
-                <span style={{fontSize:17,color:"#888"}}>{done}/{tg.sub.length}</span>
+                <div style={{height:6,background:"#e0e0e0",borderRadius:4}}>
+                  <div style={{height:6,width:p+"%",background:tg.col,borderRadius:4,transition:"width .4s"}}/>
+                </div>
+                {(planned>0||tSpent>0)&&(
+                  <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginTop:5,color:"#888"}}>
+                    <span>💸 {fmtCur(tSpent)}</span>
+                    {planned>0&&<span style={{color:tSpent>planned?"#C62828":"#2E7D32"}}>
+                      {lang==="kn"?"ಬಜೆಟ್:":"Budget:"} {fmtCur(planned)}
+                    </span>}
+                  </div>
+                )}
               </div>
-              <div style={{height:6,background:"#f0f0f0",borderRadius:6}}>
-                <div style={{height:6,width:p+"%",background:tg.col,borderRadius:6,transition:"width .4s"}}/>
-              </div>
-            </div>
-          );
-        })}
-      </Card>
+            );
+          })}
+        </div>
+      )}
 
       {/* Recent Activity */}
-      <Card>
-        <div style={{fontSize:18,fontWeight:700,marginBottom:12}}>🕒 {t("recentActivity")}</div>
-        {recent.length===0?<div style={{fontSize:18,color:"#aaa",textAlign:"center",padding:"10px 0"}}>{t("noActivity")}</div>
-          :recent.map((r,i)=>(
-            <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 0",borderBottom:i<recent.length-1?"1px solid #f5f5f5":"none"}}>
-              <span style={{fontSize:18,width:28,textAlign:"center"}}>{r.icon}</span>
+      {recent.length>0&&(
+        <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+          <div style={{fontSize:16,fontWeight:800,marginBottom:12}}>🕒 {lang==="kn"?"ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ":"Recent Activity"}</div>
+          {recent.map((r,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"center",gap:12,
+              padding:"10px 0",borderBottom:i<recent.length-1?"1px solid #f5f5f5":"none"}}>
+              <span style={{fontSize:22,width:30,textAlign:"center"}}>{r.icon}</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:18,fontWeight:500,color:"#333",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.text}</div>
+                <div style={{fontSize:15,fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.text}</div>
+                <div style={{fontSize:13,color:"#aaa",marginTop:2}}>{fmt(r.date)}</div>
               </div>
-              <div style={{fontSize:17,color:"#aaa",flexShrink:0}}>{fmt(r.date)}</div>
             </div>
           ))}
-      </Card>
+        </div>
+      )}
 
-      <div style={{textAlign:"center",fontSize:18,color:"#ccc",padding:"8px 0"}}>CodeTrail Technologies Private Limited</div>
+      <div style={{textAlign:"center",fontSize:12,color:"#ccc",padding:"8px 0"}}>
+        ನಮ್ಮ ತೋಟ v2.5 · CodeTrail Technologies
+      </div>
     </div>
   );
 }
 
-/* ── Tasks Page ──────────────────────────────────── */
+
 function TasksPage({farm,tasks,setTasks,customTasks,setCustomTasks,user,showToast}){
   const{t,lang}=useLang();const isOwner=user.role==="owner";
   const[statusFilter,setStatusFilter]=useState("all");
@@ -2220,34 +2368,7 @@ function PayStatusPicker({value,onChange,advanceBalance,lang,amount}){
   );
 }
 
-/* ── useAdvanceBalance hook ─────────────────────────────── */
-function useAdvanceBalance(payments,expenses,purchases){
-  const totalAdvance=payments.filter(p=>p.type==="advance").reduce((a,p)=>a+(+p.amount||0),0);
-  const usedFromAdv=[
-    ...expenses.filter(e=>e.payStatus==="advance").map(e=>+e.amount||0),
-    ...purchases.filter(p=>p.payStatus==="advance").map(p=>(+p.amount||0)+(+p.gstAmt||0)),
-  ].reduce((a,v)=>a+v,0);
-  const pendingClaims=[
-    ...expenses.filter(e=>e.payStatus==="claim_pending").map(e=>+e.amount||0),
-    ...purchases.filter(p=>p.payStatus==="claim_pending").map(p=>(+p.amount||0)+(+p.gstAmt||0)),
-  ].reduce((a,v)=>a+v,0);
-  const settledClaims=[
-    ...expenses.filter(e=>e.payStatus==="claim_settled").map(e=>+e.amount||0),
-    ...purchases.filter(p=>p.payStatus==="claim_settled").map(p=>(+p.amount||0)+(+p.gstAmt||0)),
-  ].reduce((a,v)=>a+v,0);
-  const ownerDirect=[
-    ...expenses.filter(e=>e.payStatus==="owner_direct").map(e=>+e.amount||0),
-    ...purchases.filter(p=>p.payStatus==="owner_direct").map(p=>(+p.amount||0)+(+p.gstAmt||0)),
-  ].reduce((a,v)=>a+v,0);
-  return{
-    totalAdvance,
-    usedFromAdv,
-    advanceBalance:Math.max(0,totalAdvance-usedFromAdv),
-    pendingClaims,
-    settledClaims,
-    ownerDirect,
-  };
-}
+
 
 /* ── FilterBar ──────────────────────────────────── */
 function FilterBar({search,setSearch,sortKey,setSortKey,sortOpts,filterKey,setFilterKey,filterOpts,placeholder,lang}){
