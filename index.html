@@ -1373,10 +1373,9 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
   const mth=now.toISOString().slice(0,7);
   const yr=now.getFullYear().toString();
   const inP=d=>{
-    if(!d)return false;
-    if(period==="month")return d.startsWith(mth);
-    if(period==="year")return d.startsWith(yr);
-    return true;
+    if(period==="month")return (d||"").startsWith(mth);
+    if(period==="year")return (d||"").startsWith(yr);
+    return true; // "all" — include everything even if no date
   };
 
   // ── Period totals ──────────────────────────────
@@ -1384,14 +1383,14 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
   const pWage=labour.filter(l=>inP(l.date)).reduce((a,l)=>a+(+l.totalWages||0),0);
   const pPur=purchases.filter(p=>inP(p.date)).reduce((a,p)=>a+(+p.amount||0),0);
   const pInc=(income||[]).filter(x=>inP(x.date)).reduce((a,x)=>a+(+x.totalAmt||0),0);
-  const pPnL=pInc-pExp-pWage-pPur;
+  const pPnL=pInc-pExp-pPur; // Expenses+Purchases from Finance module only
 
   // ── All-time totals ────────────────────────────
   const totalExp=expenses.reduce((a,e)=>a+(+e.amount||0),0);
   const totalWage=labour.reduce((a,l)=>a+(+l.totalWages||0),0);
   const totalPur=purchases.reduce((a,p)=>a+(+p.amount||0),0);
   const totalInc=(income||[]).reduce((a,x)=>a+(+x.totalAmt||0),0);
-  const totalSpent=totalExp+totalWage+totalPur;
+  const totalSpent=totalExp+totalPur; // Finance module: expenses+purchases
 
   // ── Supervisor balance ─────────────────────────
   const advGiven=payments.filter(p=>p.type==="advance").reduce((a,p)=>a+(+p.amount||0),0);
@@ -1984,7 +1983,7 @@ function DailyPage({farm,trips,setTrips,labour,setLabour,workers,setWorkers,show
 }
 
 function TripsTab({farm,trips,setTrips,showToast}){
-  const{t}=useLang();
+  const{t,lang}=useLang();
   const E={date:today(),from:"",to:"",km:"",vehicle:VEHICLES[0],fuelAmt:"",purpose:"",outcome:""};
   const[form,setForm]=useState(E);const[show,setShow]=useState(false);const[editId,setEditId]=useState(null);const[savedId,setSavedId]=useState(null);
   const[search,setSearch]=useState("");const[sortKey,setSortKey]=useState("date_desc");
@@ -3852,7 +3851,7 @@ function FarmApp({user,setUser,farm,onSwitch,onLogout,showToast}){
   );
   if(showPin)return(<><PinGate onVerified={onPinOk} onCancel={()=>{setShowPin(false);setPinTarget(null);}}/></>);
   if(overlay==="report")return(
-    <ReportPage farm={farm} tasks={tasks} expenses={expenses} purchases={purchases} payments={payments} labour={labour} trips={trips} docs={docs} allTasks={allTasks} user={user} onBack={()=>setOverlay(null)}/>
+    <ReportPage farm={farm} tasks={tasks} expenses={expenses} purchases={purchases} payments={payments} income={income} labour={labour} trips={trips} docs={docs} allTasks={allTasks} user={user} onBack={()=>setOverlay(null)}/>
   );
   if(overlay==="manage")return(
     <ManagePage user={user} onBack={()=>setOverlay(null)} showToast={showToast}/>
