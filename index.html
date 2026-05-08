@@ -2459,21 +2459,75 @@ function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,payments,purchase
 
   return(
     <div>
-      {/* Summary */}
-      <div style={{background:"#E65100",borderRadius:18,padding:16,marginBottom:14,color:"#fff"}}>
-        <div style={{fontSize:14,opacity:.8}}>{lang==="kn"?"ಒಟ್ಟು ಖರ್ಚು":"Total Expenses"}</div>
-        <div style={{fontSize:28,fontWeight:800,marginTop:4}}>{fmtCur(total)}</div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginTop:10}}>
-          <div style={{background:"rgba(255,255,255,.15)",borderRadius:12,padding:"8px 10px"}}>
-            <div style={{fontSize:12,opacity:.8}}>{lang==="kn"?"ಮುಂಗಡದಿಂದ":"From Advance"}</div>
-            <div style={{fontSize:16,fontWeight:700}}>{fmtCur(advUsed)}</div>
+      {/* Summary card — like home page */}
+      {(()=>{
+        const salAmt=(payments||[]).filter(p=>p.type==="salary").reduce((a,p)=>a+(+p.amount||0),0);
+        const purAmt=(purchases||[]).reduce((a,p)=>a+(+p.amount||0),0);
+        const grandTotal=total+salAmt+purAmt;
+        const[showCatBreak,setShowCatBreak]=React.useState(false);
+        const catAmts=ECAT.map(c=>({...c,amt:expenses.filter(e=>e.cat===c.id).reduce((a,e)=>a+(+e.amount||0),0)}));
+        return(
+          <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+            {/* Grand total */}
+            <div style={{background:"#E65100",borderRadius:14,padding:"14px 16px",marginBottom:12,color:"#fff"}}>
+              <div style={{fontSize:13,opacity:.8}}>{lang==="kn"?"ಒಟ್ಟು ಖರ್ಚು (ಖರ್ಚು + ಸಂಬಳ + ಖರೀದಿ)":"Total Outflow (Exp + Salary + Purchases)"}</div>
+              <div style={{fontSize:30,fontWeight:900,marginTop:4}}>{fmtCur(grandTotal)}</div>
+            </div>
+            {/* 3 rows */}
+            {[
+              {icon:"💰",label:lang==="kn"?"ಸಂಬಳ":"Salary",val:salAmt,col:"#2E7D32"},
+              {icon:"🛒",label:lang==="kn"?"ಖರೀದಿ":"Purchases",val:purAmt,col:"#6A1B9A"},
+            ].map(r=>(
+              <div key={r.label} style={{display:"flex",justifyContent:"space-between",
+                alignItems:"center",padding:"9px 4px",borderBottom:"1px solid #f5f5f5"}}>
+                <span style={{fontSize:14,color:"#555"}}>{r.icon} {r.label}</span>
+                <span style={{fontSize:15,fontWeight:700,color:r.col}}>{fmtCur(r.val)}</span>
+              </div>
+            ))}
+            {/* Expenses row with expand */}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
+              padding:"9px 4px",borderBottom:"1px solid #f5f5f5"}}>
+              <span style={{fontSize:14,color:"#555"}}>💸 {lang==="kn"?"ಖರ್ಚು":"Expenses"}</span>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:15,fontWeight:700,color:"#E65100"}}>{fmtCur(total)}</span>
+                <button onClick={()=>setShowCatBreak(s=>!s)}
+                  style={{background:"#FFF3E0",border:"none",borderRadius:8,
+                    padding:"4px 10px",fontSize:12,fontWeight:700,
+                    color:"#E65100",cursor:"pointer"}}>
+                  {showCatBreak?"▲":(lang==="kn"?"▼ ವಿವರ":"▼ Details")}
+                </button>
+              </div>
+            </div>
+            {/* Category breakdown */}
+            {showCatBreak&&(
+              <div style={{background:"#FFF8F5",borderRadius:12,padding:"10px 8px",margin:"6px 0"}}>
+                {catAmts.map(c=>(
+                  <div key={c.id} style={{display:"flex",justifyContent:"space-between",
+                    alignItems:"center",padding:"6px 10px",marginBottom:3,
+                    borderRadius:10,background:"#fff",opacity:c.amt>0?1:.45}}>
+                    <span style={{fontSize:13,color:"#444"}}>{c.icon} {lang==="kn"?c.kn:c.en}</span>
+                    <span style={{fontSize:13,fontWeight:c.amt>0?700:400,
+                      color:c.amt>0?"#E65100":"#bbb"}}>{fmtCur(c.amt)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {/* Advance/claim status */}
+            {(advUsed>0||pendingAmt>0)&&(
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginTop:10}}>
+                {advUsed>0&&<div style={{background:"#E3F2FD",borderRadius:12,padding:"9px 10px"}}>
+                  <div style={{fontSize:11,color:"#0277BD",fontWeight:600}}>💵 {lang==="kn"?"ಮುಂಗಡದಿಂದ":"From Advance"}</div>
+                  <div style={{fontSize:15,fontWeight:700,color:"#0277BD",marginTop:2}}>{fmtCur(advUsed)}</div>
+                </div>}
+                {pendingAmt>0&&<div style={{background:"#FFEBEE",borderRadius:12,padding:"9px 10px",border:"1.5px solid #FFCDD2"}}>
+                  <div style={{fontSize:11,color:"#C62828",fontWeight:600}}>🔴 {lang==="kn"?"ಕ್ಲೇಮ್ ಬಾಕಿ":"Claim Pending"}</div>
+                  <div style={{fontSize:15,fontWeight:700,color:"#C62828",marginTop:2}}>{fmtCur(pendingAmt)}</div>
+                </div>}
+              </div>
+            )}
           </div>
-          {pendingAmt>0&&<div style={{background:"rgba(255,0,0,.2)",borderRadius:12,padding:"8px 10px",border:"1.5px solid rgba(255,255,255,.3)"}}>
-            <div style={{fontSize:12,opacity:.8}}>🔴 {lang==="kn"?"ಕ್ಲೇಮ್ ಬಾಕಿ":"Pending Claims"}</div>
-            <div style={{fontSize:16,fontWeight:700}}>{fmtCur(pendingAmt)}</div>
-          </div>}
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Add button */}
       <button onClick={()=>{setShow(!show);setEditId(null);setForm({...E,pstatus:advBal>0?"advance":"pending"});}}
