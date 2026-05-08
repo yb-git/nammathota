@@ -1361,7 +1361,8 @@ function BottomNav({page,setPage,isOwner,onManageClick}){
 function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,allTasks,onNav}){
   const{t,lang}=useLang();
   const[period,setPeriod]=useState("all");
-  const[showDetails,setShowDetails]=useState(false);
+  const[showExpDetails,setShowExpDetails]=useState(false);
+  const[showPayDetails,setShowPayDetails]=useState(false);
 
   // ── Task progress ──────────────────────────────
   const totalSub=allTasks.reduce((a,tg)=>a+tg.sub.length,0);
@@ -1375,251 +1376,202 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
   const inP=d=>{
     if(period==="month")return (d||"").startsWith(mth);
     if(period==="year")return (d||"").startsWith(yr);
-    return true; // "all" — include everything even if no date
+    return true;
   };
 
-  // ── Period totals ──────────────────────────────
+  // ── Totals ─────────────────────────────────────
   const pExp=expenses.filter(e=>inP(e.date)).reduce((a,e)=>a+(+e.amount||0),0);
-  const pWage=labour.filter(l=>inP(l.date)).reduce((a,l)=>a+(+l.totalWages||0),0);
-  const pPur=purchases.filter(p=>inP(p.date)).reduce((a,p)=>a+(+p.amount||0),0);
+  const pPur=purchases.filter(e=>inP(e.date)).reduce((a,e)=>a+(+e.amount||0),0);
+  const pSal=payments.filter(e=>inP(e.date)&&e.type==="salary").reduce((a,e)=>a+(+e.amount||0),0);
   const pInc=(income||[]).filter(x=>inP(x.date)).reduce((a,x)=>a+(+x.totalAmt||0),0);
-  const pPnL=pInc-pExp-pPur; // Expenses+Purchases from Finance module only
-
-  // ── All-time totals ────────────────────────────
-  const totalExp=expenses.reduce((a,e)=>a+(+e.amount||0),0);
-  const totalWage=labour.reduce((a,l)=>a+(+l.totalWages||0),0);
-  const totalPur=purchases.reduce((a,p)=>a+(+p.amount||0),0);
-  const totalInc=(income||[]).reduce((a,x)=>a+(+x.totalAmt||0),0);
-  const totalSpent=totalExp+totalPur; // Finance module: expenses+purchases
-
-  // ── Supervisor balance ─────────────────────────
-  const advGiven=payments.filter(p=>p.type==="advance").reduce((a,p)=>a+(+p.amount||0),0);
-  const advUsedExp=expenses.filter(e=>e.pstatus==="advance").reduce((a,e)=>a+(+e.amount||0),0);
-  const advUsedPur=purchases.filter(p=>p.pstatus==="advance").reduce((a,p)=>a+(+p.amount||0),0);
-  const advBalance=advGiven-advUsedExp-advUsedPur;
-  const pendingClaims=expenses.filter(e=>e.pstatus==="pending").reduce((a,e)=>a+(+e.amount||0),0)
-    +purchases.filter(p=>p.pstatus==="pending").reduce((a,p)=>a+(+p.amount||0),0);
-  const salaryPaid=payments.filter(p=>p.type==="salary").reduce((a,p)=>a+(+p.amount||0),0);
-
-  // ── Budget ─────────────────────────────────────
   const landCost=+(farm.budget?.landCost||0);
-  const devBudget=+(farm.budget?.devBudget||0);
+  const totalInvested=landCost+pExp+pPur+pSal;
+  const pnl=pInc-totalInvested;
+
+  // ── Per-category expenses ──────────────────────
+  const catAmts=ECAT.map(c=>({
+    ...c,
+    amt:expenses.filter(e=>inP(e.date)&&e.cat===c.id).reduce((a,e)=>a+(+e.amount||0),0)
+  }));
+
+  // ── Payments & Advance ─────────────────────────
+  const advGiven=payments.filter(p=>inP(p.date)&&p.type==="advance").reduce((a,p)=>a+(+p.amount||0),0);
+  const advUsed=expenses.filter(e=>inP(e.date)&&e.pstatus==="advance").reduce((a,e)=>a+(+e.amount||0),0)
+               +purchases.filter(p=>inP(p.date)&&p.pstatus==="advance").reduce((a,p)=>a+(+p.amount||0),0);
+  const advRemaining=advGiven-advUsed;
+  const ownerDirect=expenses.filter(e=>inP(e.date)&&e.pstatus==="direct").reduce((a,e)=>a+(+e.amount||0),0)
+                   +purchases.filter(p=>inP(p.date)&&p.pstatus==="direct").reduce((a,p)=>a+(+p.amount||0),0);
+  const claimsPending=expenses.filter(e=>inP(e.date)&&e.pstatus==="pending").reduce((a,e)=>a+(+e.amount||0),0)
+                     +purchases.filter(p=>inP(p.date)&&p.pstatus==="pending").reduce((a,p)=>a+(+p.amount||0),0);
+  const claimsSettled=expenses.filter(e=>inP(e.date)&&e.pstatus==="settled").reduce((a,e)=>a+(+e.amount||0),0)
+                     +purchases.filter(p=>inP(p.date)&&p.pstatus==="settled").reduce((a,p)=>a+(+p.amount||0),0);
 
   // ── Recent activity ────────────────────────────
   const recent=[
-    ...expenses.map(e=>({date:e.date,text:e.desc||(ECAT.find(c=>c.id===e.cat)||{}).kn||e.cat,icon:"💸"})),
-    ...purchases.map(p=>({date:p.date,text:p.item,icon:"🛒"})),
-    ...trips.map(tr=>({date:tr.date,text:tr.from+"→"+tr.to,icon:"🚗"})),
-    ...labour.map(l=>({date:l.date,text:l.workerName,icon:"👷"})),
-  ].sort((a,b)=>(b.date||"").localeCompare(a.date||"")).slice(0,5);
+    ...expenses.map(e=>({date:e.date,text:e.desc||(ECAT.find(c=>c.id===e.cat)||{}).kn||e.cat,icon:"💸",amt:+e.amount||0})),
+    ...purchases.map(p=>({date:p.date,text:p.item,icon:"🛒",amt:+p.amount||0})),
+    ...trips.map(tr=>({date:tr.date,text:tr.from+"→"+tr.to,icon:"🚗",amt:0})),
+    ...(income||[]).map(x=>({date:x.date,text:x.crop||"Income",icon:"🌾",amt:+x.totalAmt||0})),
+  ].sort((a,b)=>(b.date||"").localeCompare(a.date||"")).slice(0,6);
+
+  const Row=({icon,label,val,col,bold,bg})=>(
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
+      padding:bold?"10px 12px":"8px 4px",
+      borderRadius:bold?12:0,
+      background:bg||"transparent",
+      borderBottom:bold?"none":"1px solid #f5f5f5"}}>
+      <span style={{fontSize:bold?15:14,color:col||"#555",fontWeight:bold?700:400}}>{icon} {label}</span>
+      <span style={{fontSize:bold?16:14,fontWeight:bold?800:600,color:col||"#333"}}>{fmtCur(val)}</span>
+    </div>
+  );
 
   return(
     <div style={{padding:"14px 14px 24px"}}>
 
-      {/* Period selector */}
-      <div style={{display:"flex",gap:8,marginBottom:14}}>
-        {[["month",lang==="kn"?"ಈ ತಿಂಗಳು":"This Month"],
-          ["year",lang==="kn"?"ಈ ವರ್ಷ":"This Year"],
-          ["all",lang==="kn"?"ಒಟ್ಟಾರೆ":"All Time"]].map(([p,lb])=>(
-          <button key={p} onClick={()=>setPeriod(p)}
-            style={{flex:1,padding:"10px 6px",borderRadius:20,fontSize:14,fontWeight:700,
-              border:"2px solid "+(period===p?(farm.col||"#1B5E20"):"#ddd"),
-              background:period===p?(farm.col||"#1B5E20"):"#fff",
-              color:period===p?"#fff":"#555",cursor:"pointer"}}>
-            {lb}
-          </button>
-        ))}
-      </div>
-
       {/* Farm banner */}
       <div style={{background:farm.col||"#1B5E20",borderRadius:20,padding:18,color:"#fff",marginBottom:14,boxShadow:"0 4px 20px rgba(0,0,0,.2)"}}>
-        <div style={{fontSize:14,opacity:.8,marginBottom:8}}>
-          {farm.location?.village||farm.type}
-          {farm.land?.totalAcres?" · "+farm.land.totalAcres+" ಎಕರೆ":""}
-        </div>
+        <div style={{fontSize:13,opacity:.8,marginBottom:6}}>{farm.location?.village||farm.type}{farm.land?.totalAcres?" · "+farm.land.totalAcres+" ಎಕರೆ":""}</div>
         <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:14}}>
           <div style={{flex:1}}>
-            <div style={{fontSize:30,fontWeight:900}}>{pct}%</div>
-            <div style={{fontSize:14,opacity:.8}}>{lang==="kn"?"ಒಟ್ಟು ಪ್ರಗತಿ":"Overall Progress"}</div>
+            <div style={{fontSize:32,fontWeight:900}}>{pct}%</div>
+            <div style={{fontSize:13,opacity:.8}}>{lang==="kn"?"ಒಟ್ಟು ಪ್ರಗತಿ":"Overall Progress"}</div>
             <div style={{height:8,background:"rgba(255,255,255,.25)",borderRadius:6,marginTop:8}}>
               <div style={{height:8,width:pct+"%",background:"#fff",borderRadius:6,transition:"width .5s"}}/>
             </div>
           </div>
-          <div style={{background:"rgba(255,255,255,.15)",borderRadius:16,padding:"12px 16px",textAlign:"center"}}>
-            <div style={{fontSize:24,fontWeight:900}}>{doneSub}/{totalSub}</div>
-            <div style={{fontSize:13,opacity:.8}}>📋 {lang==="kn"?"ಕೆಲಸ":"Tasks"}</div>
+          <div style={{background:"rgba(255,255,255,.15)",borderRadius:16,padding:"12px 16px",textAlign:"center",minWidth:80}}>
+            <div style={{fontSize:26,fontWeight:900}}>{doneSub}/{totalSub}</div>
+            <div style={{fontSize:12,opacity:.8}}>📋 {lang==="kn"?"ಕೆಲಸ":"Tasks"}</div>
           </div>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-          {[
-            {label:lang==="kn"?"ಒಟ್ಟು ಖರ್ಚು":"Total Spent",val:fmtCur(pExp+pWage+pPur),icon:"💸",page:"finance"},
-            {label:lang==="kn"?"ಆದಾಯ":"Income",val:fmtCur(pInc),icon:"🌾",page:"finance"},
-          ].map(s=>(
-            <div key={s.label} onClick={()=>onNav(s.page)}
-              style={{background:"rgba(255,255,255,.15)",borderRadius:14,padding:12,cursor:"pointer"}}>
-              <div style={{fontSize:18,marginBottom:4}}>{s.icon}</div>
-              <div style={{fontSize:18,fontWeight:800}}>{s.val}</div>
-              <div style={{fontSize:12,opacity:.8,marginTop:2}}>{s.label}</div>
-            </div>
+        {/* Period selector inside banner */}
+        <div style={{display:"flex",gap:6}}>
+          {[["all",lang==="kn"?"ಒಟ್ಟಾರೆ":"All Time"],
+            ["year",lang==="kn"?"ಈ ವರ್ಷ":"This Year"],
+            ["month",lang==="kn"?"ಈ ತಿಂಗಳು":"This Month"]].map(([p,lb])=>(
+            <button key={p} onClick={()=>setPeriod(p)}
+              style={{flex:1,padding:"8px 4px",borderRadius:16,fontSize:12,fontWeight:700,
+                border:"1.5px solid rgba(255,255,255,"+(period===p?".9":".3")+")",
+                background:period===p?"rgba(255,255,255,.25)":"transparent",
+                color:"#fff",cursor:"pointer"}}>
+              {lb}
+            </button>
           ))}
         </div>
       </div>
 
-      {/* P&L — collapsible category breakdown */}
-      {(()=>{
-        const catAmts=ECAT.map(c=>({
-          ...c,
-          amt:expenses.filter(e=>inP(e.date)&&e.cat===c.id).reduce((a,e)=>a+(+e.amount||0),0)
-        }));
-        const totalOut=pExp+pPur;
-        const pnl=pInc-totalOut;
-        return(
-          <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
-            {/* Header */}
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
-              <div style={{fontSize:16,fontWeight:800}}>
-                📊 {lang==="kn"?"ಹಣಕಾಸು ಸಾರಾಂಶ":"Financial Summary"}
-              </div>
-              <span style={{fontSize:12,color:"#888",background:"#f5f5f5",borderRadius:20,padding:"3px 10px"}}>
-                {period==="month"?mth:period==="year"?yr:(lang==="kn"?"ಎಲ್ಲಾ":"All")}
-              </span>
-            </div>
-
-            {/* Summary rows — always visible */}
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
-              padding:"10px 12px",marginBottom:6,borderRadius:12,background:"#E8F5E9"}}>
-              <span style={{fontSize:15,fontWeight:700,color:"#1B5E20"}}>🌾 {lang==="kn"?"ಆದಾಯ":"Income"}</span>
-              <span style={{fontSize:18,fontWeight:800,color:"#1B5E20"}}>{fmtCur(pInc)}</span>
-            </div>
-
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
-              padding:"10px 12px",marginBottom:6,borderRadius:12,background:"#FFF3E0"}}>
-              <span style={{fontSize:15,fontWeight:700,color:"#E65100"}}>💸 {lang==="kn"?"ಒಟ್ಟು ಖರ್ಚು":"Total Expenses"}</span>
-              <span style={{fontSize:18,fontWeight:800,color:"#E65100"}}>{fmtCur(totalOut)}</span>
-            </div>
-
-            {/* Expand/collapse details */}
-            <button onClick={()=>setShowDetails(s=>!s)}
-              style={{width:"100%",background:"#f9f9f9",border:"1.5px solid #eee",
-                borderRadius:12,padding:"9px 14px",fontSize:14,fontWeight:600,
-                color:"#555",cursor:"pointer",display:"flex",
-                alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
-              <span>🔍 {lang==="kn"?"ವಿವರ ನೋಡಿ":"View Breakdown"} ({catAmts.length+1} {lang==="kn"?"ವರ್ಗ":"categories"})</span>
-              <span>{showDetails?"▲":"▼"}</span>
-            </button>
-
-            {/* Detailed breakdown — expandable */}
-            {showDetails&&(
-              <div style={{background:"#fafafa",borderRadius:12,padding:"10px 8px",marginBottom:6}}>
-                {catAmts.map(c=>(
-                  <div key={c.id} style={{display:"flex",justifyContent:"space-between",
-                    alignItems:"center",padding:"8px 10px",marginBottom:4,
-                    borderRadius:10,background:"#fff",boxShadow:"0 1px 4px rgba(0,0,0,.05)"}}>
-                    <span style={{fontSize:14,color:"#444"}}>{c.icon} {lang==="kn"?c.kn:c.en}</span>
-                    <span style={{fontSize:15,fontWeight:700,color:"#E65100"}}>{fmtCur(c.amt)}</span>
-                  </div>
-                ))}
-                {pPur>0&&(
-                  <div style={{display:"flex",justifyContent:"space-between",
-                    alignItems:"center",padding:"8px 10px",marginBottom:4,
-                    borderRadius:10,background:"#fff",boxShadow:"0 1px 4px rgba(0,0,0,.05)"}}>
-                    <span style={{fontSize:14,color:"#444"}}>🛒 {lang==="kn"?"ಖರೀದಿ":"Purchases"}</span>
-                    <span style={{fontSize:15,fontWeight:700,color:"#6A1B9A"}}>{fmtCur(pPur)}</span>
-                  </div>
-                )}
-                {catAmts.length===0&&pPur===0&&(
-                  <div style={{fontSize:13,color:"#aaa",textAlign:"center",padding:"8px"}}>
-                    {lang==="kn"?"ಈ ಅವಧಿಯಲ್ಲಿ ಖರ್ಚಿಲ್ಲ":"No expenses this period"}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Profit/Loss */}
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
-              padding:"12px 14px",borderRadius:14,marginTop:4,
-              background:pnl>=0?"#E8F5E9":"#FFEBEE"}}>
-              <span style={{fontSize:16,fontWeight:700,color:pnl>=0?"#1B5E20":"#C62828"}}>
-                {pnl>=0?"📈":"📉"} {lang==="kn"?"ಲಾಭ / ನಷ್ಟ":"Profit / Loss"}
-              </span>
-              <span style={{fontSize:20,fontWeight:800,color:pnl>=0?"#1B5E20":"#C62828"}}>
-                {pnl>=0?"▲ ":"▼ "}{fmtCur(Math.abs(pnl))}
-              </span>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Supervisor Balance */}
+      {/* ═══ CARD 1: Investment vs Earnings ═══ */}
       <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
-        <div style={{fontSize:16,fontWeight:800,marginBottom:12}}>👷 {lang==="kn"?"ಮೇಲ್ವಿಚಾರಕ ಲೆಕ್ಕ":"Supervisor Account"}</div>
-        {[
-          {icon:"💵",label:lang==="kn"?"ಮುಂಗಡ ನೀಡಿದ್ದು":"Advance Given",val:advGiven,col:"#0277BD"},
-          {icon:"💸",label:lang==="kn"?"ಮುಂಗಡದಿಂದ ಬಳಸಿದ್ದು":"Used from Advance",val:advUsedExp+advUsedPur,col:"#E65100"},
-          {icon:"💰",label:lang==="kn"?"ಸಂಬಳ":"Salary",val:salaryPaid,col:"#555"},
-        ].map(r=>(
-          <div key={r.label} style={{display:"flex",justifyContent:"space-between",
-            alignItems:"center",padding:"8px 0",borderBottom:"1px solid #f5f5f5"}}>
-            <span style={{fontSize:15,color:"#555"}}>{r.icon} {r.label}</span>
-            <span style={{fontSize:15,fontWeight:700,color:r.col}}>{fmtCur(r.val)}</span>
-          </div>
-        ))}
+        <div style={{fontSize:16,fontWeight:800,marginBottom:12,color:"#333"}}>
+          💰 {lang==="kn"?"ಹೂಡಿಕೆ vs ಗಳಿಕೆ":"Investment vs Earnings"}
+        </div>
+
+        <div style={{fontSize:13,fontWeight:700,color:"#888",marginBottom:6,textTransform:"uppercase",letterSpacing:.5}}>
+          {lang==="kn"?"ಹೂಡಿಕೆ (ಒಟ್ಟು ಖರ್ಚು)":"Total Investment"}
+        </div>
+        {landCost>0&&<Row icon="🏡" label={lang==="kn"?"ಜಮೀನು ಖರೀದಿ":"Land Purchase"} val={landCost}/>}
+        <Row icon="💸" label={lang==="kn"?"ಖರ್ಚು (Expenses)":"Expenses"} val={pExp}/>
+        <Row icon="💰" label={lang==="kn"?"ಸಂಬಳ (Salary)":"Salary Paid"} val={pSal}/>
+        <Row icon="🛒" label={lang==="kn"?"ಖರೀದಿ (Purchases)":"Purchases"} val={pPur}/>
+        <Row icon="📊" label={lang==="kn"?"ಒಟ್ಟು ಹೂಡಿಕೆ":"Total Invested"} val={totalInvested} col="#0277BD" bold bg="#E3F2FD"/>
+
+        <div style={{height:1,background:"#eee",margin:"12px 0"}}/>
+
+        <div style={{fontSize:13,fontWeight:700,color:"#888",marginBottom:6,textTransform:"uppercase",letterSpacing:.5}}>
+          {lang==="kn"?"ಗಳಿಕೆ":"Earnings"}
+        </div>
+        <Row icon="🌾" label={lang==="kn"?"ಒಟ್ಟು ಆದಾಯ":"Total Income"} val={pInc} col="#1B5E20" bold bg="#E8F5E9"/>
+
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
-          padding:"10px 14px",marginTop:8,borderRadius:14,
-          background:advBalance>=0?"#E8F5E9":"#FFEBEE"}}>
-          <span style={{fontSize:15,fontWeight:700,color:advBalance>=0?"#1B5E20":"#C62828"}}>
-            🏦 {lang==="kn"?"ಮುಂಗಡ ಬಾಕಿ":"Advance Balance"}
+          padding:"12px 14px",marginTop:10,borderRadius:14,
+          background:pnl>=0?"#E8F5E9":"#FFEBEE",border:"2px solid "+(pnl>=0?"#A5D6A7":"#FFCDD2")}}>
+          <span style={{fontSize:16,fontWeight:700,color:pnl>=0?"#1B5E20":"#C62828"}}>
+            {pnl>=0?"📈":"📉"} {lang==="kn"?"ಲಾಭ / ನಷ್ಟ":"Net Profit / Loss"}
           </span>
-          <span style={{fontSize:18,fontWeight:800,color:advBalance>=0?"#1B5E20":"#C62828"}}>
-            {fmtCur(advBalance)}
+          <span style={{fontSize:22,fontWeight:900,color:pnl>=0?"#1B5E20":"#C62828"}}>
+            {pnl>=0?"▲ ":"▼ "}{fmtCur(Math.abs(pnl))}
           </span>
         </div>
-        {pendingClaims>0&&(
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
-            padding:"10px 14px",marginTop:8,borderRadius:14,background:"#FFEBEE",
-            border:"2px solid #FFCDD2"}}>
-            <span style={{fontSize:15,fontWeight:700,color:"#C62828"}}>
-              🔴 {lang==="kn"?"ಕ್ಲೇಮ್ ಬಾಕಿ":"Pending Claims"}
-            </span>
-            <span style={{fontSize:18,fontWeight:800,color:"#C62828"}}>{fmtCur(pendingClaims)}</span>
+      </div>
+
+      {/* ═══ CARD 2: Expense Breakdown ═══ */}
+      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+        <div style={{fontSize:16,fontWeight:800,marginBottom:12,color:"#333"}}>
+          💸 {lang==="kn"?"ಖರ್ಚಿನ ವಿವರ":"Expense Breakdown"}
+        </div>
+
+        <Row icon="💰" label={lang==="kn"?"ಸಂಬಳ":"Salary"} val={pSal} col="#2E7D32"/>
+        <Row icon="🛒" label={lang==="kn"?"ಖರೀದಿ":"Purchases"} val={pPur} col="#6A1B9A"/>
+
+        {/* Expenses with expand */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
+          padding:"8px 4px",borderBottom:"1px solid #f5f5f5"}}>
+          <span style={{fontSize:14,color:"#555"}}>💸 {lang==="kn"?"ಖರ್ಚು":"Expenses"}</span>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:14,fontWeight:600,color:"#E65100"}}>{fmtCur(pExp)}</span>
+            <button onClick={()=>setShowExpDetails(s=>!s)}
+              style={{background:"#FFF3E0",border:"none",borderRadius:8,padding:"4px 8px",
+                fontSize:12,fontWeight:700,color:"#E65100",cursor:"pointer"}}>
+              {showExpDetails?"▲":"▼ "+lang==="kn"?"ವಿವರ":"Details"}
+            </button>
+          </div>
+        </div>
+
+        {showExpDetails&&(
+          <div style={{background:"#FFF8F5",borderRadius:12,padding:"10px 8px",margin:"6px 0"}}>
+            {catAmts.map(c=>(
+              <div key={c.id} style={{display:"flex",justifyContent:"space-between",
+                alignItems:"center",padding:"7px 10px",marginBottom:3,
+                borderRadius:10,background:"#fff",
+                opacity:c.amt>0?1:.5}}>
+                <span style={{fontSize:13,color:"#444"}}>{c.icon} {lang==="kn"?c.kn:c.en}</span>
+                <span style={{fontSize:13,fontWeight:c.amt>0?700:400,
+                  color:c.amt>0?"#E65100":"#aaa"}}>{fmtCur(c.amt)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div style={{height:1,background:"#eee",margin:"10px 0"}}/>
+        <Row icon="📊" label={lang==="kn"?"ಒಟ್ಟು ಖರ್ಚು":"Total Outflow"} val={pExp+pPur+pSal} col="#E65100" bold bg="#FFF3E0"/>
+      </div>
+
+      {/* ═══ CARD 3: Payments & Advance ═══ */}
+      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+        <div style={{fontSize:16,fontWeight:800,marginBottom:12,color:"#333"}}>
+          💳 {lang==="kn"?"ಪಾವತಿ & ಮುಂಗಡ":"Payments & Advance"}
+        </div>
+
+        <Row icon="💵" label={lang==="kn"?"ಮುಂಗಡ ನೀಡಿದ್ದು":"Advance Given"} val={advGiven} col="#0277BD"/>
+        <Row icon="💸" label={lang==="kn"?"ಮುಂಗಡದಿಂದ ಪಾವತಿ":"Paid from Advance"} val={advUsed} col="#E65100"/>
+        <Row icon="🏦" label={lang==="kn"?"ಮಾಲೀಕರು ನೇರ ಪಾವತಿ":"Owner Direct Paid"} val={ownerDirect} col="#2E7D32"/>
+
+        <Row icon="🏦" label={lang==="kn"?"ಮುಂಗಡ ಬಾಕಿ":"Advance Remaining"} val={advRemaining}
+          col={advRemaining>=0?"#1B5E20":"#C62828"} bold
+          bg={advRemaining>=0?"#E8F5E9":"#FFEBEE"}/>
+
+        <div style={{height:1,background:"#eee",margin:"10px 0"}}/>
+
+        <Row icon="🔴" label={lang==="kn"?"ಕ್ಲೇಮ್ ಬಾಕಿ (ಮಾಲೀಕರು ಕೊಡಬೇಕು)":"Claims Pending (Owner owes)"} val={claimsPending} col="#C62828"/>
+        <Row icon="✅" label={lang==="kn"?"ಕ್ಲೇಮ್ ಮಂಜೂರು":"Claims Settled"} val={claimsSettled} col="#1B5E20"/>
+
+        {claimsPending>0&&(
+          <div style={{background:"#FFEBEE",border:"2px solid #FFCDD2",borderRadius:12,
+            padding:"10px 14px",marginTop:10,display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:22}}>⚠️</span>
+            <div>
+              <div style={{fontSize:14,fontWeight:700,color:"#C62828"}}>
+                {lang==="kn"?"ಪೆಂಡಿಂಗ್ ಕ್ಲೇಮ್ ಇದೆ":"Pending claims to reimburse"}
+              </div>
+              <div style={{fontSize:13,color:"#888",marginTop:2}}>
+                {lang==="kn"?"ಸೂಪರ್‌ವೈಸರ್ ಕೊಟ್ಟ ಹಣ ಹಿಂದಿರುಗಿಸಬೇಕು":"Supervisor paid from own pocket"}
+              </div>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Investment */}
-      {(landCost>0||devBudget>0||totalSpent>0)&&(
-        <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
-          <div style={{fontSize:16,fontWeight:800,marginBottom:12}}>💰 {lang==="kn"?"ಹೂಡಿಕೆ ಸಾರಾಂಶ":"Investment"}</div>
-          {landCost>0&&<div style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #f5f5f5"}}>
-            <span style={{fontSize:15,color:"#555"}}>🏡 {lang==="kn"?"ಜಮೀನು":"Land Cost"}</span>
-            <span style={{fontSize:15,fontWeight:700}}>{fmtCur(landCost)}</span>
-          </div>}
-          <div style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #f5f5f5"}}>
-            <span style={{fontSize:15,color:"#555"}}>🔨 {lang==="kn"?"ಅಭಿವೃದ್ಧಿ ಖರ್ಚು":"Dev Spent"}</span>
-            <span style={{fontSize:15,fontWeight:700,color:"#E65100"}}>{fmtCur(totalSpent)}</span>
-          </div>
-          <div style={{display:"flex",justifyContent:"space-between",padding:"12px 14px",marginTop:8,borderRadius:14,background:"#E3F2FD"}}>
-            <span style={{fontSize:16,fontWeight:700,color:"#0277BD"}}>📊 {lang==="kn"?"ಒಟ್ಟು ಹೂಡಿಕೆ":"Total Invested"}</span>
-            <span style={{fontSize:18,fontWeight:800,color:"#0277BD"}}>{fmtCur(landCost+totalSpent)}</span>
-          </div>
-          {devBudget>0&&(
-            <div style={{marginTop:10}}>
-              <div style={{display:"flex",justifyContent:"space-between",fontSize:13,marginBottom:5}}>
-                <span style={{color:"#555"}}>{lang==="kn"?"ಬಜೆಟ್:":"Budget:"} {fmtCur(devBudget)}</span>
-                <span style={{color:totalSpent>devBudget?"#C62828":"#2E7D32",fontWeight:600}}>
-                  {Math.min(Math.round(totalSpent/devBudget*100),100)}% {lang==="kn"?"ಬಳಸಿದ್ದು":"used"}
-                </span>
-              </div>
-              <div style={{height:8,background:"#f0f0f0",borderRadius:6}}>
-                <div style={{height:8,width:Math.min(Math.round(totalSpent/devBudget*100),100)+"%",
-                  background:totalSpent>devBudget?"#C62828":"#1B5E20",borderRadius:6,transition:"width .5s"}}/>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Task progress */}
+      {/* ═══ Task Progress ═══ */}
       {allTasks.length>0&&(
         <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
           <div style={{fontSize:16,fontWeight:800,marginBottom:12}}>📋 {lang==="kn"?"ಕೆಲಸ ಪ್ರಗತಿ":"Task Progress"}</div>
@@ -1632,7 +1584,7 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
               <div key={tg.id} style={{marginBottom:10,background:"#f9f9f9",borderRadius:12,padding:"10px 12px"}}>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
                   <span style={{fontSize:14,fontWeight:700,color:tg.col}}>{lang==="kn"?tg.kn:tg.en}</span>
-                  <span style={{fontSize:13,color:"#888"}}>{done}/{tg.sub.length}</span>
+                  <span style={{fontSize:13,color:"#888"}}>{done}/{tg.sub.length} · {p}%</span>
                 </div>
                 <div style={{height:6,background:"#e0e0e0",borderRadius:4}}>
                   <div style={{height:6,width:p+"%",background:tg.col,borderRadius:4,transition:"width .4s"}}/>
@@ -1657,12 +1609,13 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
           <div style={{fontSize:16,fontWeight:800,marginBottom:12}}>🕒 {lang==="kn"?"ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ":"Recent Activity"}</div>
           {recent.map((r,i)=>(
             <div key={i} style={{display:"flex",alignItems:"center",gap:12,
-              padding:"10px 0",borderBottom:i<recent.length-1?"1px solid #f5f5f5":"none"}}>
+              padding:"9px 0",borderBottom:i<recent.length-1?"1px solid #f5f5f5":"none"}}>
               <span style={{fontSize:22,width:30,textAlign:"center"}}>{r.icon}</span>
-              <div style={{flex:1}}>
-                <div style={{fontSize:15,fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.text}</div>
-                <div style={{fontSize:13,color:"#aaa",marginTop:2}}>{fmt(r.date)}</div>
+              <div style={{flex:1,overflow:"hidden"}}>
+                <div style={{fontSize:14,fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.text}</div>
+                <div style={{fontSize:12,color:"#aaa",marginTop:1}}>{fmt(r.date)}</div>
               </div>
+              {r.amt>0&&<span style={{fontSize:14,fontWeight:700,color:"#333",flexShrink:0}}>{fmtCur(r.amt)}</span>}
             </div>
           ))}
         </div>
