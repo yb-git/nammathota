@@ -1434,16 +1434,19 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
     </div>
   );
 
-  const Card=({bg,col,lbl,val,sub,icon,onClick,bold})=>(
-    <div onClick={onClick} style={{background:bg,borderRadius:18,padding:"16px 14px",
-      border:bold?"2px solid "+col+"55":"1.5px solid transparent",
-      cursor:onClick?"pointer":"default",position:"relative",
-      boxShadow:onClick?"0 2px 8px rgba(0,0,0,.06)":"none",
-      transition:"transform .1s",active:{transform:"scale(.97)"}}}>
-      {onClick&&<span style={{position:"absolute",top:12,right:12,fontSize:14,opacity:.4}}>›</span>}
-      <div style={{fontSize:11,color:col,fontWeight:700,textTransform:"uppercase",letterSpacing:.4,marginBottom:5,opacity:.85}}>{lbl}</div>
-      <div style={{fontSize:bold?22:20,fontWeight:bold?900:700,color:col,lineHeight:1.1}}>{val}</div>
-      <div style={{fontSize:12,color:col,opacity:.7,marginTop:5,display:"flex",alignItems:"center",gap:4}}>{icon} {sub}</div>
+  const Card=({col,lbl,val,sub,icon,onClick,bold,warn})=>(
+    <div onClick={onClick}
+      style={{background:"#F5F4F0",borderRadius:18,padding:"16px 14px",
+        cursor:onClick?"pointer":"default",position:"relative",
+        border:warn?"2px solid #FFCDD2":bold?"2px solid #C8E6C9":"none"}}>
+      {onClick&&<span style={{position:"absolute",top:10,right:12,fontSize:16,color:"#bbb"}}>›</span>}
+      <div style={{fontSize:12,color:"#888",marginBottom:6}}>{lbl}</div>
+      <div style={{fontSize:bold?22:20,fontWeight:700,
+        color:warn?"#C62828":bold?"#1B5E20":col||"#1a1a1a",
+        lineHeight:1.1,marginBottom:6}}>
+        {val}
+      </div>
+      <div style={{fontSize:12,color:"#888",display:"flex",alignItems:"center",gap:4}}>{icon} {sub}</div>
     </div>
   );
 
@@ -1486,32 +1489,32 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
         💳 {lang==="kn"?"ಮುಂಗಡ & ಪಾವತಿ":"Advance & Payments"}
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:18}}>
-        <Card bg="#E3F2FD" col="#0277BD"
+        <Card col="#0277BD"
           lbl={lang==="kn"?"ಮುಂಗಡ ನೀಡಿದ್ದು":"Advance given"}
           val={fmtCur(advGiven)}
           sub={payments.filter(p=>p.type==="advance").length+" "+(lang==="kn"?"ಪಾವತಿ":"payments")}
           icon="💵" onClick={()=>onNav("finance","payments")}/>
-        <Card bg="#FFF3E0" col="#E65100"
+        <Card col="#E65100"
           lbl={lang==="kn"?"ಮುಂಗಡದಿಂದ ಬಿಲ್":"Bills from advance"}
           val={fmtCur(advUsed)}
           sub={expenses.filter(e=>e.pstatus==="advance").length+" exp + "+purchases.filter(p=>p.pstatus==="advance").length+" pur"}
           icon="🧾" onClick={()=>onNav("finance","expenses")}/>
-        <Card bg={advRemaining>=0?"#E8F5E9":"#FFEBEE"} col={advRemaining>=0?"#1B5E20":"#C62828"}
+        <Card col={advRemaining>=0?"#1B5E20":"#C62828"} bold={advRemaining>=0} warn={advRemaining<0}
           lbl={lang==="kn"?"ಬಾಕಿ ಮುಂಗಡ":"Balance with supervisor"}
           val={fmtCur(advRemaining)}
           sub={advRemaining>=0?"✅ "+(lang==="kn"?"ಉಳಿದಿದೆ":"Remaining"):"⚠️ "+(lang==="kn"?"ಮೀರಿದೆ":"Exceeded")}
           icon="🏦" onClick={()=>onNav("finance","payments")} bold/>
-        <Card bg="#E8F5E9" col="#2E7D32"
+        <Card col="#2E7D32"
           lbl={lang==="kn"?"ಮಾಲೀಕರು ನೇರ ಪಾವತಿ":"Owner paid direct"}
           val={fmtCur(ownerDirect)}
           sub={(expenses.filter(e=>e.pstatus==="direct").length+purchases.filter(p=>p.pstatus==="direct").length)+" "+(lang==="kn"?"ಖರ್ಚು":"items")}
           icon="🏗️" onClick={()=>onNav("finance","purchases")}/>
-        <Card bg="#EDE7F6" col="#5E35B1"
+        <Card col="#5E35B1"
           lbl={lang==="kn"?"ಸಂಬಳ ಪಾವತಿ":"Salary paid"}
           val={fmtCur(pSal)}
           sub={payments.filter(p=>p.type==="salary").length+" "+(lang==="kn"?"ನಮೂದು":"entries")}
           icon="💰" onClick={()=>onNav("finance","payments")}/>
-        <Card bg={claimsPending>0?"#FFEBEE":"#E8F5E9"} col={claimsPending>0?"#C62828":"#1B5E20"}
+        <Card col={claimsPending>0?"#C62828":"#1B5E20"} warn={claimsPending>0}
           lbl={lang==="kn"?"ಕ್ಲೇಮ್ ಬಾಕಿ":"Pending claims"}
           val={fmtCur(claimsPending)}
           sub={claimsPending>0?(lang==="kn"?"ಮಾಲೀಕರು ಕೊಡಬೇಕು":"Owner must pay back"):(lang==="kn"?"ಯಾವುದೂ ಇಲ್ಲ":"Nothing pending")}
@@ -1523,22 +1526,22 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
         📊 {lang==="kn"?"ಹೂಡಿಕೆ & ಗಳಿಕೆ":"Investment & Earnings"}
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
-        <Card bg="#FFF3E0" col="#E65100"
+        <Card col="#E65100"
           lbl={lang==="kn"?"ಒಟ್ಟು ಖರ್ಚು":"Total expenses"}
           val={fmtCur(pExp)}
           sub={expenses.length+" "+(lang==="kn"?"ನಮೂದು":"entries")}
           icon="💸" onClick={()=>onNav("finance","expenses")}/>
-        <Card bg="#EDE7F6" col="#6A1B9A"
+        <Card col="#6A1B9A"
           lbl={lang==="kn"?"ಖರೀದಿ":"Purchases"}
           val={fmtCur(pPur)}
           sub={purchases.length+" "+(lang==="kn"?"ಐಟಂ":"items")}
           icon="🛒" onClick={()=>onNav("finance","purchases")}/>
-        <Card bg="#E8F5E9" col="#1B5E20"
+        <Card col="#1B5E20"
           lbl={lang==="kn"?"ಆದಾಯ":"Total income"}
           val={fmtCur(pInc)}
           sub={(income||[]).length+" "+(lang==="kn"?"ನಮೂದು":"entries")}
           icon="🌾" onClick={()=>onNav("finance","income")}/>
-        <Card bg={pnl>=0?"#E8F5E9":"#FFEBEE"} col={pnl>=0?"#1B5E20":"#C62828"}
+        <Card col={pnl>=0?"#1B5E20":"#C62828"} bold={pnl>=0} warn={pnl<0}
           lbl={lang==="kn"?"ಲಾಭ / ನಷ್ಟ":"Net profit / loss"}
           val={(pnl>=0?"▲ ":"▼ ")+fmtCur(Math.abs(pnl))}
           sub={lang==="kn"?"ಆದಾಯ − ಒಟ್ಟು ಹೂಡಿಕೆ":"Income − total invested"}
@@ -1546,18 +1549,18 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
       </div>
 
       {/* ── Total invested full-width ── */}
-      <div onClick={()=>onNav("finance","expenses")} style={{background:"#E3F2FD",borderRadius:18,padding:"14px 16px",
+      <div onClick={()=>onNav("finance","expenses")} style={{background:"#F5F4F0",borderRadius:18,padding:"16px 16px",
         marginBottom:18,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div>
-          <div style={{fontSize:11,color:"#0277BD",fontWeight:700,textTransform:"uppercase",letterSpacing:.4,marginBottom:4}}>
+          <div style={{fontSize:12,color:"#888",marginBottom:6}}>
             {lang==="kn"?"ಒಟ್ಟು ಹೂಡಿಕೆ":"Total invested"}
           </div>
-          <div style={{fontSize:22,fontWeight:900,color:"#0277BD"}}>{fmtCur(totalInvested)}</div>
-          <div style={{fontSize:12,color:"#0277BD",opacity:.7,marginTop:4}}>
+          <div style={{fontSize:22,fontWeight:700,color:"#1a1a1a"}}>{fmtCur(totalInvested)}</div>
+          <div style={{fontSize:12,color:"#888",marginTop:5}}>
             {lang==="kn"?"ಖರ್ಚು + ಖರೀದಿ + ಸಂಬಳ":"Expenses + purchases + salary"}
           </div>
         </div>
-        <span style={{fontSize:24,opacity:.35}}>›</span>
+        <span style={{fontSize:20,color:"#bbb"}}>›</span>
       </div>
 
       {/* ── Section: Expense breakdown by category ── */}
