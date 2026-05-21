@@ -20,7 +20,7 @@
 html,body{height:100%;overflow-x:hidden;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans Kannada",sans-serif;background:#2E7D32;color:#1a1a1a;overscroll-behavior:none;-webkit-font-smoothing:antialiased;display:flex;justify-content:center;min-height:100vh}
 #root{width:100%;display:flex;justify-content:center;align-items:flex-start;min-height:100vh}
-#app-shell{width:100%;max-width:480px;min-height:100vh;background:#F0F4F0;position:relative;box-shadow:0 0 60px rgba(0,0,0,.4)}
+#app-shell{width:100%;max-width:480px;min-height:100vh;background:#F2F0E8;position:relative;box-shadow:0 0 60px rgba(0,0,0,.4)}
 @media(max-width:479px){#app-shell{box-shadow:none;max-width:100%}}
 @media(min-width:900px){body{background:linear-gradient(135deg,#1a3a1a,#2E7D32);padding:24px 0;align-items:flex-start;box-sizing:border-box}#app-shell{border-radius:24px;min-height:calc(100vh - 48px);overflow:hidden}}
 input,select,textarea,button{font-family:inherit;font-size:16px;-webkit-appearance:none}button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
@@ -2725,13 +2725,10 @@ function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,payments,purchase
         const linked=(allTasks||[]).find(tg=>tg.id===e.taskId);
         const saved=savedId===e.id;
         return(
-          <div key={e.id} style={{background:"#fff",borderRadius:18,padding:16,marginBottom:12,
-            boxShadow:"0 2px 10px rgba(0,0,0,.07)",
-            border:saved?"2px solid #FFCC80":"2px solid transparent",transition:"border .4s"}}>
+          <div key={e.id} style={{background:"#fff",borderRadius:16,padding:"13px 14px",marginBottom:8,border:saved?"2px solid #A5D6A7":"none"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
               <div style={{display:"flex",alignItems:"center",gap:10}}>
-                <div style={{width:46,height:46,background:"#FFF3E0",borderRadius:14,
-                  display:"flex",alignItems:"center",justifyContent:"center",fontSize:24}}>{c.icon}</div>
+                <span style={{fontSize:18,marginTop:2}}>{c.icon}</span>
                 <div>
                   <div style={{fontWeight:700,fontSize:16}}>{lang==="kn"?c.kn:c.en}</div>
                   <div style={{fontSize:13,color:"#888",marginTop:2}}>📅 {fmt(e.date)}{e.desc?" · "+e.desc:""}</div>
@@ -2746,25 +2743,21 @@ function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,payments,purchase
                   {e.note&&<div style={{fontSize:12,color:"#aaa",marginTop:3,fontStyle:"italic"}}>"{e.note}"</div>}
                 </div>
               </div>
-              <div style={{fontSize:20,fontWeight:800,color:"#E65100",flexShrink:0,marginLeft:8}}>{fmtCur(e.amount)}</div>
+              <div style={{fontSize:16,fontWeight:700,color:"#1a1a1a",flexShrink:0}}>{fmtCur(e.amount)}</div>
             </div>
             <div style={{display:"flex",gap:8}}>
               <button onClick={()=>{setForm({...e});setEditId(e.id);setShow(true);}}
-                style={{flex:1,background:"#FFF3E0",border:"none",borderRadius:12,padding:10,
-                  fontSize:15,fontWeight:600,cursor:"pointer",color:"#E65100"}}>
+                style={{background:"none",border:"none",fontSize:12,color:"#999",cursor:"pointer",padding:"4px 0"}}>
                 ✏️ {lang==="kn"?"ಸಂಪಾದಿಸಿ":"Edit"}
               </button>
               <button onClick={()=>del(e.id)}
-                style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:12,padding:10,
-                  fontSize:15,fontWeight:600,cursor:"pointer",color:"#C62828"}}>
-                🗑 {lang==="kn"?"ಅಳಿಸಿ":"Delete"}
+                style={{background:"none",border:"none",fontSize:12,color:"#C62828",cursor:"pointer",padding:"4px 8px"}}>
+                🗑
               </button>
-              {/* Quick status toggle for pending → settled */}
               {(e.pstatus==="pending")&&(
-                <button onClick={()=>{setExpenses(p=>p.map(x=>x.id===e.id?{...x,pstatus:"settled"}:x));showToast("✅ "+(lang==="kn"?"ಮಂಜೂರು":"Settled"));}}
-                  style={{flex:1,background:"#E8F5E9",border:"none",borderRadius:12,padding:10,
-                    fontSize:13,fontWeight:700,cursor:"pointer",color:"#1B5E20"}}>
-                  ✅ {lang==="kn"?"ಮಂಜೂರು":"Settle"}
+                <button onClick={()=>{setExpenses(p=>p.map(x=>x.id===e.id?{...x,pstatus:"settled"}:x));showToast("✅");}}
+                  style={{background:"#E8F5E9",border:"none",fontSize:12,color:"#1B5E20",
+                    cursor:"pointer",borderRadius:8,padding:"3px 8px",fontWeight:600}}>✅ {lang==="kn"?"ಮಂಜೂರು":"Settle"}
                 </button>
               )}
             </div>
@@ -2820,14 +2813,16 @@ function PurchasesTab({farm,purchases,setPurchases,expenses,payments,showToast})
         <button onClick={()=>setViewR(null)} style={{marginTop:16,background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:20,padding:"10px 28px",fontSize:14,cursor:"pointer"}}>✕</button>
       </div>}
 
-      <div style={{background:"#6A1B9A",borderRadius:18,padding:16,marginBottom:14,color:"#fff"}}>
-        <div style={{fontSize:14,opacity:.8}}>{lang==="kn"?"ಒಟ್ಟು ಖರೀದಿ":"Total Purchases"}</div>
-        <div style={{fontSize:28,fontWeight:800,marginTop:4}}>{fmtCur(total)}</div>
-        {pendingAmt>0&&<div style={{background:"rgba(255,0,0,.2)",borderRadius:10,padding:"6px 10px",marginTop:8,fontSize:14,fontWeight:600}}>🔴 {lang==="kn"?"ಕ್ಲೇಮ್ ಬಾಕಿ:":"Pending:"} {fmtCur(pendingAmt)}</div>}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+        <div>
+          <div style={{fontSize:11,color:"#aaa"}}>{lang==="kn"?"ಒಟ್ಟು ಖರೀದಿ":"Total purchases"}</div>
+          <div style={{fontSize:20,fontWeight:700,color:"#1a1a1a"}}>{fmtCur(total)}</div>
+        </div>
+        {pendingAmt>0&&<div style={{fontSize:11,color:"#C62828",background:"#FFEBEE",borderRadius:10,padding:"4px 10px"}}>🔴 {fmtCur(pendingAmt)}</div>}
       </div>
 
       <button onClick={()=>{setShow(!show);setEditId(null);setForm({...E,pstatus:advBal>0?"advance":"pending"});}}
-        style={{width:"100%",background:"#6A1B9A",color:"#fff",border:"none",borderRadius:16,padding:15,fontSize:17,fontWeight:700,cursor:"pointer",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+        style={{width:"100%",background:show?"#eee":"#1B5E20",color:show?"#555":"#fff",border:"none",borderRadius:14,padding:"13px 0",fontSize:15,fontWeight:600,cursor:"pointer",marginBottom:12}}>
         {show?"✕ "+(lang==="kn"?"ರದ್ದು":"Cancel"):"🛒 "+(lang==="kn"?"ಖರೀದಿ ಸೇರಿಸಿ":"Add Purchase")}
       </button>
 
@@ -2902,8 +2897,7 @@ function PurchasesTab({farm,purchases,setPurchases,expenses,payments,showToast})
         <div style={{display:"flex",gap:6,overflowX:"auto",paddingBottom:4,marginBottom:6}}>
           {[["all",lang==="kn"?"ಎಲ್ಲಾ ಸ್ಥಿತಿ":"All Status"],...PSTATUS.map(ps=>[ps.id,ps.icon+" "+(lang==="kn"?ps.kn:ps.en)])].map(([val,lb])=>(
             <button key={val} onClick={()=>setFilterPS(val)}
-              style={{padding:"6px 12px",borderRadius:20,border:"1.5px solid "+(filterPS===val?"#6A1B9A":"#ddd"),
-                background:filterPS===val?"#6A1B9A":"#fff",color:filterPS===val?"#fff":"#555",
+              style={{padding:"6px 12px",borderRadius:20,border:"none",background:filterPS===val?"#1B5E20":"#fff",color:filterPS===val?"#fff":"#666",
                 fontSize:12,fontWeight:600,whiteSpace:"nowrap",flexShrink:0,cursor:"pointer"}}>{lb}</button>
           ))}
         </div>
@@ -2916,7 +2910,7 @@ function PurchasesTab({farm,purchases,setPurchases,expenses,payments,showToast})
       :list.map(p=>{
         const ps=getPS(p.pstatus||"advance");const saved=savedId===p.id;
         return(
-          <div key={p.id} style={{background:"#fff",borderRadius:18,padding:16,marginBottom:12,boxShadow:"0 2px 10px rgba(0,0,0,.07)",border:saved?"2px solid #CE93D8":"2px solid transparent",transition:"border .4s"}}>
+          <div key={p.id} style={{background:"#fff",borderRadius:16,padding:"13px 14px",marginBottom:8,border:saved?"2px solid #A5D6A7":"none"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
               <div style={{flex:1}}>
                 <div style={{fontWeight:700,fontSize:16}}>{p.item}</div>
@@ -2927,13 +2921,13 @@ function PurchasesTab({farm,purchases,setPurchases,expenses,payments,showToast})
                 {p.note&&<div style={{fontSize:12,color:"#888",fontStyle:"italic",marginTop:3}}>"{p.note}"</div>}
               </div>
               <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6}}>
-                <div style={{fontSize:20,fontWeight:800,color:"#6A1B9A"}}>{fmtCur(p.amount)}</div>
+                <div style={{fontSize:16,fontWeight:700,color:"#1a1a1a"}}>{fmtCur(p.amount)}</div>
                 {p.receipt&&<img src={p.receipt} alt="" onClick={()=>setViewR(p.receipt)} style={{width:40,height:40,objectFit:"cover",borderRadius:8,cursor:"pointer",border:"2px solid #CE93D8"}}/>}
               </div>
             </div>
             <div style={{display:"flex",gap:8}}>
-              <button onClick={()=>{setForm({...p});setEditId(p.id);setShow(true);}} style={{flex:1,background:"#F3E5F5",border:"none",borderRadius:12,padding:10,fontSize:14,fontWeight:600,cursor:"pointer",color:"#6A1B9A"}}>✏️ {lang==="kn"?"ಸಂಪಾದಿಸಿ":"Edit"}</button>
-              <button onClick={()=>del(p.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:12,padding:10,fontSize:14,fontWeight:600,cursor:"pointer",color:"#C62828"}}>🗑 {lang==="kn"?"ಅಳಿಸಿ":"Delete"}</button>
+              <button onClick={()=>{setForm({...p});setEditId(p.id);setShow(true);}} style={{flex:1,background:"#F5F4F0",border:"none",borderRadius:12,padding:10,fontSize:13,fontWeight:500,cursor:"pointer",color:"#555"}}>✏️ {lang==="kn"?"ಸಂಪಾದಿಸಿ":"Edit"}</button>
+              <button onClick={()=>del(p.id)} style={{flex:1,background:"#FFEBEE",border:"none",borderRadius:12,padding:10,fontSize:13,fontWeight:500,cursor:"pointer",color:"#C62828"}}>🗑</button>
               {p.pstatus==="pending"&&<button onClick={()=>{setPurchases(pr=>pr.map(x=>x.id===p.id?{...x,pstatus:"settled"}:x));showToast("✅ Settled");}} style={{flex:1,background:"#E8F5E9",border:"none",borderRadius:12,padding:10,fontSize:13,fontWeight:700,cursor:"pointer",color:"#1B5E20"}}>✅ {lang==="kn"?"ಮಂಜೂರು":"Settle"}</button>}
             </div>
           </div>
@@ -2992,17 +2986,17 @@ function PaymentsTab({farm,payments,setPayments,expenses,purchases,supervisors,u
   return(
     <div>
       {/* ── TRUE Advance Balance Card ── */}
-      <div style={{background:advBalance>=0?"#1B5E20":"#C62828",borderRadius:20,padding:"18px 16px",color:"#fff",marginBottom:14}}>
-        <div style={{fontSize:13,opacity:.85,marginBottom:4}}>{lang==="kn"?"💰 ಮೇಲ್ವಿಚಾರಕರ ಬಳಿ ಉಳಿದ ಮುಂಗಡ":"💰 Advance Balance with Supervisor"}</div>
-        <div style={{fontSize:36,fontWeight:900,letterSpacing:-1}}>{fmtCur(advBalance)}</div>
-        <div style={{fontSize:12,opacity:.75,marginTop:4}}>
+      <div style={{background:"#F5F4F0",borderRadius:20,padding:"18px 16px",marginBottom:14}}>
+        <div style={{fontSize:11,color:"#888",marginBottom:4}}>{lang==="kn"?"ಮೇಲ್ವಿಚಾರಕರ ಬಳಿ ಉಳಿದ ಮುಂಗಡ":"Advance balance with supervisor"}</div>
+        <div style={{fontSize:28,fontWeight:700,color:advBalance>=0?"#1B5E20":"#C62828"}}>{fmtCur(advBalance)}</div>
+        <div style={{fontSize:11,color:"#888",marginTop:4}}>
           {advBalance>=0
-            ?(lang==="kn"?"✅ ಮೇಲ್ವಿಚಾರಕರ ಬಳಿ ಇದೆ":"✅ Remaining with supervisor")
-            :(lang==="kn"?"⚠️ ಮುಂಗಡ ಮೀರಿದೆ":"⚠️ Advance exceeded")}
+            ?(lang==="kn"?"✅ ಉಳಿದಿದೆ":"✅ Remaining")
+            :(lang==="kn"?"⚠️ ಮೀರಿದೆ":"⚠️ Exceeded")}
         </div>
       </div>
       {/* ── Advance Breakdown (3-row) ── */}
-      <div style={{background:"#fff",borderRadius:16,padding:"14px 16px",marginBottom:12,boxShadow:"0 2px 8px rgba(0,0,0,.06)"}}>
+      <div style={{background:"#fff",borderRadius:16,padding:"14px 16px",marginBottom:10}}>
         <div style={{fontSize:12,fontWeight:700,color:"#888",marginBottom:10,textTransform:"uppercase",letterSpacing:.5}}>{lang==="kn"?"ಮುಂಗಡ ಲೆಕ್ಕ":"Advance Breakdown"}</div>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:"1px solid #f0f0f0"}}>
           <span style={{fontSize:14,color:"#444",display:"flex",alignItems:"center",gap:6}}>💵 {lang==="kn"?"ಮುಂಗಡ ನೀಡಿದ್ದು":"Advance Given"}</span>
@@ -3077,16 +3071,16 @@ function PaymentsTab({farm,payments,setPayments,expenses,purchases,supervisors,u
             bg:billsPending>0?"#FFEBEE":"#E8F5E9"
           },
         ].map((c,i)=>(
-          <div key={i} style={{background:c.bg,borderRadius:16,padding:"14px 14px",border:"1.5px solid "+(c.bold?c.col+"55":"transparent")}}>
-            <div style={{fontSize:11,color:c.col,opacity:.8,marginBottom:4,fontWeight:600,textTransform:"uppercase",letterSpacing:.3}}>{c.lbl}</div>
-            <div style={{fontSize:c.bold?22:18,fontWeight:c.bold?800:700,color:c.col,lineHeight:1.1}}>{c.val}</div>
-            <div style={{fontSize:11,color:c.col,opacity:.75,marginTop:5}}>{c.sub}</div>
+          <div key={i} style={{background:"#F5F4F0",borderRadius:16,padding:"14px 14px",border:c.bold?("2px solid #C8E6C9"):"none"}}>
+            <div style={{fontSize:11,color:"#888",marginBottom:4}}>{c.lbl}</div>
+            <div style={{fontSize:c.bold?22:18,fontWeight:700,color:c.bold?"#1B5E20":"#1a1a1a",lineHeight:1.1}}>{c.val}</div>
+            <div style={{fontSize:11,color:"#999",marginTop:5}}>{c.sub}</div>
           </div>
         ))}
       </div>
 
-      <button onClick={()=>setShow(!show)} style={{width:"100%",background:"#0277BD",color:"#fff",border:"none",borderRadius:16,padding:15,fontSize:17,fontWeight:700,cursor:"pointer",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
-        {show?"✕ "+(lang==="kn"?"ರದ್ದು":"Cancel"):"➕ "+(lang==="kn"?"ಪಾವತಿ ಸೇರಿಸಿ":"Add Payment")}
+      <button onClick={()=>setShow(!show)} style={{width:"100%",background:show?"#eee":"#1B5E20",color:show?"#555":"#fff",border:"none",borderRadius:14,padding:"13px 0",fontSize:15,fontWeight:600,cursor:"pointer",marginBottom:12}}>
+        {show?"✕ "+(lang==="kn"?"ರದ್ದು":"Cancel"):"+ "+(lang==="kn"?"ಪಾವತಿ ಸೇರಿಸಿ":"Add payment")}
       </button>
 
       {show&&(
@@ -3127,8 +3121,7 @@ function PaymentsTab({farm,payments,setPayments,expenses,purchases,supervisors,u
         <div style={{display:"flex",gap:6,overflowX:"auto",paddingBottom:4,marginBottom:6}}>
           {[["all",lang==="kn"?"ಎಲ್ಲಾ":"All"],["advance","💵 "+(lang==="kn"?"ಮುಂಗಡ":"Advance")],["claim","📋 "+(lang==="kn"?"ಕ್ಲೇಮ್":"Claim")],["salary","💰 "+(lang==="kn"?"ಸಂಬಳ":"Salary")]].map(([val,lb])=>(
             <button key={val} onClick={()=>setFilterType(val)}
-              style={{padding:"6px 12px",borderRadius:20,border:"1.5px solid "+(filterType===val?"#0277BD":"#ddd"),
-                background:filterType===val?"#0277BD":"#fff",color:filterType===val?"#fff":"#555",
+              style={{padding:"6px 12px",borderRadius:20,border:"none",background:filterType===val?"#1B5E20":"#fff",color:filterType===val?"#fff":"#666",
                 fontSize:12,fontWeight:600,whiteSpace:"nowrap",flexShrink:0,cursor:"pointer"}}>{lb}</button>
           ))}
         </div>
@@ -3139,17 +3132,17 @@ function PaymentsTab({farm,payments,setPayments,expenses,purchases,supervisors,u
 
       {list.length===0?<div style={{textAlign:"center",padding:"40px 20px",color:"#aaa"}}><div style={{fontSize:48,marginBottom:12}}>💳</div><div style={{fontSize:16}}>{lang==="kn"?"ಯಾವುದೇ ಪಾವತಿ ಇಲ್ಲ":"No payments yet"}</div></div>
       :list.map(p=>{const saved=savedId===p.id;const sup=supervisors.find(s=>s.id===p.supervisorId);return(
-        <div key={p.id} style={{background:"#fff",borderRadius:18,padding:16,marginBottom:12,boxShadow:"0 2px 10px rgba(0,0,0,.07)",border:saved?"2px solid #90CAF9":"2px solid transparent",transition:"border .4s"}}>
+        <div key={p.id} style={{background:"#fff",borderRadius:16,padding:"13px 14px",marginBottom:8,border:saved?"2px solid #A5D6A7":"none"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
             <div style={{display:"flex",alignItems:"center",gap:10}}>
               <div style={{width:44,height:44,background:PAY_COLS[p.type]+"18",borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>{PAY_ICONS2[p.type]}</div>
               <div>
-                <div style={{fontWeight:700,fontSize:16,color:PAY_COLS[p.type]}}>{payLabels[p.type]}</div>
+                <div style={{fontWeight:600,fontSize:14,color:"#1a1a1a"}}>{payLabels[p.type]}</div>
                 <div style={{fontSize:13,color:"#888"}}>{fmt(p.date)}{sup?" · 👷"+dispName(sup):""}</div>
                 {p.desc&&<div style={{fontSize:13,color:"#555",marginTop:2}}>{p.desc}</div>}
               </div>
             </div>
-            <div style={{fontSize:20,fontWeight:800,color:PAY_COLS[p.type]}}>{fmtCur(p.amount)}</div>
+            <div style={{fontSize:16,fontWeight:700,color:"#1a1a1a"}}>{fmtCur(p.amount)}</div>
           </div>
           {p.note&&<div style={{fontSize:12,color:"#888",fontStyle:"italic",marginBottom:6}}>"{p.note}"</div>}
           <div style={{fontSize:12,color:"#aaa",marginBottom:8}}>By: {p.addedByName||p.addedBy}</div>
@@ -3993,7 +3986,7 @@ function FarmApp({user,setUser,farm,onSwitch,onLogout,showToast}){
   );
 
   return(
-    <div style={{maxWidth:520,margin:"0 auto",background:"#F0F4F0",minHeight:"100vh",paddingTop:58,paddingBottom:72}}>
+    <div style={{maxWidth:520,margin:"0 auto",background:"#F2F0E8",minHeight:"100vh",paddingTop:58,paddingBottom:72}}>
       <Header user={user} farm={farm} onSwitch={onSwitch} onLogout={onLogout} onProfile={()=>setOverlay("profile")} syncing={syncing}/>
 
       {page==="home"&&(
