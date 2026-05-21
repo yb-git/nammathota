@@ -1434,11 +1434,24 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
     </div>
   );
 
+  const Card=({bg,col,lbl,val,sub,icon,onClick,bold})=>(
+    <div onClick={onClick} style={{background:bg,borderRadius:18,padding:"16px 14px",
+      border:bold?"2px solid "+col+"55":"1.5px solid transparent",
+      cursor:onClick?"pointer":"default",position:"relative",
+      boxShadow:onClick?"0 2px 8px rgba(0,0,0,.06)":"none",
+      transition:"transform .1s",active:{transform:"scale(.97)"}}}>
+      {onClick&&<span style={{position:"absolute",top:12,right:12,fontSize:14,opacity:.4}}>›</span>}
+      <div style={{fontSize:11,color:col,fontWeight:700,textTransform:"uppercase",letterSpacing:.4,marginBottom:5,opacity:.85}}>{lbl}</div>
+      <div style={{fontSize:bold?22:20,fontWeight:bold?900:700,color:col,lineHeight:1.1}}>{val}</div>
+      <div style={{fontSize:12,color:col,opacity:.7,marginTop:5,display:"flex",alignItems:"center",gap:4}}>{icon} {sub}</div>
+    </div>
+  );
+
   return(
     <div style={{padding:"14px 14px 24px"}}>
 
       {/* Farm banner */}
-      <div style={{background:farm.col||"#1B5E20",borderRadius:20,padding:18,color:"#fff",marginBottom:14,boxShadow:"0 4px 20px rgba(0,0,0,.2)"}}>
+      <div style={{background:farm.col||"#1B5E20",borderRadius:20,padding:18,color:"#fff",marginBottom:16,boxShadow:"0 4px 20px rgba(0,0,0,.2)"}} onClick={()=>onNav("tasks")}>
         <div style={{fontSize:13,opacity:.8,marginBottom:6}}>{farm.location?.village||farm.type}{farm.land?.totalAcres?" · "+farm.land.totalAcres+" ಎಕರೆ":""}</div>
         <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:14}}>
           <div style={{flex:1}}>
@@ -1453,12 +1466,11 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
             <div style={{fontSize:12,opacity:.8}}>📋 {lang==="kn"?"ಕೆಲಸ":"Tasks"}</div>
           </div>
         </div>
-        {/* Period selector inside banner */}
         <div style={{display:"flex",gap:6}}>
           {[["all",lang==="kn"?"ಒಟ್ಟಾರೆ":"All Time"],
             ["year",lang==="kn"?"ಈ ವರ್ಷ":"This Year"],
             ["month",lang==="kn"?"ಈ ತಿಂಗಳು":"This Month"]].map(([p,lb])=>(
-            <button key={p} onClick={()=>setPeriod(p)}
+            <button key={p} onClick={e=>{e.stopPropagation();setPeriod(p);}}
               style={{flex:1,padding:"8px 4px",borderRadius:16,fontSize:12,fontWeight:700,
                 border:"1.5px solid rgba(255,255,255,"+(period===p?".9":".3")+")",
                 background:period===p?"rgba(255,255,255,.25)":"transparent",
@@ -1469,159 +1481,162 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
         </div>
       </div>
 
-      {/* ═══ CARD 1: Investment vs Earnings ═══ */}
-      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
-        <div style={{fontSize:16,fontWeight:800,marginBottom:12,color:"#333"}}>
-          💰 {lang==="kn"?"ಹೂಡಿಕೆ vs ಗಳಿಕೆ":"Investment vs Earnings"}
-        </div>
-
-        <div style={{fontSize:13,fontWeight:700,color:"#888",marginBottom:6,textTransform:"uppercase",letterSpacing:.5}}>
-          {lang==="kn"?"ಹೂಡಿಕೆ (ಒಟ್ಟು ಖರ್ಚು)":"Total Investment"}
-        </div>
-        {landCost>0&&<Row icon="🏡" label={lang==="kn"?"ಜಮೀನು ಖರೀದಿ":"Land Purchase"} val={landCost}/>}
-        <Row icon="💸" label={lang==="kn"?"ಖರ್ಚು (Expenses)":"Expenses"} val={pExp}/>
-        <Row icon="💰" label={lang==="kn"?"ಸಂಬಳ (Salary)":"Salary Paid"} val={pSal}/>
-        <Row icon="🛒" label={lang==="kn"?"ಖರೀದಿ (Purchases)":"Purchases"} val={pPur}/>
-        <Row icon="📊" label={lang==="kn"?"ಒಟ್ಟು ಹೂಡಿಕೆ":"Total Invested"} val={totalInvested} col="#0277BD" bold bg="#E3F2FD"/>
-
-        <div style={{height:1,background:"#eee",margin:"12px 0"}}/>
-
-        <div style={{fontSize:13,fontWeight:700,color:"#888",marginBottom:6,textTransform:"uppercase",letterSpacing:.5}}>
-          {lang==="kn"?"ಗಳಿಕೆ":"Earnings"}
-        </div>
-        <Row icon="🌾" label={lang==="kn"?"ಒಟ್ಟು ಆದಾಯ":"Total Income"} val={pInc} col="#1B5E20" bold bg="#E8F5E9"/>
-
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
-          padding:"12px 14px",marginTop:10,borderRadius:14,
-          background:pnl>=0?"#E8F5E9":"#FFEBEE",border:"2px solid "+(pnl>=0?"#A5D6A7":"#FFCDD2")}}>
-          <span style={{fontSize:16,fontWeight:700,color:pnl>=0?"#1B5E20":"#C62828"}}>
-            {pnl>=0?"📈":"📉"} {lang==="kn"?"ಲಾಭ / ನಷ್ಟ":"Net Profit / Loss"}
-          </span>
-          <span style={{fontSize:22,fontWeight:900,color:pnl>=0?"#1B5E20":"#C62828"}}>
-            {pnl>=0?"▲ ":"▼ "}{fmtCur(Math.abs(pnl))}
-          </span>
-        </div>
+      {/* ── Section: Advance & Payments ── */}
+      <div style={{fontSize:13,fontWeight:700,color:"#888",marginBottom:10,letterSpacing:.3,textTransform:"uppercase"}}>
+        💳 {lang==="kn"?"ಮುಂಗಡ & ಪಾವತಿ":"Advance & Payments"}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:18}}>
+        <Card bg="#E3F2FD" col="#0277BD"
+          lbl={lang==="kn"?"ಮುಂಗಡ ನೀಡಿದ್ದು":"Advance given"}
+          val={fmtCur(advGiven)}
+          sub={payments.filter(p=>p.type==="advance").length+" "+(lang==="kn"?"ಪಾವತಿ":"payments")}
+          icon="💵" onClick={()=>onNav("finance","payments")}/>
+        <Card bg="#FFF3E0" col="#E65100"
+          lbl={lang==="kn"?"ಮುಂಗಡದಿಂದ ಬಿಲ್":"Bills from advance"}
+          val={fmtCur(advUsed)}
+          sub={expenses.filter(e=>e.pstatus==="advance").length+" exp + "+purchases.filter(p=>p.pstatus==="advance").length+" pur"}
+          icon="🧾" onClick={()=>onNav("finance","expenses")}/>
+        <Card bg={advRemaining>=0?"#E8F5E9":"#FFEBEE"} col={advRemaining>=0?"#1B5E20":"#C62828"}
+          lbl={lang==="kn"?"ಬಾಕಿ ಮುಂಗಡ":"Balance with supervisor"}
+          val={fmtCur(advRemaining)}
+          sub={advRemaining>=0?"✅ "+(lang==="kn"?"ಉಳಿದಿದೆ":"Remaining"):"⚠️ "+(lang==="kn"?"ಮೀರಿದೆ":"Exceeded")}
+          icon="🏦" onClick={()=>onNav("finance","payments")} bold/>
+        <Card bg="#E8F5E9" col="#2E7D32"
+          lbl={lang==="kn"?"ಮಾಲೀಕರು ನೇರ ಪಾವತಿ":"Owner paid direct"}
+          val={fmtCur(ownerDirect)}
+          sub={(expenses.filter(e=>e.pstatus==="direct").length+purchases.filter(p=>p.pstatus==="direct").length)+" "+(lang==="kn"?"ಖರ್ಚು":"items")}
+          icon="🏗️" onClick={()=>onNav("finance","purchases")}/>
+        <Card bg="#EDE7F6" col="#5E35B1"
+          lbl={lang==="kn"?"ಸಂಬಳ ಪಾವತಿ":"Salary paid"}
+          val={fmtCur(pSal)}
+          sub={payments.filter(p=>p.type==="salary").length+" "+(lang==="kn"?"ನಮೂದು":"entries")}
+          icon="💰" onClick={()=>onNav("finance","payments")}/>
+        <Card bg={claimsPending>0?"#FFEBEE":"#E8F5E9"} col={claimsPending>0?"#C62828":"#1B5E20"}
+          lbl={lang==="kn"?"ಕ್ಲೇಮ್ ಬಾಕಿ":"Pending claims"}
+          val={fmtCur(claimsPending)}
+          sub={claimsPending>0?(lang==="kn"?"ಮಾಲೀಕರು ಕೊಡಬೇಕು":"Owner must pay back"):(lang==="kn"?"ಯಾವುದೂ ಇಲ್ಲ":"Nothing pending")}
+          icon={claimsPending>0?"🔴":"✅"} onClick={()=>onNav("finance","expenses")}/>
       </div>
 
-      {/* ═══ CARD 2: Expense Breakdown ═══ */}
-      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
-        <div style={{fontSize:16,fontWeight:800,marginBottom:12,color:"#333"}}>
-          💸 {lang==="kn"?"ಖರ್ಚಿನ ವಿವರ":"Expense Breakdown"}
-        </div>
-
-        <Row icon="💰" label={lang==="kn"?"ಸಂಬಳ":"Salary"} val={pSal} col="#2E7D32"/>
-        <Row icon="🛒" label={lang==="kn"?"ಖರೀದಿ":"Purchases"} val={pPur} col="#6A1B9A"/>
-
-        {/* Expenses with expand */}
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",
-          padding:"8px 4px",borderBottom:"1px solid #f5f5f5"}}>
-          <span style={{fontSize:14,color:"#555"}}>💸 {lang==="kn"?"ಖರ್ಚು":"Expenses"}</span>
-          <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <span style={{fontSize:14,fontWeight:600,color:"#E65100"}}>{fmtCur(pExp)}</span>
-            <button onClick={()=>setShowExpDetails(s=>!s)}
-              style={{background:"#FFF3E0",border:"none",borderRadius:8,padding:"4px 8px",
-                fontSize:12,fontWeight:700,color:"#E65100",cursor:"pointer"}}>
-              {showExpDetails?"▲":"▼ "+lang==="kn"?"ವಿವರ":"Details"}
-            </button>
-          </div>
-        </div>
-
-        {showExpDetails&&(
-          <div style={{background:"#FFF8F5",borderRadius:12,padding:"10px 8px",margin:"6px 0"}}>
-            {catAmts.map(c=>(
-              <div key={c.id} style={{display:"flex",justifyContent:"space-between",
-                alignItems:"center",padding:"7px 10px",marginBottom:3,
-                borderRadius:10,background:"#fff",
-                opacity:c.amt>0?1:.5}}>
-                <span style={{fontSize:13,color:"#444"}}>{c.icon} {lang==="kn"?c.kn:c.en}</span>
-                <span style={{fontSize:13,fontWeight:c.amt>0?700:400,
-                  color:c.amt>0?"#E65100":"#aaa"}}>{fmtCur(c.amt)}</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div style={{height:1,background:"#eee",margin:"10px 0"}}/>
-        <Row icon="📊" label={lang==="kn"?"ಒಟ್ಟು ಖರ್ಚು":"Total Outflow"} val={pExp+pPur+pSal} col="#E65100" bold bg="#FFF3E0"/>
+      {/* ── Section: Investment & Earnings ── */}
+      <div style={{fontSize:13,fontWeight:700,color:"#888",marginBottom:10,letterSpacing:.3,textTransform:"uppercase"}}>
+        📊 {lang==="kn"?"ಹೂಡಿಕೆ & ಗಳಿಕೆ":"Investment & Earnings"}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:10}}>
+        <Card bg="#FFF3E0" col="#E65100"
+          lbl={lang==="kn"?"ಒಟ್ಟು ಖರ್ಚು":"Total expenses"}
+          val={fmtCur(pExp)}
+          sub={expenses.length+" "+(lang==="kn"?"ನಮೂದು":"entries")}
+          icon="💸" onClick={()=>onNav("finance","expenses")}/>
+        <Card bg="#EDE7F6" col="#6A1B9A"
+          lbl={lang==="kn"?"ಖರೀದಿ":"Purchases"}
+          val={fmtCur(pPur)}
+          sub={purchases.length+" "+(lang==="kn"?"ಐಟಂ":"items")}
+          icon="🛒" onClick={()=>onNav("finance","purchases")}/>
+        <Card bg="#E8F5E9" col="#1B5E20"
+          lbl={lang==="kn"?"ಆದಾಯ":"Total income"}
+          val={fmtCur(pInc)}
+          sub={(income||[]).length+" "+(lang==="kn"?"ನಮೂದು":"entries")}
+          icon="🌾" onClick={()=>onNav("finance","income")}/>
+        <Card bg={pnl>=0?"#E8F5E9":"#FFEBEE"} col={pnl>=0?"#1B5E20":"#C62828"}
+          lbl={lang==="kn"?"ಲಾಭ / ನಷ್ಟ":"Net profit / loss"}
+          val={(pnl>=0?"▲ ":"▼ ")+fmtCur(Math.abs(pnl))}
+          sub={lang==="kn"?"ಆದಾಯ − ಒಟ್ಟು ಹೂಡಿಕೆ":"Income − total invested"}
+          icon={pnl>=0?"📈":"📉"} bold/>
       </div>
 
-      {/* ═══ CARD 3: Payments & Advance ═══ */}
-      <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
-        <div style={{fontSize:16,fontWeight:800,marginBottom:12,color:"#333"}}>
-          💳 {lang==="kn"?"ಪಾವತಿ & ಮುಂಗಡ":"Payments & Advance"}
-        </div>
-
-        <Row icon="💵" label={lang==="kn"?"ಮುಂಗಡ ನೀಡಿದ್ದು":"Advance Given"} val={advGiven} col="#0277BD"/>
-        <Row icon="💸" label={lang==="kn"?"ಮುಂಗಡದಿಂದ ಪಾವತಿ":"Paid from Advance"} val={advUsed} col="#E65100"/>
-        <Row icon="🏦" label={lang==="kn"?"ಮಾಲೀಕರು ನೇರ ಪಾವತಿ":"Owner Direct Paid"} val={ownerDirect} col="#2E7D32"/>
-
-        <Row icon="🏦" label={lang==="kn"?"ಮುಂಗಡ ಬಾಕಿ":"Advance Remaining"} val={advRemaining}
-          col={advRemaining>=0?"#1B5E20":"#C62828"} bold
-          bg={advRemaining>=0?"#E8F5E9":"#FFEBEE"}/>
-
-        <div style={{height:1,background:"#eee",margin:"10px 0"}}/>
-
-        <Row icon="🔴" label={lang==="kn"?"ಕ್ಲೇಮ್ ಬಾಕಿ (ಮಾಲೀಕರು ಕೊಡಬೇಕು)":"Claims Pending (Owner owes)"} val={claimsPending} col="#C62828"/>
-        <Row icon="✅" label={lang==="kn"?"ಕ್ಲೇಮ್ ಮಂಜೂರು":"Claims Settled"} val={claimsSettled} col="#1B5E20"/>
-
-        {claimsPending>0&&(
-          <div style={{background:"#FFEBEE",border:"2px solid #FFCDD2",borderRadius:12,
-            padding:"10px 14px",marginTop:10,display:"flex",alignItems:"center",gap:10}}>
-            <span style={{fontSize:22}}>⚠️</span>
-            <div>
-              <div style={{fontSize:14,fontWeight:700,color:"#C62828"}}>
-                {lang==="kn"?"ಪೆಂಡಿಂಗ್ ಕ್ಲೇಮ್ ಇದೆ":"Pending claims to reimburse"}
-              </div>
-              <div style={{fontSize:13,color:"#888",marginTop:2}}>
-                {lang==="kn"?"ಸೂಪರ್‌ವೈಸರ್ ಕೊಟ್ಟ ಹಣ ಹಿಂದಿರುಗಿಸಬೇಕು":"Supervisor paid from own pocket"}
-              </div>
-            </div>
+      {/* ── Total invested full-width ── */}
+      <div onClick={()=>onNav("finance","expenses")} style={{background:"#E3F2FD",borderRadius:18,padding:"14px 16px",
+        marginBottom:18,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div>
+          <div style={{fontSize:11,color:"#0277BD",fontWeight:700,textTransform:"uppercase",letterSpacing:.4,marginBottom:4}}>
+            {lang==="kn"?"ಒಟ್ಟು ಹೂಡಿಕೆ":"Total invested"}
           </div>
-        )}
+          <div style={{fontSize:22,fontWeight:900,color:"#0277BD"}}>{fmtCur(totalInvested)}</div>
+          <div style={{fontSize:12,color:"#0277BD",opacity:.7,marginTop:4}}>
+            {lang==="kn"?"ಖರ್ಚು + ಖರೀದಿ + ಸಂಬಳ":"Expenses + purchases + salary"}
+          </div>
+        </div>
+        <span style={{fontSize:24,opacity:.35}}>›</span>
       </div>
 
-      {/* ═══ Task Progress ═══ */}
-      {allTasks.length>0&&(
-        <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
-          <div style={{fontSize:16,fontWeight:800,marginBottom:12}}>📋 {lang==="kn"?"ಕೆಲಸ ಪ್ರಗತಿ":"Task Progress"}</div>
-          {allTasks.slice(0,8).map(tg=>{
-            const done=tg.sub.filter((_,i)=>(tasks[tg.id+"-"+i]?.status||"pending")==="taskDone").length;
-            const p=tg.sub.length?Math.round(done/tg.sub.length*100):0;
-            const tSpent=expenses.filter(e=>e.taskId===tg.id).reduce((a,e)=>a+(+e.amount||0),0);
-            const planned=+(farm.budget?.taskBudgets||{})[tg.id]||0;
+      {/* ── Section: Expense breakdown by category ── */}
+      {pExp>0&&(
+        <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:18,
+          boxShadow:"0 2px 8px rgba(0,0,0,.06)"}}>
+          <div style={{fontSize:13,fontWeight:700,color:"#888",marginBottom:12,
+            letterSpacing:.3,textTransform:"uppercase"}}>
+            💸 {lang==="kn"?"ಖರ್ಚಿನ ವಿಭಾಗ":"Expense by category"}
+          </div>
+          {catAmts.filter(c=>c.amt>0).sort((a,b)=>b.amt-a.amt).map(c=>{
+            const pct2=Math.round(c.amt/pExp*100);
             return(
-              <div key={tg.id} style={{marginBottom:10,background:"#f9f9f9",borderRadius:12,padding:"10px 12px"}}>
-                <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
-                  <span style={{fontSize:14,fontWeight:700,color:tg.col}}>{lang==="kn"?tg.kn:tg.en}</span>
-                  <span style={{fontSize:13,color:"#888"}}>{done}/{tg.sub.length} · {p}%</span>
-                </div>
-                <div style={{height:6,background:"#e0e0e0",borderRadius:4}}>
-                  <div style={{height:6,width:p+"%",background:tg.col,borderRadius:4,transition:"width .4s"}}/>
-                </div>
-                {(planned>0||tSpent>0)&&(
-                  <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginTop:5,color:"#888"}}>
-                    <span>💸 {fmtCur(tSpent)}</span>
-                    {planned>0&&<span style={{color:tSpent>planned?"#C62828":"#2E7D32"}}>
-                      {lang==="kn"?"ಬಜೆಟ್:":"Budget:"} {fmtCur(planned)}
-                    </span>}
+              <div key={c.id} onClick={()=>onNav("finance","expenses")}
+                style={{display:"flex",alignItems:"center",gap:10,padding:"9px 0",
+                  borderBottom:"1px solid #f5f5f5",cursor:"pointer"}}>
+                <span style={{fontSize:20,width:28,textAlign:"center"}}>{c.icon}</span>
+                <div style={{flex:1}}>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                    <span style={{fontSize:13,fontWeight:600,color:"#333"}}>{lang==="kn"?c.kn:c.en}</span>
+                    <span style={{fontSize:13,fontWeight:700,color:"#E65100"}}>{fmtCur(c.amt)}</span>
                   </div>
-                )}
+                  <div style={{height:5,background:"#f0f0f0",borderRadius:3}}>
+                    <div style={{height:5,width:pct2+"%",background:"#E65100",borderRadius:3,opacity:.75}}/>
+                  </div>
+                </div>
+                <span style={{fontSize:12,color:"#aaa",width:28,textAlign:"right"}}>{pct2}%</span>
               </div>
             );
           })}
         </div>
       )}
 
-      {/* Recent Activity */}
+      {/* ── Section: Task progress ── */}
+      {allTasks.length>0&&(
+        <div style={{fontSize:13,fontWeight:700,color:"#888",marginBottom:10,letterSpacing:.3,textTransform:"uppercase"}}>
+          📋 {lang==="kn"?"ಕೆಲಸ ಪ್ರಗತಿ":"Task progress"}
+        </div>
+      )}
+      {allTasks.length>0&&(
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:18}}>
+          {allTasks.slice(0,6).map(tg=>{
+            const done=tg.sub.filter((_,i)=>(tasks[tg.id+"-"+i]?.status||"pending")==="taskDone").length;
+            const p2=tg.sub.length?Math.round(done/tg.sub.length*100):0;
+            return(
+              <div key={tg.id} onClick={()=>onNav("tasks")}
+                style={{background:"#f9f9f9",borderRadius:16,padding:"13px 13px",cursor:"pointer"}}>
+                <div style={{fontSize:12,fontWeight:700,color:tg.col,marginBottom:6,
+                  overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                  {lang==="kn"?tg.kn:tg.en}
+                </div>
+                <div style={{height:6,background:"#e0e0e0",borderRadius:4,marginBottom:6}}>
+                  <div style={{height:6,width:p2+"%",background:tg.col,borderRadius:4}}/>
+                </div>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:12}}>
+                  <span style={{color:"#888"}}>{done}/{tg.sub.length}</span>
+                  <span style={{fontWeight:700,color:tg.col}}>{p2}%</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ── Recent activity ── */}
       {recent.length>0&&(
-        <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
-          <div style={{fontSize:16,fontWeight:800,marginBottom:12}}>🕒 {lang==="kn"?"ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ":"Recent Activity"}</div>
+        <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,
+          boxShadow:"0 2px 8px rgba(0,0,0,.06)"}}>
+          <div style={{fontSize:13,fontWeight:700,color:"#888",marginBottom:12,
+            letterSpacing:.3,textTransform:"uppercase"}}>
+            🕒 {lang==="kn"?"ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ":"Recent activity"}
+          </div>
           {recent.map((r,i)=>(
             <div key={i} style={{display:"flex",alignItems:"center",gap:12,
               padding:"9px 0",borderBottom:i<recent.length-1?"1px solid #f5f5f5":"none"}}>
               <span style={{fontSize:22,width:30,textAlign:"center"}}>{r.icon}</span>
               <div style={{flex:1,overflow:"hidden"}}>
-                <div style={{fontSize:14,fontWeight:500,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.text}</div>
+                <div style={{fontSize:14,fontWeight:500,overflow:"hidden",
+                  textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.text}</div>
                 <div style={{fontSize:12,color:"#aaa",marginTop:1}}>{fmt(r.date)}</div>
               </div>
               {r.amt>0&&<span style={{fontSize:14,fontWeight:700,color:"#333",flexShrink:0}}>{fmtCur(r.amt)}</span>}
@@ -2300,9 +2315,10 @@ function LabourTab({farm,labour,setLabour,workers,setWorkers,showToast}){
 }
 
 /* ── Finance Page ────────────────────────────────── */
-function FinancePage({farm,expenses,setExpenses,purchases,setPurchases,payments,setPayments,income,setIncome,trips,allTasks,supervisors,user,showToast}){
+function FinancePage({farm,expenses,setExpenses,purchases,setPurchases,payments,setPayments,income,setIncome,trips,allTasks,supervisors,user,showToast,initialTab}){
   const{t,lang}=useLang();
-  const[tab,setTab]=useState("expenses");
+  const[tab,setTab]=useState(initialTab||"expenses");
+  React.useEffect(()=>{if(initialTab)setTab(initialTab);},[initialTab]);
   const tabs=[["expenses","💸 "+(lang==="kn"?"ಖರ್ಚು":"Expenses")],["purchases","🛒 "+(lang==="kn"?"ಖರೀದಿ":"Purchases")],["payments","💳 "+(lang==="kn"?"ಪಾವತಿ":"Payments")],["income","🌾 "+(lang==="kn"?"ಆದಾಯ":"Income")]];
   return(
     <div style={{padding:"14px 14px 24px"}}>
@@ -2319,7 +2335,7 @@ function FinancePage({farm,expenses,setExpenses,purchases,setPurchases,payments,
       </div>
       {tab==="expenses"&&<ExpensesTab farm={farm} expenses={expenses} setExpenses={setExpenses} payments={payments} purchases={purchases} trips={trips} allTasks={allTasks} showToast={showToast}/>}
       {tab==="purchases"&&<PurchasesTab farm={farm} purchases={purchases} setPurchases={setPurchases} payments={payments} expenses={expenses} showToast={showToast}/>}
-      {tab==="payments"&&<PaymentsTab farm={farm} payments={payments} setPayments={setPayments} supervisors={supervisors} user={user} showToast={showToast}/>}
+      {tab==="payments"&&<PaymentsTab farm={farm} payments={payments} setPayments={setPayments} expenses={expenses} purchases={purchases} supervisors={supervisors} user={user} showToast={showToast}/>}
       {tab==="income"&&<IncomeTab farm={farm} income={income} setIncome={setIncome} showToast={showToast}/>}
     </div>
   );
@@ -2951,7 +2967,16 @@ function PaymentsTab({farm,payments,setPayments,expenses,purchases,supervisors,u
   const totAdv=payments.filter(p=>p.type==="advance").reduce((a,p)=>a+(+p.amount||0),0);
   const totCl=payments.filter(p=>p.type==="claim").reduce((a,p)=>a+(+p.amount||0),0);
   const totSal=payments.filter(p=>p.type==="salary").reduce((a,p)=>a+(+p.amount||0),0);
-  const balance=totAdv-totCl;
+  /* Correct: bills already paid FROM the advance */
+  const billsPaidFromAdv=(expenses||[]).filter(e=>e.pstatus==="advance").reduce((a,e)=>a+(+e.amount||0),0)
+                        +(purchases||[]).filter(p=>p.pstatus==="advance").reduce((a,p)=>a+(+p.amount||0),0);
+  /* Pending = supervisor paid own pocket, owner owes back */
+  const billsPending=(expenses||[]).filter(e=>e.pstatus==="pending").reduce((a,e)=>a+(+e.amount||0),0)
+                    +(purchases||[]).filter(p=>p.pstatus==="pending").reduce((a,p)=>a+(+p.amount||0),0);
+  const billsSettled=(expenses||[]).filter(e=>e.pstatus==="settled").reduce((a,e)=>a+(+e.amount||0),0)
+                    +(purchases||[]).filter(p=>p.pstatus==="settled").reduce((a,p)=>a+(+p.amount||0),0);
+  /* TRUE remaining balance = advance given − bills paid from advance */
+  const advBalance=totAdv-billsPaidFromAdv;
 
   let list=[...payments];
   if(filterType!=="all")list=list.filter(p=>p.type===filterType);
@@ -2963,51 +2988,96 @@ function PaymentsTab({farm,payments,setPayments,expenses,purchases,supervisors,u
 
   return(
     <div>
-      {/* ── Advance Balance Card (correct: advance given − bills paid from advance) ── */}
+      {/* ── TRUE Advance Balance Card ── */}
       <div style={{background:advBalance>=0?"#1B5E20":"#C62828",borderRadius:20,padding:"18px 16px",color:"#fff",marginBottom:14}}>
-        <div style={{fontSize:13,opacity:.8,marginBottom:4}}>{lang==="kn"?"💰 ಮೇಲ್ವಿಚಾರಕರ ಬಳಿ ಉಳಿದ ಮುಂಗಡ":"💰 Advance Balance with Supervisor"}</div>
+        <div style={{fontSize:13,opacity:.85,marginBottom:4}}>{lang==="kn"?"💰 ಮೇಲ್ವಿಚಾರಕರ ಬಳಿ ಉಳಿದ ಮುಂಗಡ":"💰 Advance Balance with Supervisor"}</div>
         <div style={{fontSize:36,fontWeight:900,letterSpacing:-1}}>{fmtCur(advBalance)}</div>
         <div style={{fontSize:12,opacity:.75,marginTop:4}}>
-          {advBalance>=0?(lang==="kn"?"✅ ಮೇಲ್ವಿಚಾರಕರ ಬಳಿ ಇದೆ":"✅ Still with supervisor")
-                       :(lang==="kn"?"⚠️ ಮುಂಗಡ ಮೀರಿದೆ":"⚠️ Advance exceeded")}
+          {advBalance>=0
+            ?(lang==="kn"?"✅ ಮೇಲ್ವಿಚಾರಕರ ಬಳಿ ಇದೆ":"✅ Remaining with supervisor")
+            :(lang==="kn"?"⚠️ ಮುಂಗಡ ಮೀರಿದೆ":"⚠️ Advance exceeded")}
         </div>
       </div>
-      {/* ── Advance Breakdown ── */}
-      <div style={{background:"#fff",borderRadius:16,padding:"14px 16px",marginBottom:14,boxShadow:"0 2px 8px rgba(0,0,0,.06)"}}>
-        <div style={{fontSize:13,fontWeight:700,color:"#555",marginBottom:10}}>{lang==="kn"?"ಮುಂಗಡ ಲೆಕ್ಕ":"Advance Breakdown"}</div>
+      {/* ── Advance Breakdown (3-row) ── */}
+      <div style={{background:"#fff",borderRadius:16,padding:"14px 16px",marginBottom:12,boxShadow:"0 2px 8px rgba(0,0,0,.06)"}}>
+        <div style={{fontSize:12,fontWeight:700,color:"#888",marginBottom:10,textTransform:"uppercase",letterSpacing:.5}}>{lang==="kn"?"ಮುಂಗಡ ಲೆಕ್ಕ":"Advance Breakdown"}</div>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:"1px solid #f0f0f0"}}>
-          <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:18}}>💵</span><span style={{fontSize:14,color:"#444"}}>{lang==="kn"?"ಮುಂಗಡ ನೀಡಿದ್ದು":"Advance Given"}</span></div>
+          <span style={{fontSize:14,color:"#444",display:"flex",alignItems:"center",gap:6}}>💵 {lang==="kn"?"ಮುಂಗಡ ನೀಡಿದ್ದು":"Advance Given"}</span>
           <span style={{fontSize:15,fontWeight:700,color:"#0277BD"}}>{fmtCur(totAdv)}</span>
         </div>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:"1px solid #f0f0f0"}}>
-          <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:18}}>🧾</span><span style={{fontSize:14,color:"#444"}}>{lang==="kn"?"ಬಿಲ್ / ಖರ್ಚು ಪಾವತಿ":"Bills Paid (from advance)"}</span></div>
+          <span style={{fontSize:14,color:"#444",display:"flex",alignItems:"center",gap:6}}>🧾 {lang==="kn"?"ಬಿಲ್ ಪಾವತಿ (ಮುಂಗಡದಿಂದ)":"Bills Paid (from advance)"}</span>
           <span style={{fontSize:15,fontWeight:700,color:"#E65100"}}>− {fmtCur(billsPaidFromAdv)}</span>
         </div>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 8px 6px",background:"#F0F7F0",borderRadius:10,marginTop:6}}>
-          <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:18}}>🏦</span><span style={{fontSize:14,fontWeight:700,color:advBalance>=0?"#1B5E20":"#C62828"}}>{lang==="kn"?"ಬಾಕಿ ಮುಂಗಡ":"Balance Remaining"}</span></div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 8px 6px",background:advBalance>=0?"#E8F5E9":"#FFEBEE",borderRadius:10,marginTop:6}}>
+          <span style={{fontSize:14,fontWeight:700,color:advBalance>=0?"#1B5E20":"#C62828",display:"flex",alignItems:"center",gap:6}}>🏦 {lang==="kn"?"ಬಾಕಿ ಮುಂಗಡ":"Balance Remaining"}</span>
           <span style={{fontSize:16,fontWeight:800,color:advBalance>=0?"#1B5E20":"#C62828"}}>{fmtCur(advBalance)}</span>
         </div>
       </div>
       {/* ── Pending Claims Alert ── */}
       {billsPending>0&&(
-        <div style={{background:"#FFF3E0",border:"2px solid #FFB300",borderRadius:16,padding:"14px 16px",marginBottom:14,display:"flex",alignItems:"center",gap:12}}>
+        <div style={{background:"#FFF3E0",border:"2px solid #FFB300",borderRadius:16,padding:"14px 16px",marginBottom:12,display:"flex",alignItems:"center",gap:12}}>
           <span style={{fontSize:28}}>🔴</span>
           <div>
-            <div style={{fontSize:13,fontWeight:700,color:"#E65100"}}>{lang==="kn"?"ಕ್ಲೇಮ್ ಬಾಕಿ — ಮಾಲೀಕರು ಕೊಡಬೇಕು":"Claims Pending — Owner must pay back"}</div>
+            <div style={{fontSize:13,fontWeight:700,color:"#E65100"}}>{lang==="kn"?"ಕ್ಲೇಮ್ ಬಾಕಿ — ಮಾಲೀಕರು ಕೊಡಬೇಕು":"Pending Claims — Owner must pay back"}</div>
             <div style={{fontSize:20,fontWeight:800,color:"#E65100",marginTop:2}}>{fmtCur(billsPending)}</div>
-            {billsSettled>0&&<div style={{fontSize:12,color:"#888",marginTop:2}}>✅ {lang==="kn"?"ಮಂಜೂರು":"Settled"}: {fmtCur(billsSettled)}</div>}
+            {billsSettled>0&&<div style={{fontSize:12,color:"#888",marginTop:3}}>✅ {lang==="kn"?"ಮಂಜೂರು":"Settled"}: {fmtCur(billsSettled)}</div>}
           </div>
         </div>
       )}
-      {/* ── Quick Stats ── */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:14}}>
-        {[["💵",lang==="kn"?"ಮುಂಗಡ":"Advance","#0277BD","#E3F2FD",totAdv],
-          ["📋",lang==="kn"?"ಕ್ಲೇಮ್":"Claims","#E65100","#FFF3E0",totCl],
-          ["💰",lang==="kn"?"ಸಂಬಳ":"Salary","#2E7D32","#E8F5E9",totSal]].map(([icon,label,col,bg,val])=>(
-          <div key={label} style={{background:bg,borderRadius:14,padding:"10px 8px",textAlign:"center"}}>
-            <div style={{fontSize:18}}>{icon}</div>
-            <div style={{fontSize:14,fontWeight:700,color:col,marginTop:3}}>{fmtCur(val)}</div>
-            <div style={{fontSize:11,color:col,opacity:.8,marginTop:2}}>{label}</div>
+      {/* ── 6-card summary grid ── */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
+        {[
+          {
+            icon:"💵",
+            lbl:lang==="kn"?"ಮುಂಗಡ ನೀಡಿದ್ದು":"Advance given",
+            val:fmtCur(totAdv),
+            sub:(payments.filter(p=>p.type==="advance").length)+" "+(lang==="kn"?"ಪಾವತಿ":"payments"),
+            col:"#0277BD",bg:"#E3F2FD"
+          },
+          {
+            icon:"🧾",
+            lbl:lang==="kn"?"ಮುಂಗಡದಿಂದ ಬಿಲ್":"Bills from advance",
+            val:fmtCur(billsPaidFromAdv),
+            sub:(expenses||[]).filter(e=>e.pstatus==="advance").length+" exp + "+(purchases||[]).filter(p=>p.pstatus==="advance").length+" purchase",
+            col:"#E65100",bg:"#FFF3E0"
+          },
+          {
+            icon:"🏦",
+            lbl:lang==="kn"?"ಬಾಕಿ ಮುಂಗಡ":"Balance with supervisor",
+            val:fmtCur(advBalance),
+            sub:advBalance>=0?"✅ "+(lang==="kn"?"ಉಳಿದಿದೆ":"Remaining"):"⚠️ "+(lang==="kn"?"ಮೀರಿದೆ":"Exceeded"),
+            col:advBalance>=0?"#1B5E20":"#C62828",
+            bg:advBalance>=0?"#E8F5E9":"#FFEBEE",
+            bold:true
+          },
+          {
+            icon:"🏗️",
+            lbl:lang==="kn"?"ಮಾಲೀಕರು ನೇರ ಪಾವತಿ":"Owner paid direct",
+            val:fmtCur(ownerDirect),
+            sub:((expenses||[]).filter(e=>e.pstatus==="direct").length+(purchases||[]).filter(p=>p.pstatus==="direct").length)+" "+(lang==="kn"?"ಖರ್ಚು":"items"),
+            col:"#2E7D32",bg:"#E8F5E9"
+          },
+          {
+            icon:"💰",
+            lbl:lang==="kn"?"ಸಂಬಳ ಪಾವತಿ":"Salary paid",
+            val:fmtCur(totSal),
+            sub:(payments.filter(p=>p.type==="salary").length)+" "+(lang==="kn"?"ನಮೂದು":"entries"),
+            col:"#5E35B1",bg:"#EDE7F6"
+          },
+          {
+            icon:billsPending>0?"🔴":"✅",
+            lbl:lang==="kn"?"ಕ್ಲೇಮ್ ಬಾಕಿ":"Pending claims",
+            val:fmtCur(billsPending),
+            sub:billsPending>0?(lang==="kn"?"ಮಾಲೀಕರು ಕೊಡಬೇಕು":"Owner must pay back"):(lang==="kn"?"ಯಾವುದೂ ಬಾಕಿ ಇಲ್ಲ":"Nothing pending"),
+            col:billsPending>0?"#C62828":"#1B5E20",
+            bg:billsPending>0?"#FFEBEE":"#E8F5E9"
+          },
+        ].map((c,i)=>(
+          <div key={i} style={{background:c.bg,borderRadius:16,padding:"14px 14px",border:"1.5px solid "+(c.bold?c.col+"55":"transparent")}}>
+            <div style={{fontSize:11,color:c.col,opacity:.8,marginBottom:4,fontWeight:600,textTransform:"uppercase",letterSpacing:.3}}>{c.lbl}</div>
+            <div style={{fontSize:c.bold?22:18,fontWeight:c.bold?800:700,color:c.col,lineHeight:1.1}}>{c.val}</div>
+            <div style={{fontSize:11,color:c.col,opacity:.75,marginTop:5}}>{c.sub}</div>
           </div>
         ))}
       </div>
@@ -3796,6 +3866,8 @@ class AppErrorBoundary extends React.Component{
 function FarmApp({user,setUser,farm,onSwitch,onLogout,showToast}){
   const{t}=useLang();
   const[page,setPage]=useState("home");
+  const[financeTab,setFinanceTab]=useState("expenses");
+  const navTo=(dest,tab)=>{setPage(dest);if(tab)setFinanceTab(tab);};
   const[overlay,setOverlay]=useState(null);
   const[showPin,setShowPin]=useState(false);
   const[pinTarget,setPinTarget]=useState(null);
@@ -3922,7 +3994,7 @@ function FarmApp({user,setUser,farm,onSwitch,onLogout,showToast}){
       <Header user={user} farm={farm} onSwitch={onSwitch} onLogout={onLogout} onProfile={()=>setOverlay("profile")} syncing={syncing}/>
 
       {page==="home"&&(
-        <Dashboard farm={farm} tasks={tasks} expenses={expenses} purchases={purchases} payments={payments} labour={labour} trips={trips} income={income} allTasks={allTasks} onNav={setPage}/>
+        <Dashboard farm={farm} tasks={tasks} expenses={expenses} purchases={purchases} payments={payments} labour={labour} trips={trips} income={income} allTasks={allTasks} onNav={navTo}/>
       )}
       {page==="tasks"&&(
         <TasksPage farm={farm} tasks={tasks} setTasks={setTasks} customTasks={customTasks} setCustomTasks={setCustomTasks} user={user} showToast={showToast}/>
@@ -3931,7 +4003,7 @@ function FarmApp({user,setUser,farm,onSwitch,onLogout,showToast}){
         <DailyPage farm={farm} trips={trips} setTrips={setTrips} labour={labour} setLabour={setLabour} workers={workers} setWorkers={setWorkers} showToast={showToast}/>
       )}
       {page==="finance"&&(
-        <FinancePage farm={farm} expenses={expenses} setExpenses={setExpenses} purchases={purchases} setPurchases={setPurchases} payments={payments} setPayments={setPayments} income={income} setIncome={setIncome} trips={trips} allTasks={allTasks} supervisors={supervisors} user={user} showToast={showToast}/>
+        <FinancePage farm={farm} expenses={expenses} setExpenses={setExpenses} purchases={purchases} setPurchases={setPurchases} payments={payments} setPayments={setPayments} income={income} setIncome={setIncome} trips={trips} allTasks={allTasks} supervisors={supervisors} user={user} showToast={showToast} initialTab={financeTab}/>
       )}
       {page==="more"&&(
         <MorePage farm={farm} docs={docs} setDocs={setDocs} user={user} onManage={isOwner?()=>requirePin("manage"):null} onProfile={()=>setOverlay("profile")} onReport={()=>requirePin("report")} onLogout={onLogout} showToast={showToast}/>
