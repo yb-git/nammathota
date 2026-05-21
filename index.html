@@ -2925,7 +2925,7 @@ function PurchasesTab({farm,purchases,setPurchases,expenses,payments,showToast})
 }
 
 
-function PaymentsTab({farm,payments,setPayments,supervisors,user,showToast}){
+function PaymentsTab({farm,payments,setPayments,expenses,purchases,supervisors,user,showToast}){
   const{t,lang}=useLang();
   const isOwner=user.role==="owner";
   const PAY_ICONS2={advance:"💵",claim:"📋",salary:"💰"};
@@ -2963,17 +2963,51 @@ function PaymentsTab({farm,payments,setPayments,supervisors,user,showToast}){
 
   return(
     <div>
-      {/* Balance card */}
-      <div style={{background:balance>=0?"#1B5E20":"#C62828",borderRadius:16,padding:"14px 16px",color:"#fff",marginBottom:14}}>
-        <div style={{fontSize:13,opacity:.8}}>{lang==="kn"?"ಮುಂಗಡ ಬಾಕಿ (ಮುಂಗಡ − ಕ್ಲೇಮ್)":"Balance (Advance − Claims)"}</div>
-        <div style={{fontSize:24,fontWeight:800,marginTop:4}}>{balance>=0?"▲ ":"▼ "}{fmtCur(Math.abs(balance))}</div>
+      {/* ── Advance Balance Card (correct: advance given − bills paid from advance) ── */}
+      <div style={{background:advBalance>=0?"#1B5E20":"#C62828",borderRadius:20,padding:"18px 16px",color:"#fff",marginBottom:14}}>
+        <div style={{fontSize:13,opacity:.8,marginBottom:4}}>{lang==="kn"?"💰 ಮೇಲ್ವಿಚಾರಕರ ಬಳಿ ಉಳಿದ ಮುಂಗಡ":"💰 Advance Balance with Supervisor"}</div>
+        <div style={{fontSize:36,fontWeight:900,letterSpacing:-1}}>{fmtCur(advBalance)}</div>
+        <div style={{fontSize:12,opacity:.75,marginTop:4}}>
+          {advBalance>=0?(lang==="kn"?"✅ ಮೇಲ್ವಿಚಾರಕರ ಬಳಿ ಇದೆ":"✅ Still with supervisor")
+                       :(lang==="kn"?"⚠️ ಮುಂಗಡ ಮೀರಿದೆ":"⚠️ Advance exceeded")}
+        </div>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:14}}>
-        {[["advance","#0277BD","#E3F2FD",totAdv],["claim","#E65100","#FFF3E0",totCl],["salary","#2E7D32","#E8F5E9",totSal]].map(([type,col,bg,val])=>(
-          <div key={type} style={{background:bg,borderRadius:14,padding:"11px 10px",textAlign:"center"}}>
-            <div style={{fontSize:18}}>{PAY_ICONS2[type]}</div>
-            <div style={{fontSize:16,fontWeight:700,color:col,marginTop:4}}>{fmtCur(val)}</div>
-            <div style={{fontSize:12,color:col,opacity:.8,marginTop:2}}>{payLabels[type]}</div>
+      {/* ── Advance Breakdown ── */}
+      <div style={{background:"#fff",borderRadius:16,padding:"14px 16px",marginBottom:14,boxShadow:"0 2px 8px rgba(0,0,0,.06)"}}>
+        <div style={{fontSize:13,fontWeight:700,color:"#555",marginBottom:10}}>{lang==="kn"?"ಮುಂಗಡ ಲೆಕ್ಕ":"Advance Breakdown"}</div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:"1px solid #f0f0f0"}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:18}}>💵</span><span style={{fontSize:14,color:"#444"}}>{lang==="kn"?"ಮುಂಗಡ ನೀಡಿದ್ದು":"Advance Given"}</span></div>
+          <span style={{fontSize:15,fontWeight:700,color:"#0277BD"}}>{fmtCur(totAdv)}</span>
+        </div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:"1px solid #f0f0f0"}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:18}}>🧾</span><span style={{fontSize:14,color:"#444"}}>{lang==="kn"?"ಬಿಲ್ / ಖರ್ಚು ಪಾವತಿ":"Bills Paid (from advance)"}</span></div>
+          <span style={{fontSize:15,fontWeight:700,color:"#E65100"}}>− {fmtCur(billsPaidFromAdv)}</span>
+        </div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 8px 6px",background:"#F0F7F0",borderRadius:10,marginTop:6}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:18}}>🏦</span><span style={{fontSize:14,fontWeight:700,color:advBalance>=0?"#1B5E20":"#C62828"}}>{lang==="kn"?"ಬಾಕಿ ಮುಂಗಡ":"Balance Remaining"}</span></div>
+          <span style={{fontSize:16,fontWeight:800,color:advBalance>=0?"#1B5E20":"#C62828"}}>{fmtCur(advBalance)}</span>
+        </div>
+      </div>
+      {/* ── Pending Claims Alert ── */}
+      {billsPending>0&&(
+        <div style={{background:"#FFF3E0",border:"2px solid #FFB300",borderRadius:16,padding:"14px 16px",marginBottom:14,display:"flex",alignItems:"center",gap:12}}>
+          <span style={{fontSize:28}}>🔴</span>
+          <div>
+            <div style={{fontSize:13,fontWeight:700,color:"#E65100"}}>{lang==="kn"?"ಕ್ಲೇಮ್ ಬಾಕಿ — ಮಾಲೀಕರು ಕೊಡಬೇಕು":"Claims Pending — Owner must pay back"}</div>
+            <div style={{fontSize:20,fontWeight:800,color:"#E65100",marginTop:2}}>{fmtCur(billsPending)}</div>
+            {billsSettled>0&&<div style={{fontSize:12,color:"#888",marginTop:2}}>✅ {lang==="kn"?"ಮಂಜೂರು":"Settled"}: {fmtCur(billsSettled)}</div>}
+          </div>
+        </div>
+      )}
+      {/* ── Quick Stats ── */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:14}}>
+        {[["💵",lang==="kn"?"ಮುಂಗಡ":"Advance","#0277BD","#E3F2FD",totAdv],
+          ["📋",lang==="kn"?"ಕ್ಲೇಮ್":"Claims","#E65100","#FFF3E0",totCl],
+          ["💰",lang==="kn"?"ಸಂಬಳ":"Salary","#2E7D32","#E8F5E9",totSal]].map(([icon,label,col,bg,val])=>(
+          <div key={label} style={{background:bg,borderRadius:14,padding:"10px 8px",textAlign:"center"}}>
+            <div style={{fontSize:18}}>{icon}</div>
+            <div style={{fontSize:14,fontWeight:700,color:col,marginTop:3}}>{fmtCur(val)}</div>
+            <div style={{fontSize:11,color:col,opacity:.8,marginTop:2}}>{label}</div>
           </div>
         ))}
       </div>
