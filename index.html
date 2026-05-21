@@ -424,7 +424,7 @@ function Toast({msg,type}){
 function Card({children,style,onClick}){
   return(
     <div onClick={onClick} style={{background:"#fff",borderRadius:18,padding:"14px 16px",
-      boxShadow:"0 2px 10px rgba(0,0,0,.07)",marginBottom:12,cursor:onClick?"pointer":"default",...style}}>
+      boxShadow:"none",marginBottom:12,cursor:onClick?"pointer":"default",...style}}>
       {children}
     </div>
   );
@@ -815,8 +815,8 @@ function ProfilePage({user,onSave,onBack,onLogout}){
     setTimeout(()=>setSaved(false),2500);
   };
   return(
-    <div style={{minHeight:"100vh",background:"#F0F4F0"}}>
-      <div style={{background:"#37474F",padding:"14px 16px",display:"flex",alignItems:"center",gap:12,color:"#fff"}}>
+    <div style={{minHeight:"100vh",background:"#F2F0E8"}}>
+      <div style={{background:"#1B5E20",padding:"14px 16px",display:"flex",alignItems:"center",gap:12,color:"#fff"}}>
         <button onClick={onBack} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"8px 14px",fontSize:18,cursor:"pointer"}}>‹ {t("back")}</button>
         <div style={{fontSize:17,fontWeight:700}}>👤 {t("profileTitle")}</div>
       </div>
@@ -885,12 +885,12 @@ function FarmSelector({user,onSelect,onManage,onProfile,onAddFarm,showToast}){
     });
   },[]);
   if(!farms)return(
-    <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:16,background:"#F0F4F0"}}>
+    <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:16,background:"#F2F0E8"}}>
       <Spinner size={40}/><div style={{fontSize:18,color:"#666"}}>{useLang().t("loading")}</div>
     </div>
   );
   if(farms.length===0&&!isOwner)return(
-    <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,textAlign:"center",background:"linear-gradient(160deg,#F0F4F0,#E8F5E9)"}}>
+    <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,textAlign:"center",background:"linear-gradient(160deg,#F2F0E8,#E8F5E9)"}}>
       <div style={{fontSize:64,marginBottom:16}}>🚫</div>
       <div style={{fontSize:20,fontWeight:800,marginBottom:8,color:"#1B5E20"}}>{t("noAccess")}</div>
       <div style={{color:"#666",fontSize:18,lineHeight:1.7}}>{t("noAccessSub")}</div>
@@ -920,7 +920,7 @@ function FarmSelector({user,onSelect,onManage,onProfile,onAddFarm,showToast}){
     </div>
   );
   return(
-    <div style={{minHeight:"100vh",background:"#F0F4F0"}}>
+    <div style={{minHeight:"100vh",background:"#F2F0E8"}}>
       <div style={{background:"#1B5E20",padding:"18px 16px",color:"#fff"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
           <div>
@@ -935,7 +935,7 @@ function FarmSelector({user,onSelect,onManage,onProfile,onAddFarm,showToast}){
         </div>
       </div>
       <div style={{padding:16}}>
-        <div style={{fontSize:17,fontWeight:700,marginBottom:14,color:"#111"}}>{t("yourFarms")}</div>
+        <div style={{fontSize:12,color:"#aaa",marginBottom:12}}>{t("yourFarms")}</div>
         {farms.map(f=>{
           const totalAcres=f.land?.totalAcres||"";const pAcres=f.land?.purchasedAcres||"";
           return(
@@ -1216,7 +1216,7 @@ function FarmCreation({editFarm,onDone,onBack,showToast}){
   };
 
   return(
-    <div style={{minHeight:"100vh",background:"#F0F4F0"}}>
+    <div style={{minHeight:"100vh",background:"#F2F0E8"}}>
       <div style={{background:f.col||"#1B5E20",padding:"14px 16px",color:"#fff",display:"flex",alignItems:"center",gap:12}}>
         <button onClick={onBack} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"8px 14px",fontSize:18,cursor:"pointer"}}>‹</button>
         <div>
@@ -1454,7 +1454,7 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
     <div style={{padding:"14px 14px 24px"}}>
 
       {/* Farm banner */}
-      <div style={{background:farm.col||"#1B5E20",borderRadius:20,padding:18,color:"#fff",marginBottom:16,boxShadow:"0 4px 20px rgba(0,0,0,.2)"}} onClick={()=>onNav("tasks")}>
+      <div style={{background:farm.col||"#1B5E20",borderRadius:20,padding:18,color:"#fff",marginBottom:16,boxShadow:"none"}} onClick={()=>onNav("tasks")}>
         <div style={{fontSize:13,opacity:.8,marginBottom:6}}>{farm.location?.village||farm.type}{farm.land?.totalAcres?" · "+farm.land.totalAcres+" ಎಕರೆ":""}</div>
         <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:14}}>
           <div style={{flex:1}}>
@@ -1566,7 +1566,7 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
       {/* ── Section: Expense breakdown by category ── */}
       {pExp>0&&(
         <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:18,
-          boxShadow:"0 2px 8px rgba(0,0,0,.06)"}}>
+          boxShadow:"none"}}>
           <div style={{fontSize:13,fontWeight:700,color:"#888",marginBottom:12,
             letterSpacing:.3,textTransform:"uppercase"}}>
             💸 {lang==="kn"?"ಖರ್ಚಿನ ವಿಭಾಗ":"Expense by category"}
@@ -1628,7 +1628,7 @@ function Dashboard({farm,tasks,expenses,purchases,payments,labour,trips,income,a
       {/* ── Recent activity ── */}
       {recent.length>0&&(
         <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,
-          boxShadow:"0 2px 8px rgba(0,0,0,.06)"}}>
+          boxShadow:"none"}}>
           <div style={{fontSize:13,fontWeight:700,color:"#888",marginBottom:12,
             letterSpacing:.3,textTransform:"uppercase"}}>
             🕒 {lang==="kn"?"ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ":"Recent activity"}
@@ -1803,7 +1803,7 @@ function TasksPage({farm,tasks,setTasks,customTasks,setCustomTasks,user,showToas
       />
       <SHdr title={<span>📋 {t("taskList")}{anyDirty&&<Dot/>}</span>}
         action={isOwner&&<div style={{display:"flex",gap:8}}>
-          <button onClick={()=>{if(window.confirm(lang==="kn"?"Default tasks ಮರಳಿ ತರುವುದೇ?":"Restore all default task groups?"))setCustomTasks(DEFAULT_TASK_GROUPS.map(tg=>({...tg,sub:[...tg.sub]})));}} style={{background:"#F0F4F0",border:"1.5px solid #ccc",borderRadius:12,padding:"8px 12px",fontSize:17,fontWeight:600,cursor:"pointer",color:"#555"}}>↺ {lang==="kn"?"ಮರಳಿ":"Reset"}</button>
+          <button onClick={()=>{if(window.confirm(lang==="kn"?"Default tasks ಮರಳಿ ತರುವುದೇ?":"Restore all default task groups?"))setCustomTasks(DEFAULT_TASK_GROUPS.map(tg=>({...tg,sub:[...tg.sub]})));}} style={{background:"#F2F0E8",border:"1.5px solid #ccc",borderRadius:12,padding:"8px 12px",fontSize:17,fontWeight:600,cursor:"pointer",color:"#555"}}>↺ {lang==="kn"?"ಮರಳಿ":"Reset"}</button>
           <Btn onClick={()=>setShowNG(true)} sm col={farm.col}>{t("addGroup")}</Btn>
         </div>}/>
 
@@ -1830,7 +1830,7 @@ function TasksPage({farm,tasks,setTasks,customTasks,setCustomTasks,user,showToas
         const isOpen=open===tg.id;const isC=tg.id.startsWith("C");const gDirty=subs.some((_,i)=>isDirty(tg.id+"-"+i));
         const planned=+(farm.budget?.taskBudgets||{})[tg.id]||0;
         return(
-          <div key={tg.id} style={{marginBottom:12,borderRadius:18,overflow:"hidden",boxShadow:"0 2px 10px rgba(0,0,0,.08)",border:"1.5px solid "+(gDirty?tg.col+"80":"transparent")}}>
+          <div key={tg.id} style={{marginBottom:10,borderRadius:16,overflow:"hidden",border:"1.5px solid "+(gDirty?tg.col+"80":"transparent")}}>
             <div style={{background:tg.col,padding:"13px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer"}} onClick={()=>setOpen(isOpen?null:tg.id)}>
               <div style={{flex:1}}>
                 <div style={{color:"#fff",fontWeight:800,fontSize:15}}>{tg.id} — {tg.kn}</div>
@@ -1945,8 +1945,7 @@ function DailyPage({farm,trips,setTrips,labour,setLabour,workers,setWorkers,show
   const[tab,setTab]=useState("trips");
   return(
     <div style={{padding:"14px 14px 24px"}}>
-      <div style={{fontSize:17,fontWeight:700,marginBottom:14}}>📅 {t("dailyLog")}</div>
-      <div style={{display:"flex",gap:8,marginBottom:16}}>
+      <div style={{display:"flex",gap:6,marginBottom:14}}>
         {[["trips","🚗 "+t("trips")],["labour","👷 "+t("labour")]].map(([id,lb])=>(
           <button key={id} onClick={()=>setTab(id)}
             style={{flex:1,padding:"11px",borderRadius:14,border:"1.5px solid "+(tab===id?farm.col:"#ddd"),
@@ -2129,14 +2128,14 @@ function MorePage({farm,docs,setDocs,user,onManage,onProfile,onReport,onLogout,s
   ];
   return(
     <div style={{padding:"14px 14px 24px"}}>
-      <div style={{fontSize:17,fontWeight:700,marginBottom:14}}>☰ {lang==="kn"?"ಹೆಚ್ಚಿನ ಆಯ್ಕೆ":"More"}</div>
+      <div style={{fontSize:12,color:"#aaa",marginBottom:12}}>{lang==="kn"?"ಆಯ್ಕೆಗಳು":"Options"}</div>
 
       {/* Menu grid */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:20}}>
         {menuItems.map((m,i)=>(
-          <div key={i} onClick={m.action} style={{background:"#fff",borderRadius:16,padding:"16px 14px",cursor:"pointer",boxShadow:"0 2px 8px rgba(0,0,0,.06)",display:"flex",alignItems:"center",gap:10}}>
-            <span style={{fontSize:26}}>{m.icon}</span>
-            <span style={{fontSize:15,fontWeight:600,color:"#333"}}>{m.label}</span>
+          <div key={i} onClick={m.action} style={{background:"#fff",borderRadius:16,padding:"18px 14px",cursor:"pointer",display:"flex",flexDirection:"column",gap:8}}>
+            <span style={{fontSize:28}}>{m.icon}</span>
+            <span style={{fontSize:14,fontWeight:600,color:"#1a1a1a"}}>{m.label}</span>
           </div>
         ))}
       </div>
@@ -2148,7 +2147,7 @@ function MorePage({farm,docs,setDocs,user,onManage,onProfile,onReport,onLogout,s
       <DocsPage docs={docs} setDocs={setDocs} showToast={showToast}/>
 
       {/* Backup & Restore */}
-      <div style={{background:"#fff",borderRadius:18,padding:16,marginTop:14,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+      <div style={{background:"#fff",borderRadius:18,padding:16,marginTop:14,marginBottom:14,boxShadow:"none"}}>
         <div style={{fontSize:17,fontWeight:700,marginBottom:12}}>
           ☁️ {lang==="kn"?"ಡೇಟಾ ಬ್ಯಾಕಪ್ & ಮರುಸ್ಥಾಪನೆ":"Data Backup & Restore"}
         </div>
@@ -2241,13 +2240,13 @@ function LabourTab({farm,labour,setLabour,workers,setWorkers,showToast}){
   const totalWages=labour.reduce((a,l)=>a+(+l.totalWages||0),0);
   return(
     <div>
-      <div style={{background:"#2E7D32",borderRadius:18,padding:16,marginBottom:14,color:"#fff"}}>
+      <div style={{background:"#F5F4F0",borderRadius:16,padding:"14px 16px",marginBottom:12}}>
         <div style={{fontSize:14,opacity:.8}}>{lang==="kn"?"ಒಟ್ಟು ಕೂಲಿ":"Total Wages"}</div>
         <div style={{fontSize:28,fontWeight:800,marginTop:4}}>{fmtCur(totalWages)}</div>
         <div style={{fontSize:13,opacity:.7,marginTop:4}}>{labour.length} entries · {workers.length} workers</div>
       </div>
       <button onClick={()=>{setShow(!show);setEditId(null);setForm(E);}}
-        style={{width:"100%",background:"#2E7D32",color:"#fff",border:"none",borderRadius:16,padding:15,fontSize:17,fontWeight:700,cursor:"pointer",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+        style={{width:"100%",background:show?"#eee":"#1B5E20",color:show?"#555":"#fff",border:"none",borderRadius:14,padding:"13px 0",fontSize:15,fontWeight:600,cursor:"pointer",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
         {show?"✕ "+(lang==="kn"?"ರದ್ದು":"Cancel"):"👷 "+(lang==="kn"?"ಕಾರ್ಮಿಕ ಸೇರಿಸಿ":"Add Labour")}
       </button>
       {show&&(
@@ -2296,7 +2295,7 @@ function LabourTab({farm,labour,setLabour,workers,setWorkers,showToast}){
         else if(sortKey==="amt_asc")list.sort((a,b)=>(+a.totalWages||0)-(+b.totalWages||0));
         if(list.length===0)return(<div style={{textAlign:"center",padding:"40px 20px",color:"#aaa"}}><div style={{fontSize:48,marginBottom:12}}>👷</div><div style={{fontSize:16}}>{search?(lang==="kn"?"ಫಲಿತಾಂಶ ಇಲ್ಲ":"No results"):(lang==="kn"?"ಕಾರ್ಮಿಕ ದಾಖಲೆ ಇಲ್ಲ":"No labour entries")}</div></div>);
         return list.map(l=>{const saved=savedId===l.id;return(
-        <div key={l.id} style={{background:"#fff",borderRadius:18,padding:16,marginBottom:12,boxShadow:"0 2px 10px rgba(0,0,0,.07)",border:saved?"2px solid #A5D6A7":"2px solid transparent",transition:"border .4s"}}>
+        <div key={l.id} style={{background:"#fff",borderRadius:18,padding:16,marginBottom:12,boxShadow:"none",border:saved?"2px solid #A5D6A7":"2px solid transparent",transition:"border .4s"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
             <div>
               <div style={{fontWeight:700,fontSize:16}}>{l.workerName}</div>
@@ -2325,7 +2324,7 @@ function FinancePage({farm,expenses,setExpenses,purchases,setPurchases,payments,
   const tabs=[["expenses","💸 "+(lang==="kn"?"ಖರ್ಚು":"Expenses")],["purchases","🛒 "+(lang==="kn"?"ಖರೀದಿ":"Purchases")],["payments","💳 "+(lang==="kn"?"ಪಾವತಿ":"Payments")],["income","🌾 "+(lang==="kn"?"ಆದಾಯ":"Income")]];
   return(
     <div style={{padding:"14px 14px 24px"}}>
-      <div style={{fontSize:17,fontWeight:700,marginBottom:14}}>💰 {lang==="kn"?"ಹಣಕಾಸು":"Finance"}</div>
+      
       <div style={{display:"flex",gap:6,marginBottom:16,overflowX:"auto",paddingBottom:4}}>
         {tabs.map(([id,lb])=>(
           <button key={id} onClick={()=>setTab(id)}
@@ -2412,8 +2411,7 @@ function FilterBar({search,setSearch,sortKey,setSortKey,sortOpts,filterKey,setFi
       <div style={{position:"relative",marginBottom:8}}>
         <input value={search} onChange={e=>setSearch(e.target.value)}
           placeholder={"🔍 "+(placeholder||"Search...")}
-          style={{paddingLeft:14,paddingRight:36,fontSize:15,background:"#fff",
-            border:"1.5px solid #ddd",borderRadius:14}}/>
+          style={{paddingLeft:14,paddingRight:36,fontSize:14,background:"#fff",border:"none",borderRadius:14}}/>
         {search&&(
           <button onClick={()=>setSearch("")}
             style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",
@@ -2495,7 +2493,7 @@ function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,payments,purchase
         const[showCatBreak,setShowCatBreak]=React.useState(false);
         const catAmts=ECAT.map(c=>({...c,amt:expenses.filter(e=>e.cat===c.id).reduce((a,e)=>a+(+e.amount||0),0)}));
         return(
-          <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+          <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"none"}}>
             {/* Grand total */}
             <div style={{background:"#E65100",borderRadius:14,padding:"14px 16px",marginBottom:12,color:"#fff"}}>
               <div style={{fontSize:13,opacity:.8}}>{lang==="kn"?"ಒಟ್ಟು ಖರ್ಚು (ಖರ್ಚು + ಸಂಬಳ + ಖರೀದಿ)":"Total Outflow (Exp + Salary + Purchases)"}</div>
@@ -2703,7 +2701,7 @@ function ExpensesTab({farm,expenses,setExpenses,trips,allTasks,payments,purchase
         </div>
         {/* Sort */}
         <select value={sortKey} onChange={e=>setSortKey(e.target.value)}
-          style={{fontSize:13,padding:"8px 12px",borderRadius:12,border:"1.5px solid #ddd",color:"#555"}}>
+          style={{fontSize:13,padding:"8px 12px",borderRadius:12,border:"none",background:"#fff",color:"#555"}}>
           {[["date_desc",lang==="kn"?"ಹೊಸದು ಮೊದಲು":"Newest First"],
             ["date_asc",lang==="kn"?"ಹಳೆಯದು ಮೊದಲು":"Oldest First"],
             ["amt_desc",lang==="kn"?"ಹೆಚ್ಚು ಮೊದಲು":"Highest First"],
@@ -2901,7 +2899,7 @@ function PurchasesTab({farm,purchases,setPurchases,expenses,payments,showToast})
                 fontSize:12,fontWeight:600,whiteSpace:"nowrap",flexShrink:0,cursor:"pointer"}}>{lb}</button>
           ))}
         </div>
-        <select value={sortKey} onChange={e=>setSortKey(e.target.value)} style={{fontSize:13,padding:"8px 12px",borderRadius:12,border:"1.5px solid #ddd",color:"#555"}}>
+        <select value={sortKey} onChange={e=>setSortKey(e.target.value)} style={{fontSize:13,padding:"8px 12px",borderRadius:12,border:"none",background:"#fff",color:"#555"}}>
           {[["date_desc",lang==="kn"?"ಹೊಸದು ಮೊದಲು":"Newest"],["date_asc",lang==="kn"?"ಹಳೆಯದು":"Oldest"],["amt_desc",lang==="kn"?"ಹೆಚ್ಚು":"Highest"],["amt_asc",lang==="kn"?"ಕಡಿಮೆ":"Lowest"]].map(([v,lb])=><option key={v} value={v}>{lb}</option>)}
         </select>
       </div>
@@ -3097,7 +3095,7 @@ function PaymentsTab({farm,payments,setPayments,expenses,purchases,supervisors,u
               </div>
             ))}
           </div>
-          <div style={{background:"#F0F4F0",borderRadius:10,padding:"8px 12px",marginBottom:12,fontSize:13,color:"#555"}}>
+          <div style={{background:"#F2F0E8",borderRadius:10,padding:"8px 12px",marginBottom:12,fontSize:13,color:"#555"}}>
             {payType==="advance"?(lang==="kn"?"ಮೇಲ್ವಿಚಾರಕರಿಗೆ ಮುಂಗಡ ನೀಡಿದ ಹಣ":"Money given to supervisor as advance"):payType==="claim"?(lang==="kn"?"ಮೇಲ್ವಿಚಾರಕರ ಬಿಲ್ ಮರುಪಾವತಿ":"Reimburse supervisor's bill claim"):(lang==="kn"?"ಮೇಲ್ವಿಚಾರಕರ ಸಂಬಳ":"Supervisor salary")}
           </div>
           <div style={{marginBottom:12}}><div style={{fontSize:14,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ದಿನಾಂಕ":"Date"}</div><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></div>
@@ -3125,7 +3123,7 @@ function PaymentsTab({farm,payments,setPayments,expenses,purchases,supervisors,u
                 fontSize:12,fontWeight:600,whiteSpace:"nowrap",flexShrink:0,cursor:"pointer"}}>{lb}</button>
           ))}
         </div>
-        <select value={sortKey} onChange={e=>setSortKey(e.target.value)} style={{fontSize:13,padding:"8px 12px",borderRadius:12,border:"1.5px solid #ddd",color:"#555"}}>
+        <select value={sortKey} onChange={e=>setSortKey(e.target.value)} style={{fontSize:13,padding:"8px 12px",borderRadius:12,border:"none",background:"#fff",color:"#555"}}>
           {[["date_desc",lang==="kn"?"ಹೊಸದು":"Newest"],["date_asc","Oldest"],["amt_desc",lang==="kn"?"ಹೆಚ್ಚು":"Highest"],["amt_asc","Lowest"]].map(([v,lb])=><option key={v} value={v}>{lb}</option>)}
         </select>
       </div>
@@ -3191,9 +3189,9 @@ function IncomeTab({farm,income,setIncome,showToast}){
   return(
     <div>
       {/* Summary */}
-      <div style={{background:"#1B5E20",borderRadius:18,padding:16,marginBottom:14,color:"#fff"}}>
-        <div style={{fontSize:14,opacity:.8}}>{lang==="kn"?"ಒಟ್ಟು ಆದಾಯ":"Total Income"}</div>
-        <div style={{fontSize:28,fontWeight:800,marginTop:4}}>{fmtCur(total)}</div>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+        <div><div style={{fontSize:11,color:"#aaa"}}>{lang==="kn"?"ಒಟ್ಟು ಆದಾಯ":"Total income"}</div>
+        <div style={{fontSize:20,fontWeight:700,color:"#1B5E20"}}>{fmtCur(total)}</div></div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:10}}>
           {Object.keys(byMonth).sort().reverse().slice(0,3).map(m=>(
             <div key={m} style={{background:"rgba(255,255,255,.2)",borderRadius:20,padding:"3px 12px",fontSize:13}}>
@@ -3366,9 +3364,7 @@ function IncomeTab({farm,income,setIncome,showToast}){
         const saved=savedId===x.id;
         const pmIcon=x.payMode==="cash"?"💵":x.payMode==="cheque"?"📝":"📱";
         return(
-          <div key={x.id} style={{background:"#fff",borderRadius:18,padding:16,marginBottom:12,
-            boxShadow:"0 2px 10px rgba(0,0,0,.07)",
-            border:saved?"2px solid #A5D6A7":"2px solid transparent",transition:"border .4s"}}>
+          <div key={x.id} style={{background:"#fff",borderRadius:16,padding:"13px 14px",marginBottom:8,border:saved?"2px solid #A5D6A7":"none"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
               <div style={{display:"flex",alignItems:"center",gap:12}}>
                 <div style={{width:46,height:46,background:"#E8F5E9",borderRadius:14,
@@ -3563,8 +3559,8 @@ function ReportPage({farm,tasks,expenses,purchases,payments,income,labour,trips,
   };
 
   return(
-    <div style={{minHeight:"100vh",background:"#F0F4F0"}}>
-      <div style={{background:"#37474F",padding:"14px 16px",display:"flex",alignItems:"center",gap:12,color:"#fff"}}>
+    <div style={{minHeight:"100vh",background:"#F2F0E8"}}>
+      <div style={{background:"#1B5E20",padding:"14px 16px",display:"flex",alignItems:"center",gap:12,color:"#fff"}}>
         <button onClick={onBack} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"8px 14px",fontSize:14,cursor:"pointer"}}>‹ {lang==="kn"?"ಹಿಂದೆ":"Back"}</button>
         <div style={{fontSize:17,fontWeight:700}}>📊 {lang==="kn"?"ವರದಿ":"Report"}</div>
       </div>
@@ -3572,7 +3568,7 @@ function ReportPage({farm,tasks,expenses,purchases,payments,income,labour,trips,
 
         {/* Farm selector — only for owner */}
         {user.role==="owner"&&allFarms.length>1&&(
-          <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+          <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"none"}}>
             <div style={{fontSize:15,fontWeight:700,marginBottom:10}}>🌾 {lang==="kn"?"Farm ಆಯ್ಕೆ ಮಾಡಿ":"Select Farm"}</div>
             {allFarms.map(f=>(
               <div key={f.id} onClick={()=>setSelFarmId(f.id)}
@@ -3592,7 +3588,7 @@ function ReportPage({farm,tasks,expenses,purchases,payments,income,labour,trips,
         )}
 
         {/* Date range */}
-        <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+        <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"none"}}>
           <div style={{fontSize:15,fontWeight:700,marginBottom:12}}>📅 {lang==="kn"?"ಅವಧಿ ಆಯ್ಕೆ ಮಾಡಿ":"Select Period"}</div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
             <div><div style={{fontSize:13,fontWeight:600,marginBottom:6}}>{lang==="kn"?"ಆರಂಭ":"From"}</div><input type="date" value={df} onChange={e=>setDf(e.target.value)}/></div>
@@ -3607,7 +3603,7 @@ function ReportPage({farm,tasks,expenses,purchases,payments,income,labour,trips,
               [lang==="kn"?"ಎಲ್ಲಾ":"All Time", ()=>{setDf("2020-01-01");setDt(today());}],
             ].map(([lb,fn])=>(
               <button key={lb} onClick={fn}
-                style={{background:"#F0F4F0",border:"1.5px solid #ddd",borderRadius:20,
+                style={{background:"#F2F0E8",border:"1.5px solid #ddd",borderRadius:20,
                   padding:"7px 14px",fontSize:13,fontWeight:600,cursor:"pointer",color:"#555"}}>
                 {lb}
               </button>
@@ -3616,7 +3612,7 @@ function ReportPage({farm,tasks,expenses,purchases,payments,income,labour,trips,
         </div>
 
         {/* Preview */}
-        <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"0 2px 10px rgba(0,0,0,.07)"}}>
+        <div style={{background:"#fff",borderRadius:18,padding:16,marginBottom:14,boxShadow:"none"}}>
           <div style={{fontSize:15,fontWeight:700,marginBottom:12}}>👁️ {lang==="kn"?"ಮುನ್ನೋಟ":"Preview"} — {selFarm.name}</div>
           {[
             {icon:"📋",label:lang==="kn"?"ಕೆಲಸ":"Tasks",val:doneSub+"/"+totalSub},
@@ -3669,8 +3665,8 @@ function ManagePage({user,onBack,showToast}){
     ["users", "👥 "+(lang==="kn"?"Users & Access":"Users & Access")],
   ];
   return(
-    <div style={{minHeight:"100vh",background:"#F0F4F0"}}>
-      <div style={{background:"#37474F",padding:"14px 16px",display:"flex",alignItems:"center",gap:12,color:"#fff"}}>
+    <div style={{minHeight:"100vh",background:"#F2F0E8"}}>
+      <div style={{background:"#1B5E20",padding:"14px 16px",display:"flex",alignItems:"center",gap:12,color:"#fff"}}>
         <button onClick={onBack} style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",borderRadius:10,padding:"8px 14px",fontSize:17,cursor:"pointer"}}>‹ {lang==="kn"?"ಹಿಂದೆ":"Back"}</button>
         <div style={{fontSize:17,fontWeight:700}}>⚙️ {lang==="kn"?"ನಿರ್ವಹಣೆ":"Manage"} — NammaThota</div>
       </div>
@@ -3842,7 +3838,7 @@ class AppErrorBoundary extends React.Component{
   render(){
     if(this.state.err)return(
       <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",
-        alignItems:"center",justifyContent:"center",padding:24,background:"#F0F4F0",textAlign:"center"}}>
+        alignItems:"center",justifyContent:"center",padding:24,background:"#F2F0E8",textAlign:"center"}}>
         <div style={{fontSize:52,marginBottom:16}}>⚠️</div>
         <div style={{fontSize:18,fontWeight:700,color:"#C62828",marginBottom:8}}>ದೋಷ ಸಂಭವಿಸಿದೆ</div>
         <div style={{fontSize:18,color:"#666",marginBottom:20}}>Something went wrong. Please go back and try again.</div>
